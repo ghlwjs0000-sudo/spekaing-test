@@ -941,8 +941,8 @@ async function submitRecording(){
     hideLoading();
     renderResults();
     goToStep(3);
-    // 채점 즉시 저장 (PPT 제외, 실시간 반영)
-    await saveSubmission(false);
+   // 채점 즉시 저장 (기존 PPT URL 유지)
+    await saveSubmission(true);
   } catch(err){
     hideLoading();
     alert('채점 오류: '+err.message);
@@ -1232,32 +1232,35 @@ async function saveSubmission(includePpt, isFinalSubmitted){
       transcript:r.transcript||'',
     };
 
-    // PPT/활동지는 Storage에 업로드 후 URL만 저장
-    if(includePpt){
-      setLoadingStep('발표 자료 업로드 중...');
-      if(state.pptDataUrl && state.pptFilename && !state.pptDataUrl.startsWith('http')) {
+   // PPT/활동지 처리 — 항상 포함 (절대 사라지지 않도록)
+    if (state.pptDataUrl && state.pptFilename) {
+      if (!state.pptDataUrl.startsWith('http')) {
+        // 새 파일 — Storage 업로드
+        setLoadingStep('PPT 업로드 중...');
         const pptUrl = await uploadFile(state.pptDataUrl, state.pptFilename, 'ppt');
-        if(pptUrl) {
-          state.pptDataUrl = pptUrl; // URL로 교체
-          body.pptDataUrl = pptUrl;
-          body.pptFilename = state.pptFilename;
+        if (pptUrl) {
+          state.pptDataUrl = pptUrl;
+          body.pptUpdatedAt = new Date().toISOString();
         }
-      } else if(state.pptDataUrl) {
-        body.pptDataUrl = state.pptDataUrl;
-        body.pptFilename = state.pptFilename;
       }
+      // 기존 URL이든 새 URL이든 항상 저장
+      body.pptDataUrl = state.pptDataUrl;
+      body.pptFilename = state.pptFilename;
+    }
 
-      if(state.wsDataUrl && state.wsFilename && !state.wsDataUrl.startsWith('http')) {
+    if (state.wsDataUrl && state.wsFilename) {
+      if (!state.wsDataUrl.startsWith('http')) {
+        // 새 파일 — Storage 업로드
+        setLoadingStep('활동지 업로드 중...');
         const wsUrl = await uploadFile(state.wsDataUrl, state.wsFilename, 'worksheet');
-        if(wsUrl) {
-          state.wsDataUrl = wsUrl; // URL로 교체
-          body.worksheetDataUrl = wsUrl;
-          body.worksheetFilename = state.wsFilename;
+        if (wsUrl) {
+          state.wsDataUrl = wsUrl;
+          body.worksheetUpdatedAt = new Date().toISOString();
         }
-      } else if(state.wsDataUrl) {
-        body.worksheetDataUrl = state.wsDataUrl;
-        body.worksheetFilename = state.wsFilename;
       }
+      // 기존 URL이든 새 URL이든 항상 저장
+      body.worksheetDataUrl = state.wsDataUrl;
+      body.worksheetFilename = state.wsFilename;
     }
 
     const res=await fetch('/api/submit',{
