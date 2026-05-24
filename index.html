@@ -454,15 +454,31 @@ async function submitRecording() {
   if (state.attempts <= 0) { alert('최대 시도 횟수를 초과했습니다.'); return; }
   state.attempts--;
   document.getElementById('attemptsLeft').textContent = state.attempts;
-  showLoading('AI 채점 시작...', '음성 분석 중');
-  await sleep(400); setLoadingStep('발음 정확도 분석 중');
-  await sleep(400); setLoadingStep('내용 · 유창성 검사 중');
+  showLoading('AI 채점 시작...', '음성을 텍스트로 변환 중');
+  await sleep(300);
+
   try {
+    // 녹음 파일을 base64로 변환
+    const base64 = await new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onloadend = () => resolve(reader.result.split(',')[1]);
+      reader.onerror = reject;
+      reader.readAsDataURL(state.audioBlob);
+    });
+
+    setLoadingStep('발음 정확도 분석 중');
+    await sleep(300);
+    setLoadingStep('내용 · 유창성 검사 중');
+
     const { name, id, book, author, script } = state.currentStudent;
     const res = await fetch('/api/score', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name, id, book, author, script })
+      body: JSON.stringify({
+        name, id, book, author, script,
+        audioBase64: base64,
+        mimeType: state.audioBlob.type
+      })
     });
     if (!res.ok) {
       const e = await res.json().catch(() => ({}));
