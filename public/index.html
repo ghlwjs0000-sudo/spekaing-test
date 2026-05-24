@@ -765,7 +765,7 @@ document.getElementById && document.getElementById('scriptText')?.addEventListen
   document.getElementById('scriptProgress').style.width = Math.min(w/50*100,100)+'%';
 });
 
-function submitScript() {
+async function submitScript() {
   const book = document.getElementById('bookTitle').value.trim();
   const author = document.getElementById('bookAuthor').value.trim();
   const script = document.getElementById('scriptText').value.trim();
@@ -774,13 +774,85 @@ function submitScript() {
   state.currentBook = { book, author };
   state.script = script;
   state.sentences = script.split(/(?<=[.!?])\s+/).filter(s=>s.trim().length>3);
-  state.sentenceStatuses = state.sentences.map(()=>'retry');
-  state.attemptCount = 0;
-  state.submissionId = null;
+
+  // 기존 제출이 없을 때만 초기화
+  if (!state.submissionId) {
+    state.sentenceStatuses = state.sentences.map(()=>'retry');
+    state.attemptCount = 0;
+  }
+
   document.getElementById('scriptDisplay').textContent = script;
   updateAttemptUI();
   document.getElementById('prevSummary').style.display = 'none';
+
+  // PPT/활동지 포함해서 바로 저장
+  showLoading('저장 중...');
+  await saveScriptAndFiles();
+  hideLoading();
+
   goToStep(2);
+}
+
+async function saveScriptAndFiles() {
+  if (!state.user) return;
+  try {
+    const body = {
+      studentId: state.user.id,
+      studentName: state.user.name,
+      studentNumber: state.user.studentNumber,
+      classId: state.user.classId,
+      bookTitle: state.currentBook.book,
+      bookAuthor: state.currentBook.author||'',
+      script: state.script,
+      aiScore: state.lastResult?.total || 0,
+      finalScore: state.lastResult?.total || 0,
+      grade: state.lastResult?.grade || '',
+      pronunciation: state.lastResult?.pronunciation || 0,
+      content: state.lastResult?.content || 0,
+      fluency: state.lastResult?.fluency || 0,
+      completeness: state.lastResult?.completeness || 0,
+      sentences: state.sentences,
+      sentenceResults: state.lastResult?.sentenceResults || [],
+      attemptCount: state.attemptCount,
+      isPassed: state.sentenceStatuses.every(s=>s==='ok'),
+      isFinalSubmitted: false,
+      pronunciationFeedback: state.lastResult?.pronunciationFeedback||'',
+      contentFeedback: state.lastResult?.contentFeedback||'',
+      fluencyFeedback: state.lastResult?.fluencyFeedback||'',
+      overallFeedback: state.lastResult?.overallFeedback||'',
+      transcript: state.lastResult?.transcript||'',
+    };
+
+    // PPT 업로드
+    if (state.pptDataUrl && state.pptFilename) {
+      if (!state.pptDataUrl.startsWith('http')) {
+        setLoadingStep('PPT 업로드 중...');
+        const url = await uploadFile(state.pptDataUrl, state.pptFilename, 'ppt');
+        if (url) { state.pptDataUrl = url; }
+      }
+      body.pptDataUrl = state.pptDataUrl;
+      body.pptFilename = state.pptFilename;
+    }
+
+    // 활동지 업로드
+    if (state.wsDataUrl && state.wsFilename) {
+      if (!state.wsDataUrl.startsWith('http')) {
+        setLoadingStep('활동지 업로드 중...');
+        const url = await uploadFile(state.wsDataUrl, state.wsFilename, 'worksheet');
+        if (url) { state.wsDataUrl = url; }
+      }
+      body.worksheetDataUrl = state.wsDataUrl;
+      body.worksheetFilename = state.wsFilename;
+    }
+
+    const res = await fetch('/api/submit', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    });
+    const data = await res.json();
+    if (data.id) state.submissionId = data.id;
+  } catch(err) { console.error('저장 오류:', err); }
 }
 
 // ── 녹음 ──
@@ -1201,10 +1273,8 @@ async function finalSubmit(){
   const okCount=state.sentenceStatuses.filter(s=>s==='ok').length;
   if(okCount<state.sentences.length){alert('아직 통과하지 못한 문장이 있어요!');return;}
   if(!confirm('최종 제출하시겠습니까?\n제출 후에도 제출 내역 보기에서 확인할 수 있어요.')) return;
- showLoading('최종 제출 중...');
+  showLoading('최종 제출 중...');
   await saveSubmission(true, true);
-  // PPT/활동지는 saveSubmission에서 이미 state에 있으므로
-  // DB에서 다시 불러오기 전에 currentSubmissionData에 직접 세팅
   state.currentSubmissionData = {
     ...( state.currentSubmissionData || {} ),
     ppt_url: state.pptDataUrl,
@@ -1389,9 +1459,25 @@ async function refreshCurrentSubmission() {
     if (Array.isArray(data) && data.length) {
       const prev = data[0];
       state.currentSubmissionData = prev;
-      // PPT/활동지 URL 복원
-      if (prev.ppt_url) { state.pptDataUrl = prev.ppt_url; state.pptFilename = prev.ppt_filename; }
-      if (prev.worksheet_url) { state.wsDataUrl = prev.worksheet_url; state.wsFilename = prev.worksheet_filename; }
+// PPT/활동지 URL 복원
+    if (prev.ppt_url) {
+      state.pptDataUrl = prev.ppt_url;
+      state.pptFilename = prev.ppt_filename;
+      // 1단계 업로드 UI 업데이트
+      const pptUpload = document.getElementById('pptUpload');
+      const pptUploadText = document.getElementById('pptUploadText');
+      if (pptUpload) pptUpload.classList.add('has-file');
+      if (pptUploadText) pptUploadText.textContent = '✓ ' + prev.ppt_filename;
+    }
+    if (prev.worksheet_url) {
+      state.wsDataUrl = prev.worksheet_url;
+      state.wsFilename = prev.worksheet_filename;
+      // 1단계 업로드 UI 업데이트
+      const wsUpload = document.getElementById('wsUpload');
+      const wsUploadText = document.getElementById('wsUploadText');
+      if (wsUpload) wsUpload.classList.add('has-file');
+      if (wsUploadText) wsUploadText.textContent = '✓ ' + prev.worksheet_filename;
+    }
     }
   } catch(err) { console.error(err); }
 }
