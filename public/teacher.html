@@ -374,7 +374,9 @@ async function teacherLogin() {
     if (!data.success) { showErr('loginError', data.error||'로그인 실패'); return; }
     state.teacher = data.user;
     state.classes = data.classes || [];
-    document.getElementById('teacherBadge').textContent = `${data.user.name} 선생님`;
+    document.getElementById('teacherBadge').textContent = data.user.isMaster 
+      ? `👑 ${data.user.name} 선생님 (마스터)` 
+      : `${data.user.name} 선생님`;
     document.getElementById('teacherBadge').style.display = 'block';
     document.getElementById('logoutBtn').style.display = 'block';
     showScreen('main');
@@ -434,9 +436,11 @@ let rosterClassFilter = '';
 async function loadRoster() {
   showLoading('전체 명단 로딩 중...');
   try {
+    const isMaster = state.teacher?.isMaster || false;
     const classIds = state.teacher?.classIds || [];
     let url = '/api/teacher?action=roster';
-    if (classIds.length > 0) url += `&classIds=${classIds.join(',')}`;
+    // 마스터는 전체, 일반 교사는 담당 반만
+    if (!isMaster && classIds.length > 0) url += `&classIds=${classIds.join(',')}`;
     const res = await fetch(url);
     const data = await res.json();
     rosterData = Array.isArray(data) ? data : [];
@@ -504,9 +508,10 @@ function renderRoster(data) {
 async function loadSubmissions() {
   showLoading('제출 현황 로딩 중...');
   try {
+    const isMaster = state.teacher?.isMaster || false;
     const classIds = state.teacher?.classIds || [];
     let url = '/api/teacher?action=submissions';
-    if (classIds.length > 0) url += `&classIds=${classIds.join(',')}`;
+    if (!isMaster && classIds.length > 0) url += `&classIds=${classIds.join(',')}`;
     const res = await fetch(url);
     state.submissions = await res.json();
     hideLoading();
@@ -669,10 +674,11 @@ async function loadStudents() {
   const classId = document.getElementById('studentClassFilter')?.value||'';
   showLoading('학생 목록 로딩 중...');
   try {
+    const isMaster = state.teacher?.isMaster || false;
     const classIds = state.teacher?.classIds||[];
     let url = '/api/teacher?action=students';
     if (classId) url += `&classId=${classId}`;
-    else if (classIds.length>0) url += `&classIds=${classIds.join(',')}`;
+    else if (!isMaster && classIds.length>0) url += `&classIds=${classIds.join(',')}`;
     const res = await fetch(url);
     state.students = await res.json();
     hideLoading(); filterStudents();
@@ -785,9 +791,10 @@ async function bulkAddStudents(){
 async function loadClasses(){
   showLoading('반 현황 로딩 중...');
   try{
+    const isMaster = state.teacher?.isMaster || false;
     const classIds = state.teacher?.classIds||[];
     let url = '/api/teacher?action=roster';
-    if (classIds.length) url += `&classIds=${classIds.join(',')}`;
+    if (!isMaster && classIds.length) url += `&classIds=${classIds.join(',')}`;
     const res = await fetch(url);
     const roster = Array.isArray(await res.json()) ? await (await fetch(url)).json() : [];
     hideLoading();
