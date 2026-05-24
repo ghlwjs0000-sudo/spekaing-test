@@ -1,0 +1,68 @@
+const SUPABASE_URL = process.env.SUPABASE_URL;
+const SUPABASE_KEY = process.env.SUPABASE_SECRET_KEY;
+
+module.exports = async (req, res) => {
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  if (req.method === 'OPTIONS') return res.status(200).end();
+  if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
+
+  const { fileBase64, filename, studentId, fileType } = req.body;
+  if (!fileBase64 || !filename || !studentId) {
+    return res.status(400).json({ error: '필수 항목 누락' });
+  }
+
+  try {
+    // base64 → Buffer 변환
+    const base64Data = fileBase64.includes(',') ? fileBase64.split(',')[1] : fileBase64;
+    const buffer = Buffer.from(base64Data, 'base64');
+
+    // 파일 확장자 추출
+    const ext = filename.split('.').pop();
+    const path = `${studentId}/${fileType}_${Date.now()}.${ext}`;
+
+    // Supabase Storage 업로드
+    const uploadRes = await fetch(
+      `${SUPABASE_URL}/storage/v1/object/submissions/${path}`,
+      {
+        method: 'POST',
+        headers: {
+          'apikey': SUPABASE_KEY,
+          'Authorization': `Bearer ${SUPABASE_KEY}`,
+          'Content-Type': getContentType(filename),
+          'x-upsert': 'true'
+        },
+        body: buffer
+      }
+    );
+
+    if (!uploadRes.ok) {
+      const e = await uploadRes.text();
+      return res.status(500).json({ error: `Storage 업로드 실패: ${e}` });
+    }
+
+    // 공개 URL 생성
+    const publicUrl = `${SUPABASE_URL}/storage/v1/object/public/submissions/${path}`;
+    return res.status(200).json({ success: true, url: publicUrl, path });
+
+  } catch (err) {
+    return res.status(500).json({ error: err.message });
+  }
+};
+
+function getContentType(filename) {
+  const ext = filename.split('.').pop().toLowerCase();
+  const types = {
+    'pdf': 'application/pdf',
+    'ppt': 'application/vnd.ms-powerpoint',
+    'pptx': 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+    'jpg': 'image/jpeg', 'jpeg': 'image/jpeg',
+    'png': 'image/png', 'gif': 'image/gif',
+    'webp': 'image/webp',
+    'doc': 'application/msword',
+    'docx': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    'hwp': 'application/x-hwp',
+  };
+  return types[ext] || 'application/octet-stream';
+}
