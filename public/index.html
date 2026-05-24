@@ -986,29 +986,35 @@ function updateGoalUI(){
 }
 
 // ── 저장 ──
-async function saveSubmission(){
+async function saveSubmission(includePpt){
   if(!state.user||!state.lastResult) return;
   const r=state.lastResult;
   try{
+    const body={
+      studentId:state.user.id,
+      studentName:state.user.name,
+      studentNumber:state.user.studentNumber,
+      classId:state.user.classId,
+      bookTitle:state.currentBook.book,
+      bookAuthor:state.currentBook.author||'',
+      script:state.script,
+      aiScore:r.total, finalScore:r.total, grade:r.grade,
+      pronunciation:r.pronunciation, content:r.content,
+      fluency:r.fluency, completeness:r.completeness,
+      sentences:state.sentences, sentenceResults:r.sentenceResults,
+      attemptCount:state.attemptCount,
+      isPassed:state.sentenceStatuses.every(s=>s==='ok'),
+    };
+    // PPT는 최종 제출 시에만 포함 (파일 크기 문제 방지)
+    if(includePpt){
+      body.pptDataUrl=state.pptDataUrl;
+      body.pptFilename=state.pptFilename;
+      body.worksheetDataUrl=state.wsDataUrl;
+      body.worksheetFilename=state.wsFilename;
+    }
     const res=await fetch('/api/submit',{
       method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({
-        studentId:state.user.id,
-        studentName:state.user.name,
-        studentNumber:state.user.studentNumber,
-        classId:state.user.classId,
-        bookTitle:state.currentBook.book,
-        bookAuthor:state.currentBook.author||'',
-        script:state.script,
-        aiScore:r.total, finalScore:r.total, grade:r.grade,
-        pronunciation:r.pronunciation, content:r.content,
-        fluency:r.fluency, completeness:r.completeness,
-        sentences:state.sentences, sentenceResults:r.sentenceResults,
-        attemptCount:state.attemptCount,
-        isPassed:state.sentenceStatuses.every(s=>s==='ok'),
-        pptDataUrl:state.pptDataUrl, pptFilename:state.pptFilename,
-        worksheetDataUrl:state.wsDataUrl, worksheetFilename:state.wsFilename,
-      })
+      body:JSON.stringify(body)
     });
     const data=await res.json();
     if(data.id) state.submissionId=data.id;
