@@ -40,7 +40,8 @@ module.exports = async (req, res) => {
       aiScore, finalScore, grade,
       pronunciation, content, fluency, completeness,
       sentences, sentenceResults, attemptCount, isPassed,
-      pptDataUrl, pptFilename, worksheetDataUrl, worksheetFilename
+      pptDataUrl, pptFilename, worksheetDataUrl, worksheetFilename,
+      pronunciationFeedback, contentFeedback, fluencyFeedback, overallFeedback, transcript
     } = req.body;
 
     // 기존 제출 확인
@@ -70,6 +71,11 @@ module.exports = async (req, res) => {
       ppt_filename: pptFilename || null,
       worksheet_url: worksheetDataUrl || null,
       worksheet_filename: worksheetFilename || null,
+      pronunciation_feedback: pronunciationFeedback || null,
+      content_feedback: contentFeedback || null,
+      fluency_feedback: fluencyFeedback || null,
+      overall_feedback: overallFeedback || null,
+      transcript: transcript || null,
       updated_at: new Date().toISOString()
     };
 
