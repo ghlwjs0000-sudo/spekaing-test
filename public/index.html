@@ -664,11 +664,15 @@ function goToStep(n) {
     const dot = document.getElementById('dot'+i);
     const lbl = document.getElementById('lbl'+i);
     if(dot) {
+      dot.style.cursor = 'pointer';
+      dot.onclick = () => navigateToStep(i);
       if (i < n) { dot.className='step-dot done'; }
       else if (i===n) { dot.className='step-dot active'; }
       else { dot.className='step-dot'; }
     }
     if(lbl) {
+      lbl.style.cursor = 'pointer';
+      lbl.onclick = () => navigateToStep(i);
       if (i===n) { lbl.className='step-label active'; }
       else { lbl.className='step-label'; }
     }
@@ -678,6 +682,26 @@ function goToStep(n) {
     }
   });
   window.scrollTo(0,0);
+}
+
+function navigateToStep(n) {
+  // 2단계로 이동: 스크립트가 있어야 함
+  if (n === 2 && !state.script) { alert('먼저 스크립트를 제출해주세요.'); return; }
+  // 3단계로 이동: 이전 결과가 있어야 함
+  if (n === 3 && !state.lastResult) { alert('먼저 녹음을 완료해주세요.'); return; }
+  if (n === 2) {
+    document.getElementById('audioPlayback').style.display='none';
+    document.getElementById('recordStatus').textContent='버튼을 눌러 녹음을 시작하세요';
+    document.getElementById('recordTimer').textContent='00:00';
+    document.getElementById('waveform').classList.remove('active');
+    state.audioBlob=null;
+    document.getElementById('scriptDisplay').textContent = state.script||'';
+    updateAttemptUI();
+  }
+  if (n === 3 && state.lastResult) {
+    renderResults();
+  }
+  goToStep(n);
 }
 
 // ── 파일 처리 ──
@@ -902,12 +926,15 @@ function renderResults(){
     </div>`;
   }).join('');
 
+ const pfb = r.pronunciationFeedback || r.pronunciation_feedback || '';
+  const cfb = r.contentFeedback || r.content_feedback || '';
+  const ffb = r.fluencyFeedback || r.fluency_feedback || '';
+  const ofb = r.overallFeedback || r.overall_feedback || '';
   document.getElementById('feedbackGrid').innerHTML=`
-    <div class="feedback-item"><div class="feedback-icon">🔊</div><div class="feedback-title">발음</div><div class="feedback-text">${r.pronunciationFeedback||''}</div></div>
-    <div class="feedback-item"><div class="feedback-icon">📖</div><div class="feedback-title">내용</div><div class="feedback-text">${r.contentFeedback||''}</div></div>
-    <div class="feedback-item"><div class="feedback-icon">💬</div><div class="feedback-title">유창성</div><div class="feedback-text">${r.fluencyFeedback||''}</div></div>
-    <div class="feedback-item"><div class="feedback-icon">⭐</div><div class="feedback-title">종합</div><div class="feedback-text">${r.overallFeedback||''}</div></div>`;
-
+    <div class="feedback-item"><div class="feedback-icon">🔊</div><div class="feedback-title">발음</div><div class="feedback-text">${pfb||'피드백 없음'}</div></div>
+    <div class="feedback-item"><div class="feedback-icon">📖</div><div class="feedback-title">내용</div><div class="feedback-text">${cfb||'피드백 없음'}</div></div>
+    <div class="feedback-item"><div class="feedback-icon">💬</div><div class="feedback-title">유창성</div><div class="feedback-text">${ffb||'피드백 없음'}</div></div>
+    <div class="feedback-item"><div class="feedback-icon">⭐</div><div class="feedback-title">종합</div><div class="feedback-text">${ofb||'피드백 없음'}</div></div>`;
   document.getElementById('transcriptDisplay').textContent=r.transcript||r.simulatedTranscript||'';
   document.getElementById('submitBtn').disabled=!allClear;
   document.getElementById('submitHint').textContent=allClear?'':`모든 문장(${total}개)을 통과해야 제출할 수 있어요.`;
