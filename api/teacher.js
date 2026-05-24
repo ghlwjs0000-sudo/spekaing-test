@@ -97,16 +97,50 @@ module.exports = async (req, res) => {
     }
 
     // 교사 점수 조정 / 통과 처리
+    // 교사 점수 조정 / 통과 처리
     if (action === 'updateSubmission' && req.method === 'PATCH') {
-      const { id, finalScore, teacherNote, teacherOverride, isPassed } = req.body;
-      await sb('PATCH', 'submissions', {
+      const { id, finalScore, teacherNote, teacherOverride, isPassed, teacherApprovedSentences } = req.body;
+      const patch = {
         final_score: finalScore,
         teacher_note: teacherNote || null,
         teacher_override: teacherOverride || false,
         is_passed: isPassed,
         updated_at: new Date().toISOString()
-      }, `?id=eq.${id}`);
+      };
+      if (teacherApprovedSentences !== undefined) {
+        patch.teacher_approved_sentences = teacherApprovedSentences;
+      }
+      await sb('PATCH', 'submissions', patch, `?id=eq.${id}`);
       return res.status(200).json({ success: true });
+    }
+
+    // 문장별 교사 승인
+    if (action === 'approveSentence' && req.method === 'PATCH') {
+      const { id, sentenceIndex, approved } = req.body;
+      // 현재 승인 목록 가져오기
+      const current = await sb('GET', 'submissions', null, `?id=eq.${id}&select=teacher_approved_sentences,sentences,sentence_results,is_passed`);
+      if (!current.length) return res.status(404).json({ error: '제출 없음' });
+      const sub = current[0];
+      let approved_list = sub.teacher_approved_sentences || [];
+      if (approved) {
+        if (!approved_list.includes(sentenceIndex)) approved_list.push(sentenceIndex);
+      } else {
+        approved_list = approved_list.filter(i => i !== sentenceIndex);
+      }
+      // 모든 문장 통과 여부 확인 (AI 통과 + 교사 승인 합산)
+      const sentences = sub.sentences || [];
+      const srs = sub.sentence_results || [];
+      const allPassed = sentences.every((_, i) => {
+        const aiOk = srs[i]?.status === 'ok';
+        const teacherOk = approved_list.includes(i);
+        return aiOk || teacherOk;
+      });
+      await sb('PATCH', 'submissions', {
+        teacher_approved_sentences: approved_list,
+        is_passed: allPassed,
+        updated_at: new Date().toISOString()
+      }, `?id=eq.${id}`);
+      return res.status(200).json({ success: true, approvedList: approved_list, allPassed });
     }
 
     return res.status(400).json({ error: '알 수 없는 action' });
