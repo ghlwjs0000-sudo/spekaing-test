@@ -624,7 +624,10 @@ function filterByClass(classId, el) {
 async function loadSubmissions() {
   showLoading('제출 현황 로딩 중...');
   try {
-    const res = await fetch('/api/teacher?action=submissions');
+    const classIds = state.teacher?.classIds || [];
+    let url = '/api/teacher?action=submissions';
+    if (classIds.length > 0) url += `&classIds=${classIds.join(',')}`;
+    const res = await fetch(url);
     state.submissions = await res.json();
     hideLoading();
     filterSubmissions();
