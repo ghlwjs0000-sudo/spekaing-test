@@ -531,7 +531,12 @@ function renderSubmissions(data) {
       <td><span class="${effort}" style="font-family:'DM Mono',monospace;">${s.attempt_count||0}회</span></td>
       <td>${statusBadge}</td>
       <td>${files.join(' ')||'<span style="color:var(--text3);font-size:12px;">없음</span>'}</td>
-      <td style="color:var(--text3);font-size:11px;white-space:nowrap;">${submitted}</td>
+      <td style="color:var(--text3);font-size:11px;white-space:nowrap;">
+        <div>${submitted}</div>
+        ${s.ppt_updated_at?`<div style="color:var(--blue);font-size:10px;">PPT수정: ${new Date(s.ppt_updated_at).toLocaleString('ko-KR',{month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'})}</div>`:''}
+        ${s.worksheet_updated_at?`<div style="color:var(--blue);font-size:10px;">활동지수정: ${new Date(s.worksheet_updated_at).toLocaleString('ko-KR',{month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'})}</div>`:''}
+        ${s.final_submitted_at?`<div style="color:var(--green);font-size:10px;font-weight:700;">최종: ${new Date(s.final_submitted_at).toLocaleString('ko-KR',{month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'})}</div>`:''}
+      </td>
       <td><button class="btn btn-ghost btn-sm" onclick="openDetail('${s.id}')">상세</button></td>
     </tr>`;
   }).join('');
