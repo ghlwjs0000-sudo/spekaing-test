@@ -605,23 +605,35 @@ async function loadPreviousSubmission() {
       document.getElementById('scriptProgress').style.width = Math.min(w/50*100,100)+'%';
     }
 
-    // 이전 결과가 있으면 안내 메시지 표시
-    if (prev.attempt_count > 0) {
-      const okCount = (state.sentenceStatuses||[]).filter(s=>s==='ok').length;
-      const total = (state.sentences||[]).length;
-      const allClear = okCount === total && total > 0;
+// 이전 결과가 있으면 결과 화면으로 바로 이동
+    if (prev.attempt_count > 0 && prev.sentence_results && prev.sentence_results.length) {
+      // lastResult 형식 맞추기
+      state.lastResult = {
+        total: prev.ai_score,
+        grade: prev.grade,
+        pronunciation: prev.pronunciation,
+        content: prev.content,
+        fluency: prev.fluency,
+        completeness: prev.completeness,
+        sentenceResults: prev.sentence_results,
+        sentences: prev.sentences,
+        transcript: '',
+        pronunciationFeedback: prev.pronunciation_feedback||'이전 분석 결과입니다.',
+        contentFeedback: prev.content_feedback||'이전 분석 결과입니다.',
+        fluencyFeedback: prev.fluency_feedback||'이전 분석 결과입니다.',
+        overallFeedback: prev.overall_feedback||'다시 도전하거나 최종 제출하세요.',
+      };
+      state.attemptCount = prev.attempt_count||0;
+      updateAttemptUI();
+
+      // 스크립트 화면 세팅
+      document.getElementById('scriptDisplay').textContent = prev.script||'';
+
+      // 결과 화면으로 이동
       setTimeout(()=>{
-        const banner = document.createElement('div');
-        banner.style.cssText = 'position:fixed;top:70px;right:20px;z-index:200;background:#fff;border:1.5px solid #2563eb;border-radius:12px;padding:14px 18px;box-shadow:0 4px 12px rgba(0,0,0,.1);font-size:13px;max-width:280px;';
-        banner.innerHTML = `
-          <div style="font-weight:700;color:#2563eb;margin-bottom:4px;">이전 기록이 있어요 📋</div>
-          <div style="color:#64748b;">${prev.attempt_count}번 도전 · ${okCount}/${total}문장 통과</div>
-          <div style="color:#64748b;margin-top:4px;">${allClear ? '✅ 모든 문장 통과 완료! 최종 제출하세요.' : '❌ 아직 통과 못한 문장이 있어요.'}</div>
-          <button onclick="this.parentElement.remove()" style="margin-top:8px;background:none;border:none;color:#94a3b8;font-size:11px;cursor:pointer;font-family:inherit;">닫기</button>
-        `;
-        document.body.appendChild(banner);
-        setTimeout(()=>banner.remove(), 8000);
-      }, 500);
+        renderResults();
+        goToStep(3);
+      }, 300);
     }
   } catch(err) {
     console.error('이전 데이터 로딩 오류:', err);
