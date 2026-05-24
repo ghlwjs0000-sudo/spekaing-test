@@ -1,4 +1,4 @@
-export default async function handler(req, res) {
+const handler = async (req, res) => {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
@@ -52,4 +52,13 @@ Scoring guide: strong script/delivery → 78-90, average → 60-77, weak → 38-
 
     const data = await response.json();
     const text = data.choices[0].message.content;
-    cons
+    const result = JSON.parse(text);
+
+    return res.status(200).json(result);
+
+  } catch (err) {
+    return res.status(500).json({ error: err.message });
+  }
+};
+
+module.exports = handler;
