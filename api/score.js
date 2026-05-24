@@ -1,26 +1,51 @@
-const handler = async (req, res) => {
-  if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method not allowed' });
-  }
+const SUPABASE_URL = process.env.SUPABASE_URL;
+const SUPABASE_KEY = process.env.SUPABASE_SECRET_KEY;
 
-  const { name, id, book, author, script, audioBase64, mimeType } = req.body;
+async function supabasePost(table, body) {
+  const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}`, {
+    method: 'POST',
+    headers: {
+      'apikey': SUPABASE_KEY,
+      'Authorization': `Bearer ${SUPABASE_KEY}`,
+      'Content-Type': 'application/json',
+      'Prefer': 'return=representation'
+    },
+    body: JSON.stringify(body)
+  });
+  return res.json();
+}
 
-  if (!script || script.trim().length < 10) {
-    return res.status(400).json({ error: '스크립트가 너무 짧습니다.' });
-  }
-  if (!audioBase64) {
-    return res.status(400).json({ error: '녹음 파일이 없습니다.' });
-  }
+async function supabasePatch(table, id, body) {
+  const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}?id=eq.${id}`, {
+    method: 'PATCH',
+    headers: {
+      'apikey': SUPABASE_KEY,
+      'Authorization': `Bearer ${SUPABASE_KEY}`,
+      'Content-Type': 'application/json',
+      'Prefer': 'return=representation'
+    },
+    body: JSON.stringify(body)
+  });
+  return res.json();
+}
+
+module.exports = async (req, res) => {
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  if (req.method === 'OPTIONS') return res.status(200).end();
+  if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
+
+  const { studentId, submissionId, script, audioBase64, mimeType, singleSentence, sentenceIdx } = req.body;
+
+  if (!script || !audioBase64) return res.status(400).json({ error: '스크립트와 녹음이 필요합니다.' });
 
   try {
     // 1단계: Whisper STT
     const audioBuffer = Buffer.from(audioBase64, 'base64');
-    const ext = (mimeType || 'audio/webm').includes('mp4') ? 'mp4'
-              : (mimeType || '').includes('ogg') ? 'ogg' : 'webm';
-
+    const ext = (mimeType || '').includes('mp4') ? 'mp4' : (mimeType || '').includes('ogg') ? 'ogg' : 'webm';
     const formData = new FormData();
-    const blob = new Blob([audioBuffer], { type: mimeType || 'audio/webm' });
-    formData.append('file', blob, `recording.${ext}`);
+    formData.append('file', new Blob([audioBuffer], { type: mimeType || 'audio/webm' }), `rec.${ext}`);
     formData.append('model', 'whisper-1');
     formData.append('language', 'en');
 
@@ -29,87 +54,91 @@ const handler = async (req, res) => {
       headers: { 'Authorization': `Bearer ${process.env.OPENAI_API_KEY}` },
       body: formData
     });
-
     if (!whisperRes.ok) {
       const e = await whisperRes.json().catch(() => ({}));
       return res.status(500).json({ error: `Whisper 오류: ${e.error?.message || whisperRes.status}` });
     }
+    const { text: transcript } = await whisperRes.json();
 
-    const whisperData = await whisperRes.json();
-    const transcript = whisperData.text || '';
+    // 2단계: 문장 분리
+    const sentences = singleSentence
+      ? [script]
+      : script.split(/(?<=[.!?])\s+/).filter(s => s.trim().length > 3);
 
-    // 2단계: GPT-4o 문장별 분석 + 채점
-    const sentences = script.split(/(?<=[.!?])\s+/).filter(s => s.trim().length > 3);
-
+    // 3단계: GPT-4o 채점
     const prompt = `You are a strict English speaking assessment AI for Korean high school students.
 
-STUDENT INFO: ${name} / Book: "${book}" by ${author || 'unknown'}
-
-PLANNED SCRIPT (split into sentences):
+PLANNED SCRIPT (sentences):
 ${sentences.map((s, i) => `[${i+1}] ${s}`).join('\n')}
 
 ACTUAL SPEECH (Whisper transcript):
 "${transcript || '(no speech detected)'}"
 
-TASK:
-1. For each sentence [1] to [${sentences.length}], determine if the student said it correctly.
-   - "ok": said clearly and correctly
-   - "partial": said but with errors or incomplete
-   - "missed": not said at all
+TASK: For each sentence, determine status:
+- "ok": said clearly and correctly
+- "partial": said but with notable errors
+- "missed": not said at all
 
-2. Score STRICTLY:
-- pronunciation (0-40): Korean students typically score 15-28. Only give 35+ for near-native pronunciation.
-- content (0-30): coverage of planned script
-- fluency (0-20): natural delivery without long pauses
-- completeness (0-10): finished the full introduction
-- If transcript under 10 words: total must be under 15
+STRICT scoring:
+- pronunciation (0-40): Korean students typically 15-28. 35+ only near-native.
+- content (0-30): coverage of script
+- fluency (0-20): natural delivery, no long pauses
+- completeness (0-10): finished introduction
+- Empty/short transcript (<10 words): total < 15
 - Average: 40-58, Good: 59-72, Excellent: 73-85. Above 85 is exceptional.
+- partial and missed both count as needing retry.
 
-Respond ONLY in this exact JSON (no markdown):
+Respond ONLY in JSON (no markdown):
 {
-  "transcript": "${transcript.replace(/"/g, "'")}",
-  "sentenceResults": [${sentences.map((_, i) => `{"index":${i+1},"status":"ok|partial|missed","issue":"brief note in Korean if partial/missed, else null"}`).join(',')}],
+  "transcript": "${(transcript||'').replace(/"/g,"'")}",
+  "sentenceResults": [${sentences.map((_,i) => `{"index":${i+1},"status":"ok|partial|missed","issue":"Korean note if not ok, else null"}`).join(',')}],
   "pronunciation": INT_0_40,
   "content": INT_0_30,
   "fluency": INT_0_20,
   "completeness": INT_0_10,
   "total": INT_0_100,
   "grade": "A+ or A or B+ or B or C+ or C or D",
-  "pronunciationFeedback": "Korean 2-sentence feedback",
-  "contentFeedback": "Korean 2-sentence feedback",
-  "fluencyFeedback": "Korean 2-sentence feedback",
-  "overallFeedback": "Korean 2-sentence encouraging comment"
+  "pronunciationFeedback": "Korean 2-sentence",
+  "contentFeedback": "Korean 2-sentence",
+  "fluencyFeedback": "Korean 2-sentence",
+  "overallFeedback": "Korean 2-sentence encouraging"
 }
-total must equal pronunciation+content+fluency+completeness exactly.`;
+total = pronunciation+content+fluency+completeness exactly.`;
 
     const gptRes = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`
-      },
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${process.env.OPENAI_API_KEY}` },
       body: JSON.stringify({
-        model: 'gpt-4o',
-        max_tokens: 2000,
+        model: 'gpt-4o', max_tokens: 2000,
         response_format: { type: 'json_object' },
         messages: [{ role: 'user', content: prompt }]
       })
     });
-
     if (!gptRes.ok) {
       const e = await gptRes.json().catch(() => ({}));
-      return res.status(500).json({ error: e.error?.message || `GPT 오류: ${gptRes.status}` });
+      return res.status(500).json({ error: e.error?.message || `GPT 오류` });
     }
-
     const gptData = await gptRes.json();
     const result = JSON.parse(gptData.choices[0].message.content);
     result.sentences = sentences;
 
-    return res.status(200).json(result);
+    // 4단계: 시도 기록 저장
+    if (submissionId && studentId) {
+      const now = new Date().toISOString();
+      const logs = (result.sentenceResults || []).map((sr, i) => ({
+        submission_id: submissionId,
+        student_id: studentId,
+        sentence_index: singleSentence ? sentenceIdx : i,
+        sentence_text: sentences[i] || sentences[0],
+        status: sr.status,
+        issue: sr.issue || null,
+        attempted_at: now
+      }));
+      await supabasePost('attempt_logs', logs).catch(() => {});
+    }
 
+    return res.status(200).json(result);
   } catch (err) {
     return res.status(500).json({ error: err.message });
   }
 };
-
-module.exports = handler;
