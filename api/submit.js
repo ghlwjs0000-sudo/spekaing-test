@@ -42,7 +42,7 @@ module.exports = async (req, res) => {
       sentences, sentenceResults, attemptCount, isPassed,
       pptDataUrl, pptFilename, worksheetDataUrl, worksheetFilename,
       pronunciationFeedback, contentFeedback, fluencyFeedback, overallFeedback, transcript,
-      teacherApprovedSentences
+      teacherApprovedSentences, isFinalSubmitted
     } = req.body;
 
     // 기존 제출 확인
@@ -78,7 +78,11 @@ module.exports = async (req, res) => {
       overall_feedback: overallFeedback || null,
       transcript: transcript || null,
       updated_at: new Date().toISOString(),
-      teacher_approved_sentences: teacherApprovedSentences || []
+      teacher_approved_sentences: teacherApprovedSentences || [],
+      is_final_submitted: isFinalSubmitted || false,
+      final_submitted_at: isFinalSubmitted ? new Date().toISOString() : undefined,
+      ppt_updated_at: pptDataUrl ? new Date().toISOString() : undefined,
+      worksheet_updated_at: worksheetDataUrl ? new Date().toISOString() : undefined,
     };
 
     let result;
