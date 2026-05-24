@@ -31,11 +31,16 @@ module.exports = async (req, res) => {
       return res.status(200).json(data);
     }
 
-    // 학생 목록
+   // 학생 목록
     if (action === 'students') {
-      const { classId } = req.query;
-      let params = '?select=*,classes(name,level)&order=student_number.asc';
-      if (classId) params += `&class_id=eq.${classId}`;
+      const { classId, classIds } = req.query;
+      let params = '?select=*,classes(name)&order=student_number.asc';
+      if (classId) {
+        params += `&class_id=eq.${classId}`;
+      } else if (classIds) {
+        const ids = classIds.split(',').filter(Boolean);
+        if (ids.length > 0) params += `&class_id=in.(${ids.join(',')})`;
+      }
       const data = await sb('GET', 'students', null, params);
       return res.status(200).json(data);
     }
