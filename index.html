@@ -13,6 +13,7 @@
   --accent:#d4a843;--accent2:#e8c06a;
   --green:#4caf82;--green-bg:rgba(76,175,130,0.12);
   --red:#e05a5a;--red-bg:rgba(224,90,90,0.1);
+  --yellow:#e8c06a;--yellow-bg:rgba(232,192,106,0.12);
   --blue:#5a9de0;--blue-bg:rgba(90,157,224,0.1);
   --amber-bg:rgba(212,168,67,0.1);
   --radius:14px;--radius-sm:8px;
@@ -51,7 +52,6 @@ body{font-family:'Pretendard',-apple-system,sans-serif;background:var(--bg);colo
 .badge-green{background:var(--green-bg);color:var(--green);}
 .badge-amber{background:var(--amber-bg);color:var(--accent2);}
 .badge-red{background:var(--red-bg);color:var(--red);}
-.badge-blue{background:var(--blue-bg);color:var(--blue);}
 .record-area{display:flex;flex-direction:column;align-items:center;gap:22px;padding:40px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);text-align:center;}
 .record-btn{width:90px;height:90px;border-radius:50%;border:3px solid var(--border2);background:var(--surface2);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .3s;font-size:32px;}
 .record-btn:hover{border-color:var(--accent);transform:scale(1.04);}
@@ -64,16 +64,27 @@ body{font-family:'Pretendard',-apple-system,sans-serif;background:var(--bg);colo
 .wave-bar{width:4px;border-radius:2px;background:var(--accent);min-height:4px;transition:height .1s;}
 .script-display{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:18px;font-size:15px;line-height:1.8;color:var(--text);max-height:190px;overflow-y:auto;text-align:left;}
 audio{width:100%;border-radius:var(--radius-sm);margin-top:8px;}
-.score-hero{display:flex;align-items:center;gap:30px;padding:28px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:18px;}
-.score-circle{width:120px;height:120px;border-radius:50%;background:conic-gradient(var(--accent) 0deg,var(--surface2) 0deg);display:flex;align-items:center;justify-content:center;flex-shrink:0;position:relative;}
-.score-circle::before{content:'';position:absolute;inset:9px;border-radius:50%;background:var(--surface);}
-.score-number{position:relative;z-index:1;font-family:'DM Serif Display',serif;font-size:34px;color:var(--text);}
-.score-breakdown{flex:1;}
-.score-row{display:flex;align-items:center;gap:12px;margin-bottom:12px;}
-.score-label{font-size:13px;color:var(--text2);width:78px;flex-shrink:0;}
-.score-bar-wrap{flex:1;background:var(--surface2);border-radius:4px;height:7px;overflow:hidden;}
-.score-bar{height:100%;border-radius:4px;transition:width 1s cubic-bezier(.25,.46,.45,.94);}
-.score-val{font-size:13px;font-family:'DM Mono',monospace;color:var(--text2);width:44px;text-align:right;}
+.upload-area{border:2px dashed var(--border2);border-radius:var(--radius);padding:28px;text-align:center;cursor:pointer;transition:all .2s;}
+.upload-area:hover{border-color:var(--accent);background:var(--amber-bg);}
+.upload-area.has-file{border-color:var(--green);background:var(--green-bg);}
+.upload-icon{font-size:32px;margin-bottom:8px;}
+.upload-filename{font-size:13px;color:var(--green);margin-top:6px;font-weight:500;}
+.sentence-list{display:flex;flex-direction:column;gap:10px;}
+.sentence-item{display:flex;align-items:flex-start;gap:12px;padding:12px 16px;border-radius:var(--radius-sm);border:1px solid var(--border);}
+.sentence-item.ok{background:var(--green-bg);border-color:rgba(76,175,130,0.25);}
+.sentence-item.partial{background:var(--yellow-bg);border-color:rgba(232,192,106,0.25);}
+.sentence-item.missed{background:var(--red-bg);border-color:rgba(224,90,90,0.2);}
+.sentence-icon{font-size:18px;flex-shrink:0;margin-top:1px;}
+.sentence-item.ok .sentence-text{color:var(--green);}
+.sentence-item.partial .sentence-text{color:var(--yellow);}
+.sentence-item.missed .sentence-text{color:var(--red);}
+.sentence-text{font-size:14px;line-height:1.6;flex:1;}
+.sentence-issue{font-size:12px;margin-top:4px;opacity:.8;}
+.result-banner{padding:20px 24px;border-radius:var(--radius);margin-bottom:18px;text-align:center;}
+.result-banner.good{background:var(--green-bg);border:1px solid rgba(76,175,130,0.25);}
+.result-banner.retry{background:var(--red-bg);border:1px solid rgba(224,90,90,0.2);}
+.result-banner-title{font-family:'DM Serif Display',serif;font-size:22px;margin-bottom:6px;}
+.result-banner-sub{font-size:14px;color:var(--text2);}
 .feedback-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px;}
 .feedback-item{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:16px;}
 .feedback-icon{font-size:20px;margin-bottom:7px;}
@@ -103,12 +114,13 @@ tbody td{padding:12px 14px;font-size:14px;}
 h2{font-family:'DM Serif Display',serif;font-size:26px;font-weight:400;margin-bottom:6px;}
 p{color:var(--text2);font-size:14px;}
 .text-muted{color:var(--text2);font-size:13px;}
-.mt-2{margin-top:8px;} .mb-4{margin-bottom:24px;}
+.mt-2{margin-top:8px;}.mb-4{margin-bottom:24px;}
 .login-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;}
 .login-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:40px;width:100%;max-width:400px;text-align:center;}
-.login-card h2{margin-bottom:8px;}
-.login-card p{margin-bottom:28px;}
+.login-card h2{margin-bottom:8px;}.login-card p{margin-bottom:28px;}
 #editModal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:500;align-items:center;justify-content:center;}
+.ppt-link{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:6px;background:var(--blue-bg);color:var(--blue);font-size:12px;text-decoration:none;border:1px solid rgba(90,157,224,0.2);}
+.attempt-badge{display:inline-flex;align-items:center;gap:6px;padding:4px 12px;border-radius:999px;background:var(--amber-bg);border:1px solid rgba(212,168,67,0.2);font-size:12px;color:var(--accent2);}
 </style>
 </head>
 <body>
@@ -142,10 +154,11 @@ p{color:var(--text2);font-size:14px;}
     <span class="text-muted" style="margin-left:8px;" id="stepLabel">정보 입력 및 스크립트 제출</span>
   </div>
 
-  <!-- STEP 1 -->
+  <!-- STEP 1: 스크립트 + PPT 제출 -->
   <div id="step1">
-    <h2>책 소개 스크립트 제출</h2>
-    <p class="mb-4">읽은 책을 영어로 소개하는 스크립트를 작성하고 제출하세요.</p>
+    <h2>스크립트 및 발표 자료 제출</h2>
+    <p class="mb-4">읽은 책 소개 스크립트와 발표 자료(PPT)를 함께 제출하세요.</p>
+
     <div class="card">
       <div class="card-title">학생 정보</div>
       <div class="form-row">
@@ -155,6 +168,7 @@ p{color:var(--text2);font-size:14px;}
       <div class="form-group"><label class="form-label">읽은 책 제목</label><input class="form-input" id="bookTitle" placeholder="예: The Little Prince / 어린왕자"/></div>
       <div class="form-group"><label class="form-label">저자</label><input class="form-input" id="bookAuthor" placeholder="예: Antoine de Saint-Exupéry"/></div>
     </div>
+
     <div class="card">
       <div class="card-title">말하기 스크립트 (영어)</div>
       <div class="form-group">
@@ -164,19 +178,39 @@ p{color:var(--text2);font-size:14px;}
       <div class="progress-wrap"><div class="progress-bar" id="scriptProgress"></div></div>
       <div class="text-muted mt-2" id="wordCount">단어 수: 0 / 50</div>
     </div>
+
+    <div class="card">
+      <div class="card-title">발표 자료 업로드 <span style="font-size:11px;color:var(--text3);font-weight:400;">(선택 — ppt, pptx, pdf, jpg, png 등 모든 파일)</span></div>
+      <div class="upload-area" id="uploadArea" onclick="document.getElementById('pptFile').click()">
+        <div class="upload-icon">📎</div>
+        <div class="upload-text" id="uploadText">클릭하여 발표 자료 선택<br><span style="font-size:12px;opacity:.6;">모든 파일 형식 지원 · 최대 30MB</span></div>
+        <div class="upload-filename" id="uploadFilename" style="display:none;"></div>
+      </div>
+      <input type="file" id="pptFile" accept="*/*" style="display:none;" onchange="handleFileSelect(this)"/>
+      <div id="uploadedPreview" style="display:none;margin-top:12px;"></div>
+    </div>
+
     <div style="display:flex;justify-content:flex-end;">
-      <button class="btn btn-primary btn-lg" onclick="submitScript()">스크립트 제출 후 녹음하기 →</button>
+      <button class="btn btn-primary btn-lg" onclick="submitScript()">제출 후 녹음하기 →</button>
     </div>
   </div>
 
-  <!-- STEP 2 -->
+  <!-- STEP 2: 녹음 -->
   <div id="step2" style="display:none;">
     <h2>음성 녹음</h2>
-    <p class="mb-4">스크립트를 보며 자연스럽게 영어로 말해보세요. 최대 3분까지 녹음됩니다.</p>
+    <p class="mb-4">스크립트를 보며 자연스럽게 영어로 말해보세요. 만족스러울 때까지 다시 녹음할 수 있습니다.</p>
+
     <div class="card">
       <div class="card-title">나의 스크립트</div>
       <div class="script-display" id="scriptDisplay"></div>
     </div>
+
+    <div id="prevResultSummary" style="display:none;margin-bottom:18px;">
+      <div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:14px 18px;font-size:13px;color:var(--text2);">
+        이전 시도 결과 — <span id="prevOkCount" style="color:var(--green);font-weight:600;"></span> 확인 후 다시 도전해보세요.
+      </div>
+    </div>
+
     <div class="record-area">
       <div class="waveform" id="waveform">
         <div class="wave-bar" style="height:8px"></div><div class="wave-bar" style="height:18px"></div>
@@ -195,38 +229,44 @@ p{color:var(--text2);font-size:14px;}
         <audio id="audioPlayer" controls></audio>
         <div class="mt-2" style="display:flex;gap:10px;justify-content:center;">
           <button class="btn btn-ghost btn-sm" onclick="retryRecording()">🔄 다시 녹음</button>
-          <button class="btn btn-primary" onclick="submitRecording()">AI 채점 받기 →</button>
+          <button class="btn btn-primary" onclick="submitRecording()">AI 분석 받기 →</button>
         </div>
       </div>
-      <div class="text-muted" style="font-size:13px;">남은 시도 횟수: <span id="attemptsLeft">3</span>회</div>
+      <div class="attempt-badge">🔄 시도 횟수 제한 없음 — <span id="attemptCount">0</span>회 시도</div>
     </div>
   </div>
 
-  <!-- STEP 3 -->
+  <!-- STEP 3: 발화 분석 결과 -->
   <div id="step3" style="display:none;">
-    <h2>채점 결과</h2>
+    <h2>발화 분석 결과</h2>
     <p class="mb-4" id="resultInfo"></p>
-    <div class="score-hero">
-      <div class="score-circle" id="scoreCircle"><div class="score-number" id="scoreTotal">--</div></div>
-      <div class="score-breakdown">
-        <div style="font-size:14px;font-weight:600;margin-bottom:14px;" id="scoreGrade"></div>
-        <div class="score-row"><div class="score-label">발음 정확도</div><div class="score-bar-wrap"><div class="score-bar" id="bar1" style="background:#d4a843;width:0%"></div></div><div class="score-val" id="val1">--/40</div></div>
-        <div class="score-row"><div class="score-label">내용 일치</div><div class="score-bar-wrap"><div class="score-bar" id="bar2" style="background:#4caf82;width:0%"></div></div><div class="score-val" id="val2">--/30</div></div>
-        <div class="score-row"><div class="score-label">유창성</div><div class="score-bar-wrap"><div class="score-bar" id="bar3" style="background:#5a9de0;width:0%"></div></div><div class="score-val" id="val3">--/20</div></div>
-        <div class="score-row"><div class="score-label">완성도</div><div class="score-bar-wrap"><div class="score-bar" id="bar4" style="background:#e08a5a;width:0%"></div></div><div class="score-val" id="val4">--/10</div></div>
-      </div>
+
+    <div class="result-banner" id="resultBanner">
+      <div class="result-banner-title" id="resultBannerTitle"></div>
+      <div class="result-banner-sub" id="resultBannerSub"></div>
     </div>
+
     <div class="card">
-      <div class="card-title">AI 상세 피드백</div>
+      <div class="card-title">문장별 발화 확인</div>
+      <div class="sentence-list" id="sentenceList"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">AI 피드백</div>
       <div class="feedback-grid" id="feedbackGrid"></div>
-      <div class="card-title" style="margin-top:16px;">인식된 발화 내용</div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">인식된 발화 내용</div>
       <div class="script-display" id="transcriptDisplay" style="min-height:50px;"></div>
     </div>
+
     <div style="display:flex;gap:10px;flex-wrap:wrap;">
-      <button class="btn btn-ghost" id="retryBtn" onclick="goToStep2()">🔄 다시 시도 (<span id="attemptsLeft2">0</span>회 남음)</button>
-      <button class="btn btn-primary" onclick="finalSubmit()">✓ 최종 제출 완료</button>
+      <button class="btn btn-ghost" onclick="goToStep2Again()">🔄 다시 발화하기</button>
+      <button class="btn btn-primary btn-lg" onclick="finalSubmit()">✓ 최종 제출 완료</button>
     </div>
   </div>
+
 </div>
 </div>
 
@@ -262,22 +302,23 @@ p{color:var(--text2);font-size:14px;}
     <div class="stat-card"><div class="stat-num" id="stat-total">0</div><div class="stat-label">전체 제출</div></div>
     <div class="stat-card"><div class="stat-num" id="stat-avg">-</div><div class="stat-label">평균 점수</div></div>
     <div class="stat-card"><div class="stat-num" id="stat-high">-</div><div class="stat-label">최고 점수</div></div>
-    <div class="stat-card"><div class="stat-num" id="stat-low">-</div><div class="stat-label">최저 점수</div></div>
+    <div class="stat-card"><div class="stat-num" id="stat-ppt">0</div><div class="stat-label">자료 제출</div></div>
   </div>
   <div class="tab-bar">
     <div class="tab-item active" onclick="switchTab('all',this)">전체</div>
-    <div class="tab-item" onclick="switchTab('high',this)">우수 (80점 이상)</div>
-    <div class="tab-item" onclick="switchTab('low',this)">주의 (60점 미만)</div>
+    <div class="tab-item" onclick="switchTab('high',this)">우수 (75점 이상)</div>
+    <div class="tab-item" onclick="switchTab('low',this)">주의 (50점 미만)</div>
+    <div class="tab-item" onclick="switchTab('noppt',this)">자료 미제출</div>
   </div>
   <div class="card" style="padding:0;overflow:hidden;">
     <table>
       <thead><tr>
         <th>이름</th><th>학번</th><th>책 제목</th>
-        <th>AI 점수</th><th>최종 점수</th><th>등급</th>
-        <th>제출 시각</th><th>관리</th>
+        <th>점수</th><th>등급</th><th>시도횟수</th><th>발표자료</th>
+        <th>제출시각</th><th>관리</th>
       </tr></thead>
       <tbody id="studentTable">
-        <tr><td colspan="8" style="text-align:center;color:var(--text3);padding:40px;">아직 제출한 학생이 없습니다.</td></tr>
+        <tr><td colspan="9" style="text-align:center;color:var(--text3);padding:40px;">아직 제출한 학생이 없습니다.</td></tr>
       </tbody>
     </table>
   </div>
@@ -306,9 +347,7 @@ p{color:var(--text2);font-size:14px;}
 </div>
 
 <script>
-// ── 교사 비밀번호 (이 파일에서는 비밀번호만 관리, API 키는 서버에) ──
 const TEACHER_PASSWORD = '1234';
-const MAX_ATTEMPTS = 3;
 const MAX_RECORD_SECONDS = 180;
 
 const state = {
@@ -316,9 +355,12 @@ const state = {
   mediaRecorder: null, audioChunks: [],
   recordingInterval: null, waveInterval: null,
   recordSeconds: 0, isRecording: false,
-  audioBlob: null, attempts: MAX_ATTEMPTS,
+  audioBlob: null,
+  attemptCount: 0,
   submissions: [], currentEditIdx: null,
   teacherLoggedIn: false, currentTab: 'all',
+  lastResult: null,
+  pptFile: null, pptDataUrl: null, pptFileName: null,
 };
 try { const s = localStorage.getItem('speakingTestData'); if (s) state.submissions = JSON.parse(s); } catch(e) {}
 
@@ -353,15 +395,42 @@ document.getElementById('scriptText').addEventListener('input', function() {
 
 function goToStep(n) {
   [1,2,3].forEach(i => {
-    document.getElementById('step'+i).style.display = i===n ? 'block' : 'none';
+    const el = document.getElementById('step'+i);
+    if (el) el.style.display = i===n ? 'block' : 'none';
     const d = document.getElementById('dot'+i);
+    if (!d) return;
     if (i < n) { d.style.background='var(--green)'; d.style.color='#fff'; d.style.border='none'; }
     else if (i === n) { d.style.background='var(--accent)'; d.style.color='#000'; d.style.border='none'; }
     else { d.style.background='var(--surface2)'; d.style.color='var(--text3)'; d.style.border='1px solid var(--border)'; }
   });
-  const labels = ['정보 입력 및 스크립트 제출','음성 녹음','채점 결과 확인'];
+  const labels = ['정보 입력 · 스크립트 · 발표 자료 제출','음성 녹음','발화 분석 결과'];
   document.getElementById('stepLabel').textContent = labels[n-1];
 }
+
+// PPT 파일 처리
+function handleFileSelect(input) {
+  const file = input.files[0];
+  if (!file) return;
+  if (file.size > 30 * 1024 * 1024) { alert('파일 크기가 30MB를 초과합니다.'); return; }
+  state.pptFile = file;
+  state.pptFileName = file.name;
+  document.getElementById('uploadArea').classList.add('has-file');
+  document.getElementById('uploadFilename').style.display = 'block';
+  document.getElementById('uploadFilename').textContent = '✓ ' + file.name;
+  document.getElementById('uploadText').style.display = 'none';
+
+  const reader = new FileReader();
+  reader.onloadend = () => {
+    state.pptDataUrl = reader.result;
+    // 이미지 파일이면 미리보기
+    if (file.type.startsWith('image/')) {
+      document.getElementById('uploadedPreview').style.display = 'block';
+      document.getElementById('uploadedPreview').innerHTML = `<img src="${reader.result}" style="max-width:100%;max-height:200px;border-radius:var(--radius-sm);border:1px solid var(--border);">`;
+    }
+  };
+  reader.readAsDataURL(file);
+}
+
 function submitScript() {
   const name = document.getElementById('studentName').value.trim();
   const id = document.getElementById('studentId').value.trim();
@@ -371,28 +440,49 @@ function submitScript() {
   if (!name||!id||!book||!script) { alert('이름, 학번, 책 제목, 스크립트를 모두 입력해주세요.'); return; }
   if (script.split(/\s+/).filter(x=>x).length < 10) { alert('스크립트가 너무 짧습니다.'); return; }
   state.currentStudent = { name, id, book, author, script };
-  state.attempts = MAX_ATTEMPTS;
+  state.attemptCount = 0;
   document.getElementById('scriptDisplay').textContent = script;
-  document.getElementById('attemptsLeft').textContent = state.attempts;
+  document.getElementById('attemptCount').textContent = state.attemptCount;
+  document.getElementById('prevResultSummary').style.display = 'none';
   goToStep(2);
 }
-function goToStep2() {
-  if (state.attempts <= 0) { alert('최대 시도 횟수를 초과했습니다.'); return; }
+
+function goToStep2Again() {
   document.getElementById('audioPlayback').style.display = 'none';
   document.getElementById('recordStatus').textContent = '버튼을 눌러 녹음을 시작하세요';
   document.getElementById('recordTimer').textContent = '00:00';
   document.getElementById('waveform').classList.remove('active');
   state.audioBlob = null;
+
+  // 이전 결과 요약 표시
+  if (state.lastResult) {
+    const results = state.lastResult.sentenceResults || [];
+    const okCount = results.filter(s => s.status === 'ok').length;
+    const total = results.length;
+    document.getElementById('prevResultSummary').style.display = 'block';
+    document.getElementById('prevOkCount').textContent = `${total}개 문장 중 ${okCount}개 성공`;
+  }
   goToStep(2);
 }
+
 function finalSubmit() {
+  saveSubmission(state.lastResult);
+  // 초기화
   ['studentName','studentId','bookTitle','bookAuthor','scriptText'].forEach(id => { document.getElementById(id).value = ''; });
   document.getElementById('wordCount').textContent = '단어 수: 0 / 50';
   document.getElementById('scriptProgress').style.width = '0%';
-  state.currentStudent = {};
+  document.getElementById('uploadArea').classList.remove('has-file');
+  document.getElementById('uploadFilename').style.display = 'none';
+  document.getElementById('uploadText').style.display = 'block';
+  document.getElementById('uploadedPreview').style.display = 'none';
+  document.getElementById('pptFile').value = '';
+  state.currentStudent = {}; state.lastResult = null;
+  state.pptFile = null; state.pptDataUrl = null; state.pptFileName = null;
   goToStep(1);
+  alert('제출이 완료되었습니다! 수고했어요 😊');
 }
 
+// 녹음
 function getMimeType() {
   const types = ['audio/webm;codecs=opus','audio/webm','audio/ogg;codecs=opus','audio/mp4'];
   for (const t of types) if (MediaRecorder.isTypeSupported(t)) return t;
@@ -423,7 +513,7 @@ async function startRecording() {
     state.waveInterval = setInterval(() => {
       document.querySelectorAll('.wave-bar').forEach(b => { b.style.height = (Math.random()*32+4)+'px'; });
     }, 100);
-  } catch(err) { alert('마이크 접근 권한이 필요합니다.\n브라우저 주소창 옆 자물쇠 아이콘에서 마이크를 허용해주세요.'); }
+  } catch(err) { alert('마이크 접근 권한이 필요합니다.'); }
 }
 function stopRecording() {
   if (!state.mediaRecorder) return;
@@ -448,89 +538,105 @@ function retryRecording() {
   state.audioBlob = null;
 }
 
-// ── AI 채점 (API 키는 서버에 숨겨져 있음) ──
+// AI 채점
 async function submitRecording() {
   if (!state.audioBlob) { alert('먼저 녹음해주세요.'); return; }
-  if (state.attempts <= 0) { alert('최대 시도 횟수를 초과했습니다.'); return; }
-  state.attempts--;
-  document.getElementById('attemptsLeft').textContent = state.attempts;
-  showLoading('AI 채점 시작...', '음성을 텍스트로 변환 중');
+  state.attemptCount++;
+  document.getElementById('attemptCount').textContent = state.attemptCount;
+  showLoading('AI 분석 시작...', '음성을 텍스트로 변환 중');
   await sleep(300);
-
   try {
-    // 녹음 파일을 base64로 변환
     const base64 = await new Promise((resolve, reject) => {
       const reader = new FileReader();
       reader.onloadend = () => resolve(reader.result.split(',')[1]);
       reader.onerror = reject;
       reader.readAsDataURL(state.audioBlob);
     });
-
-    setLoadingStep('발음 정확도 분석 중');
+    setLoadingStep('문장별 발화 분석 중');
     await sleep(300);
-    setLoadingStep('내용 · 유창성 검사 중');
-
     const { name, id, book, author, script } = state.currentStudent;
     const res = await fetch('/api/score', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        name, id, book, author, script,
-        audioBase64: base64,
-        mimeType: state.audioBlob.type
-      })
+      body: JSON.stringify({ name, id, book, author, script, audioBase64: base64, mimeType: state.audioBlob.type })
     });
     if (!res.ok) {
       const e = await res.json().catch(() => ({}));
       throw new Error(e.error || `서버 오류 ${res.status}`);
     }
     const result = await res.json();
+    result.attemptCount = state.attemptCount;
+    state.lastResult = result;
     hideLoading();
     renderResults(result);
     goToStep(3);
-    saveSubmission(result);
   } catch(err) {
     hideLoading();
     alert('채점 오류: ' + err.message);
+    state.attemptCount--;
+    document.getElementById('attemptCount').textContent = state.attemptCount;
   }
 }
 
 function renderResults(r) {
-  const deg = Math.round(r.total/100*360);
-  document.getElementById('scoreCircle').style.background = `conic-gradient(var(--accent) ${deg}deg, var(--surface2) ${deg}deg)`;
-  document.getElementById('scoreTotal').textContent = r.total;
-  const c = r.total>=90?'var(--green)':r.total>=75?'var(--accent)':r.total>=60?'var(--blue)':'var(--red)';
-  document.getElementById('scoreGrade').innerHTML = `<span style="color:${c};font-family:'DM Serif Display',serif;font-size:22px;">${r.grade}</span>&nbsp;&nbsp;${r.total}점`;
-  setTimeout(() => {
-    document.getElementById('bar1').style.width = (r.pronunciation/40*100)+'%';
-    document.getElementById('bar2').style.width = (r.content/30*100)+'%';
-    document.getElementById('bar3').style.width = (r.fluency/20*100)+'%';
-    document.getElementById('bar4').style.width = (r.completeness/10*100)+'%';
-  }, 100);
-  document.getElementById('val1').textContent = `${r.pronunciation}/40`;
-  document.getElementById('val2').textContent = `${r.content}/30`;
-  document.getElementById('val3').textContent = `${r.fluency}/20`;
-  document.getElementById('val4').textContent = `${r.completeness}/10`;
-  document.getElementById('feedbackGrid').innerHTML = `
-    <div class="feedback-item"><div class="feedback-icon">🔊</div><div class="feedback-title">발음 피드백</div><div class="feedback-text">${r.pronunciationFeedback}</div></div>
-    <div class="feedback-item"><div class="feedback-icon">📖</div><div class="feedback-title">내용 피드백</div><div class="feedback-text">${r.contentFeedback}</div></div>
-    <div class="feedback-item"><div class="feedback-icon">💬</div><div class="feedback-title">유창성 피드백</div><div class="feedback-text">${r.fluencyFeedback}</div></div>
-    <div class="feedback-item"><div class="feedback-icon">⭐</div><div class="feedback-title">종합 의견</div><div class="feedback-text">${r.overallFeedback}</div></div>`;
-  document.getElementById('transcriptDisplay').textContent = r.simulatedTranscript || '';
   const { name, id, book } = state.currentStudent;
-  document.getElementById('resultInfo').textContent = `${name} (${id}) · 《${book}》`;
-  document.getElementById('attemptsLeft2').textContent = state.attempts;
-  document.getElementById('retryBtn').disabled = state.attempts <= 0;
+  document.getElementById('resultInfo').textContent = `${name} (${id}) · 《${book}》 · ${state.attemptCount}번째 시도`;
+
+  const okCount = (r.sentenceResults || []).filter(s => s.status === 'ok').length;
+  const total = (r.sentenceResults || []).length;
+  const pct = total > 0 ? Math.round(okCount / total * 100) : 0;
+  const banner = document.getElementById('resultBanner');
+
+  if (pct >= 70) {
+    banner.className = 'result-banner good';
+    document.getElementById('resultBannerTitle').textContent = '잘 했어요! 👏';
+    document.getElementById('resultBannerSub').textContent = `${total}개 문장 중 ${okCount}개를 정확하게 발화했습니다.`;
+  } else {
+    banner.className = 'result-banner retry';
+    document.getElementById('resultBannerTitle').textContent = '다시 도전해보세요 💪';
+    document.getElementById('resultBannerSub').textContent = `${total}개 문장 중 ${okCount}개 성공. 빨간 문장을 다시 연습하고 재도전하세요.`;
+  }
+
+  const sentences = r.sentences || [];
+  const results = r.sentenceResults || [];
+  document.getElementById('sentenceList').innerHTML = sentences.map((sent, i) => {
+    const sr = results[i] || { status: 'missed', issue: null };
+    const icon = sr.status === 'ok' ? '✅' : sr.status === 'partial' ? '⚠️' : '❌';
+    const issue = sr.issue ? `<div class="sentence-issue">${sr.issue}</div>` : '';
+    return `<div class="sentence-item ${sr.status}">
+      <div class="sentence-icon">${icon}</div>
+      <div><div class="sentence-text">${sent}</div>${issue}</div>
+    </div>`;
+  }).join('');
+
+  document.getElementById('feedbackGrid').innerHTML = `
+    <div class="feedback-item"><div class="feedback-icon">🔊</div><div class="feedback-title">발음 피드백</div><div class="feedback-text">${r.pronunciationFeedback||''}</div></div>
+    <div class="feedback-item"><div class="feedback-icon">📖</div><div class="feedback-title">내용 피드백</div><div class="feedback-text">${r.contentFeedback||''}</div></div>
+    <div class="feedback-item"><div class="feedback-icon">💬</div><div class="feedback-title">유창성 피드백</div><div class="feedback-text">${r.fluencyFeedback||''}</div></div>
+    <div class="feedback-item"><div class="feedback-icon">⭐</div><div class="feedback-title">종합 의견</div><div class="feedback-text">${r.overallFeedback||''}</div></div>`;
+
+  document.getElementById('transcriptDisplay').textContent = r.transcript || r.simulatedTranscript || '';
 }
 
 function saveSubmission(r) {
+  if (!r) return;
   const { name, id, book, author, script } = state.currentStudent;
-  const rec = { name, id, book, author, script, aiScore:r.total, finalScore:r.total, grade:r.grade,
-    pronunciation:r.pronunciation, content:r.content, fluency:r.fluency, completeness:r.completeness,
-    feedback:r, submittedAt:new Date().toLocaleString('ko-KR'), memo:'', adjusted:false };
+  const rec = {
+    name, id, book, author, script,
+    aiScore: r.total, finalScore: r.total, grade: r.grade,
+    pronunciation: r.pronunciation, content: r.content,
+    fluency: r.fluency, completeness: r.completeness,
+    sentenceResults: r.sentenceResults, sentences: r.sentences,
+    attemptCount: state.attemptCount,
+    pptDataUrl: state.pptDataUrl || null,
+    pptFileName: state.pptFileName || null,
+    submittedAt: new Date().toLocaleString('ko-KR'),
+    memo: '', adjusted: false
+  };
   const idx = state.submissions.findIndex(s => s.id === id);
   if (idx >= 0) state.submissions[idx] = rec; else state.submissions.push(rec);
   try { localStorage.setItem('speakingTestData', JSON.stringify(state.submissions)); } catch(e) {}
+  renderTeacher();
 }
 
 function switchTab(tab, el) {
@@ -539,34 +645,46 @@ function switchTab(tab, el) {
   el.classList.add('active');
   renderTeacher();
 }
+
 function renderTeacher() {
   const subs = state.submissions;
   const scores = subs.map(s => s.finalScore);
   document.getElementById('stat-total').textContent = subs.length;
   document.getElementById('stat-avg').textContent = scores.length ? Math.round(scores.reduce((a,b)=>a+b,0)/scores.length) : '-';
   document.getElementById('stat-high').textContent = scores.length ? Math.max(...scores) : '-';
-  document.getElementById('stat-low').textContent  = scores.length ? Math.min(...scores) : '-';
+  document.getElementById('stat-ppt').textContent = subs.filter(s => s.pptFileName).length;
+
   let filtered = subs;
-  if (state.currentTab==='high') filtered = subs.filter(s=>s.finalScore>=80);
-  else if (state.currentTab==='low') filtered = subs.filter(s=>s.finalScore<60);
+  if (state.currentTab === 'high') filtered = subs.filter(s => s.finalScore >= 75);
+  else if (state.currentTab === 'low') filtered = subs.filter(s => s.finalScore < 50);
+  else if (state.currentTab === 'noppt') filtered = subs.filter(s => !s.pptFileName);
+
   const tbody = document.getElementById('studentTable');
-  if (!filtered.length) { tbody.innerHTML=`<tr><td colspan="8" style="text-align:center;color:var(--text3);padding:40px;">해당 학생이 없습니다.</td></tr>`; return; }
+  if (!filtered.length) {
+    tbody.innerHTML = `<tr><td colspan="9" style="text-align:center;color:var(--text3);padding:40px;">해당 학생이 없습니다.</td></tr>`;
+    return;
+  }
   tbody.innerHTML = filtered.map(s => {
     const realIdx = state.submissions.indexOf(s);
-    const c  = s.finalScore>=90?'var(--green)':s.finalScore>=75?'var(--accent)':s.finalScore>=60?'var(--blue)':'var(--red)';
-    const bg = s.finalScore>=90?'var(--green-bg)':s.finalScore>=75?'var(--amber-bg)':s.finalScore>=60?'var(--blue-bg)':'var(--red-bg)';
+    const c  = s.finalScore>=75?'var(--green)':s.finalScore>=55?'var(--accent)':'var(--red)';
+    const bg = s.finalScore>=75?'var(--green-bg)':s.finalScore>=55?'var(--amber-bg)':'var(--red-bg)';
+    const pptCell = s.pptFileName
+      ? `<a class="ppt-link" href="${s.pptDataUrl}" download="${s.pptFileName}">📎 ${s.pptFileName}</a>`
+      : `<span style="color:var(--text3);font-size:12px;">미제출</span>`;
     return `<tr>
       <td style="font-weight:500;">${s.name}</td>
       <td style="color:var(--text2);font-size:13px;">${s.id}</td>
       <td style="color:var(--text2);">《${s.book}》</td>
-      <td><span class="score-chip" style="background:${bg};color:${c};">${s.aiScore}</span></td>
       <td><span class="score-chip" style="background:${bg};color:${c};${s.adjusted?'border:1px solid '+c:''}">${s.finalScore}${s.adjusted?' ✎':''}</span></td>
-      <td><span class="badge badge-${s.finalScore>=80?'green':s.finalScore>=60?'amber':'red'}">${s.grade}</span></td>
+      <td><span class="badge badge-${s.finalScore>=75?'green':s.finalScore>=55?'amber':'red'}">${s.grade||'-'}</span></td>
+      <td style="color:var(--text2);font-size:13px;text-align:center;">${s.attemptCount||1}회</td>
+      <td>${pptCell}</td>
       <td style="color:var(--text3);font-size:12px;">${s.submittedAt}</td>
       <td><button class="btn btn-ghost btn-sm" onclick="openEdit(${realIdx})">점수 조정</button></td>
     </tr>`;
   }).join('');
 }
+
 function openEdit(idx) {
   state.currentEditIdx = idx;
   const s = state.submissions[idx];
@@ -587,8 +705,8 @@ function saveEdit() {
 }
 function exportCSV() {
   if (!state.submissions.length) { alert('데이터가 없습니다.'); return; }
-  const h = ['이름','학번','책제목','저자','AI점수','최종점수','등급','발음(40)','내용(30)','유창성(20)','완성도(10)','제출시각','메모'];
-  const rows = state.submissions.map(s=>[s.name,s.id,s.book,s.author||'',s.aiScore,s.finalScore,s.grade,s.pronunciation,s.content,s.fluency,s.completeness,s.submittedAt,s.memo||'']);
+  const h = ['이름','학번','책제목','저자','AI점수','최종점수','등급','시도횟수','발음(40)','내용(30)','유창성(20)','완성도(10)','발표자료','제출시각','메모'];
+  const rows = state.submissions.map(s=>[s.name,s.id,s.book,s.author||'',s.aiScore,s.finalScore,s.grade,s.attemptCount||1,s.pronunciation,s.content,s.fluency,s.completeness,s.pptFileName||'',s.submittedAt,s.memo||'']);
   const csv = [h,...rows].map(r=>r.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(',')).join('\n');
   const a = document.createElement('a');
   a.href = URL.createObjectURL(new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8;'}));
@@ -607,4 +725,3 @@ function sleep(ms){return new Promise(r=>setTimeout(r,ms));}
 </script>
 </body>
 </html>
-
