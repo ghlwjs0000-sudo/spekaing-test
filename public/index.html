@@ -585,11 +585,13 @@ async function loadPreviousSubmission() {
     state.attemptCount = prev.attempt_count||0;
     state.lastResult = prev;
 
-    // 문장 상태 복원
+// 문장 상태 복원 (AI 통과 + 교사 승인 합산)
     if (prev.sentence_results && prev.sentence_results.length) {
-      state.sentenceStatuses = prev.sentence_results.map(sr =>
-        sr.status === 'ok' ? 'ok' : 'retry'
+      const approvedList = prev.teacher_approved_sentences || [];
+      state.sentenceStatuses = prev.sentence_results.map((sr, i) =>
+        sr.status === 'ok' || approvedList.includes(i) ? 'ok' : 'retry'
       );
+      state.teacherApprovedSentences = approvedList;
     }
 
     // 입력 폼 복원
@@ -839,10 +841,13 @@ async function submitRecording(){
     });
     if(!res.ok){const e=await res.json().catch(()=>({}));throw new Error(e.error||`서버 오류`);}
     const result=await res.json();
-    state.lastResult=result;
-    state.sentences=result.sentences||state.sentences;
-    // partial/missed 모두 retry 처리
-    state.sentenceStatuses=(result.sentenceResults||[]).map(sr=>sr.status==='ok'?'ok':'retry');
+    state.lastResult = result;
+    state.sentences = result.sentences||state.sentences;
+    // partial/missed 모두 retry 처리 (단, 교사 승인 문장은 ok 유지)
+    const approvedList = state.teacherApprovedSentences || [];
+    state.sentenceStatuses = (result.sentenceResults||[]).map((sr, i) =>
+      sr.status === 'ok' || approvedList.includes(i) ? 'ok' : 'retry'
+    );
     hideLoading();
     renderResults();
     goToStep(3);
