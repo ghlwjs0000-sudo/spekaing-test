@@ -41,8 +41,8 @@ module.exports = async (req, res) => {
       pronunciation, content, fluency, completeness,
       sentences, sentenceResults, attemptCount, isPassed,
       pptDataUrl, pptFilename, worksheetDataUrl, worksheetFilename,
-      pronunciationFeedback, contentFeedback, fluencyFeedback, overallFeedback, transcript,
-      teacherApprovedSentences, isFinalSubmitted
+     pronunciationFeedback, contentFeedback, fluencyFeedback, overallFeedback, transcript,
+      teacherApprovedSentences, isFinalSubmitted, pptUpdatedAt, worksheetUpdatedAt
     } = req.body;
 
     // 기존 제출 확인
@@ -68,10 +68,12 @@ module.exports = async (req, res) => {
       sentence_results: sentenceResults,
       attempt_count: attemptCount,
       is_passed: isPassed,
-      ppt_url: pptDataUrl || null,
+     ppt_url: pptDataUrl || null,
       ppt_filename: pptFilename || null,
       worksheet_url: worksheetDataUrl || null,
       worksheet_filename: worksheetFilename || null,
+      ppt_updated_at: pptDataUrl ? (pptUpdatedAt || undefined) : undefined,
+      worksheet_updated_at: worksheetDataUrl ? (worksheetUpdatedAt || undefined) : undefined,
      pronunciation_feedback: pronunciationFeedback || null,
       content_feedback: contentFeedback || null,
       fluency_feedback: fluencyFeedback || null,
