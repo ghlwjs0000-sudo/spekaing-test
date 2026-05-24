@@ -488,9 +488,10 @@ p { color: var(--text2); font-size: 14px; }
       <div class="script-display" id="transcriptDisplay" style="min-height:50px;background:var(--surface2);border-color:var(--border);"></div>
     </div>
 
-    <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
+<div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
       <button class="btn btn-ghost" onclick="goToStep2Again()">🔄 전체 다시 녹음</button>
       <button class="btn btn-success btn-lg" id="submitBtn" onclick="finalSubmit()" disabled>✓ 최종 제출 완료</button>
+      <button class="btn btn-ghost" id="mySubmitViewBtn" onclick="showMySubmission()" style="display:none;">📋 제출 내역 보기</button>
       <span id="submitHint" style="font-size:12px;color:var(--text2);"></span>
     </div>
   </div>
@@ -579,6 +580,7 @@ async function loadPreviousSubmission() {
 
     // 이전 데이터 복원
     state.submissionId = prev.id;
+    state.currentSubmissionData = prev;
     state.currentBook = { book: prev.book_title||'', author: prev.book_author||'' };
     state.script = prev.script||'';
     state.sentences = prev.sentences||[];
@@ -635,6 +637,10 @@ async function loadPreviousSubmission() {
       setTimeout(()=>{
         renderResults();
         goToStep(3);
+        if (prev.is_final_submitted) {
+          const btn = document.getElementById('mySubmitViewBtn');
+          if (btn) btn.style.display='inline-flex';
+        }
       }, 300);
     }
   } catch(err) {
@@ -1091,7 +1097,7 @@ function updateGoalUI(){
 }
 
 // ── 저장 ──
-async function saveSubmission(includePpt){
+async function saveSubmission(includePpt, isFinalSubmitted){
   if(!state.user||!state.lastResult) return;
   const r=state.lastResult;
   try{
@@ -1109,6 +1115,8 @@ async function saveSubmission(includePpt){
       sentences:state.sentences, sentenceResults:r.sentenceResults,
       attemptCount:state.attemptCount,
       isPassed:state.sentenceStatuses.every(s=>s==='ok'),
+      isFinalSubmitted: isFinalSubmitted || false,
+    };
       pronunciationFeedback:r.pronunciationFeedback||'',
       contentFeedback:r.contentFeedback||'',
       fluencyFeedback:r.fluencyFeedback||'',
@@ -1134,22 +1142,183 @@ async function saveSubmission(includePpt){
 async function finalSubmit(){
   const okCount=state.sentenceStatuses.filter(s=>s==='ok').length;
   if(okCount<state.sentences.length){alert('아직 통과하지 못한 문장이 있어요!');return;}
-  showLoading('최종 제출 중...');
-  await saveSubmission(true);
+  if(!confirm('최종 제출하시겠습니까?\n제출 후에도 제출 내역 보기에서 확인할 수 있어요.')) return;
+ showLoading('최종 제출 중...');
+  await saveSubmission(true, true);
+  await refreshCurrentSubmission();
   hideLoading();
-  alert('🎉 제출 완료! 수고했어요!');
-  // 초기화
-  ['bookTitle','bookAuthor','scriptText'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
-  document.getElementById('wordCount').textContent='단어 수: 0 / 50';
-  document.getElementById('scriptProgress').style.width='0%';
-  ['pptUpload','wsUpload'].forEach(id=>{const el=document.getElementById(id);if(el)el.classList.remove('has-file');});
-  document.getElementById('pptUploadText').textContent='클릭하여 선택';
-  document.getElementById('wsUploadText').textContent='클릭하여 선택';
-  document.getElementById('pptPreview').style.display='none';
-  document.getElementById('wsPreview').style.display='none';
-  state.pptDataUrl=null;state.pptFilename=null;state.wsDataUrl=null;state.wsFilename=null;
-  state.lastResult=null;state.submissionId=null;state.attemptCount=0;
-  goToStep(1);
+  document.getElementById('mySubmitViewBtn').style.display='inline-flex';
+  showMySubmission();
+}
+
+function showMySubmission() {
+  const s = state.lastResult;
+  const sub = state.currentSubmissionData || {};
+  const approvedList = state.teacherApprovedSentences || [];
+
+  // 제출 내역 화면 동적 생성
+  let html = `
+    <div style="max-width:840px;margin:0 auto;padding:32px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;flex-wrap:wrap;gap:12px;">
+        <div>
+          <h2 style="font-size:22px;font-weight:700;color:var(--text);">📋 나의 제출 내역</h2>
+          <p style="font-size:13px;color:var(--text2);margin-top:4px;">${state.user?.name} · 《${state.currentBook?.book||''}》</p>
+        </div>
+        <div style="display:flex;gap:8px;">
+          <button class="btn btn-ghost" onclick="showUpdateFiles()" style="font-size:13px;">📎 자료 수정</button>
+          <button class="btn btn-ghost" onclick="goToStep(3);document.getElementById('mySubmissionWrap').remove();" style="font-size:13px;">← 결과로 돌아가기</button>
+        </div>
+      </div>
+
+      <!-- 제출 정보 -->
+      <div class="card" style="margin-bottom:16px;">
+        <div class="card-title">제출 정보</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;font-size:13px;">
+          <div><span style="color:var(--text2);">최초 제출:</span> <strong>${sub.submitted_at ? new Date(sub.submitted_at).toLocaleString('ko-KR') : '-'}</strong></div>
+          <div><span style="color:var(--text2);">최종 제출:</span> <strong style="color:var(--green);">${sub.final_submitted_at ? new Date(sub.final_submitted_at).toLocaleString('ko-KR') : '-'}</strong></div>
+          <div><span style="color:var(--text2);">총 도전 횟수:</span> <strong>${state.attemptCount}회</strong></div>
+          <div><span style="color:var(--text2);">통과 문장:</span> <strong>${state.sentenceStatuses.filter(s=>s==='ok').length} / ${state.sentences.length}개</strong></div>
+        </div>
+      </div>
+
+      <!-- 제출 자료 -->
+      <div class="card" style="margin-bottom:16px;">
+        <div class="card-title">제출 자료</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+          <div>
+            <div style="font-size:13px;font-weight:600;color:var(--text2);margin-bottom:8px;">📊 PPT / 발표 자료</div>
+            ${state.pptDataUrl ? `
+              <a href="${state.pptDataUrl}" download="${state.pptFilename}" class="btn btn-ghost btn-sm" style="margin-bottom:8px;">📥 ${state.pptFilename} 다운로드</a>
+              ${state.pptFilename?.endsWith('.pdf') ? `<embed src="${state.pptDataUrl}" type="application/pdf" width="100%" height="200px" style="border-radius:8px;border:1px solid var(--border);margin-top:6px;">` : ''}
+              ${state.pptFilename?.match(/\.(jpg|jpeg|png|gif|webp)$/i) ? `<img src="${state.pptDataUrl}" style="max-width:100%;max-height:200px;border-radius:8px;border:1px solid var(--border);margin-top:6px;">` : ''}
+              ${sub.ppt_updated_at ? `<div style="font-size:11px;color:var(--text3);margin-top:4px;">수정: ${new Date(sub.ppt_updated_at).toLocaleString('ko-KR')}</div>` : ''}
+            ` : '<div style="color:var(--text3);font-size:13px;">제출 없음</div>'}
+          </div>
+          <div>
+            <div style="font-size:13px;font-weight:600;color:var(--text2);margin-bottom:8px;">📝 활동지</div>
+            ${state.wsDataUrl ? `
+              <a href="${state.wsDataUrl}" download="${state.wsFilename}" class="btn btn-ghost btn-sm" style="margin-bottom:8px;">📥 ${state.wsFilename} 다운로드</a>
+              ${state.wsFilename?.endsWith('.pdf') ? `<embed src="${state.wsDataUrl}" type="application/pdf" width="100%" height="200px" style="border-radius:8px;border:1px solid var(--border);margin-top:6px;">` : ''}
+              ${state.wsFilename?.match(/\.(jpg|jpeg|png|gif|webp)$/i) ? `<img src="${state.wsDataUrl}" style="max-width:100%;max-height:200px;border-radius:8px;border:1px solid var(--border);margin-top:6px;">` : ''}
+              ${sub.worksheet_updated_at ? `<div style="font-size:11px;color:var(--text3);margin-top:4px;">수정: ${new Date(sub.worksheet_updated_at).toLocaleString('ko-KR')}</div>` : ''}
+            ` : '<div style="color:var(--text3);font-size:13px;">제출 없음</div>'}
+          </div>
+        </div>
+      </div>
+
+      <!-- 문장별 결과 -->
+      <div class="card" style="margin-bottom:16px;">
+        <div class="card-title">문장별 발화 결과</div>
+        <div style="display:flex;flex-direction:column;gap:8px;">
+          ${state.sentences.map((sent,i)=>{
+            const status = state.sentenceStatuses[i]||'retry';
+            const isOk = status==='ok';
+            const teacherOk = approvedList.includes(i);
+            const label = isOk ? (teacherOk ? '✅ 교사 승인' : '✅ 통과') : '❌ 미통과';
+            return `<div style="padding:10px 14px;border-radius:8px;background:${isOk?'var(--green-bg)':'var(--red-bg)'};border:1.5px solid ${isOk?'var(--green-border)':'var(--red-border)'};font-size:13px;">
+              <span style="font-weight:700;color:${isOk?'var(--green)':'var(--red)'};">${label}</span>
+              <div style="margin-top:4px;color:var(--text);">${sent}</div>
+            </div>`;
+          }).join('')}
+        </div>
+      </div>
+
+      <!-- AI 피드백 -->
+      <div class="card">
+        <div class="card-title">AI 피드백</div>
+        <div class="feedback-grid">
+          <div class="feedback-item"><div class="feedback-icon">🔊</div><div class="feedback-title">발음</div><div class="feedback-text">${s?.pronunciationFeedback||s?.pronunciation_feedback||'-'}</div></div>
+          <div class="feedback-item"><div class="feedback-icon">📖</div><div class="feedback-title">내용</div><div class="feedback-text">${s?.contentFeedback||s?.content_feedback||'-'}</div></div>
+          <div class="feedback-item"><div class="feedback-icon">💬</div><div class="feedback-title">유창성</div><div class="feedback-text">${s?.fluencyFeedback||s?.fluency_feedback||'-'}</div></div>
+          <div class="feedback-item"><div class="feedback-icon">⭐</div><div class="feedback-title">종합</div><div class="feedback-text">${s?.overallFeedback||s?.overall_feedback||'-'}</div></div>
+        </div>
+      </div>
+    </div>`;
+
+  // 화면에 표시
+  let wrap = document.getElementById('mySubmissionWrap');
+  if (!wrap) {
+    wrap = document.createElement('div');
+    wrap.id = 'mySubmissionWrap';
+    wrap.style.cssText = 'position:fixed;inset:0;background:var(--bg);z-index:300;overflow-y:auto;padding-top:60px;';
+    document.body.appendChild(wrap);
+  }
+  wrap.innerHTML = html;
+}
+
+function showUpdateFiles() {
+  // 자료 수정 팝업
+  const modal = document.createElement('div');
+  modal.id = 'updateFilesModal';
+  modal.style.cssText = 'position:fixed;inset:0;background:rgba(15,23,42,.5);z-index:400;display:flex;align-items:center;justify-content:center;';
+  modal.innerHTML = `
+    <div style="background:var(--white);border-radius:16px;padding:28px;max-width:480px;width:90%;box-shadow:0 10px 40px rgba(0,0,0,.15);">
+      <div style="font-size:17px;font-weight:700;margin-bottom:16px;">📎 자료 수정</div>
+      <div style="font-size:13px;color:var(--text2);margin-bottom:16px;">새 파일을 선택하면 기존 파일이 교체됩니다. 교사 대시보드에 수정 시각이 기록돼요.</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px;">
+        <div>
+          <div style="font-size:13px;font-weight:600;color:var(--text2);margin-bottom:6px;">📊 PPT / 발표 자료</div>
+          <div class="upload-area" onclick="document.getElementById('updatePptFile').click()" id="updatePptArea" style="padding:16px;">
+            <div style="font-size:20px;margin-bottom:4px;">📎</div>
+            <div style="font-size:12px;color:var(--text2);" id="updatePptText">${state.pptFilename||'클릭하여 선택'}</div>
+          </div>
+          <input type="file" id="updatePptFile" accept="*/*" style="display:none;" onchange="handleUpdateFile('ppt',this)"/>
+        </div>
+        <div>
+          <div style="font-size:13px;font-weight:600;color:var(--text2);margin-bottom:6px;">📝 활동지</div>
+          <div class="upload-area" onclick="document.getElementById('updateWsFile').click()" id="updateWsArea" style="padding:16px;">
+            <div style="font-size:20px;margin-bottom:4px;">📄</div>
+            <div style="font-size:12px;color:var(--text2);" id="updateWsText">${state.wsFilename||'클릭하여 선택'}</div>
+          </div>
+          <input type="file" id="updateWsFile" accept="*/*" style="display:none;" onchange="handleUpdateFile('ws',this)"/>
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;justify-content:flex-end;">
+        <button class="btn btn-ghost btn-sm" onclick="document.getElementById('updateFilesModal').remove()">취소</button>
+        <button class="btn btn-primary btn-sm" onclick="submitFileUpdate()">수정 제출</button>
+      </div>
+    </div>`;
+  document.body.appendChild(modal);
+}
+
+function handleUpdateFile(type, input) {
+  const file = input.files[0];
+  if (!file) return;
+  if (file.size > 30*1024*1024) { alert('30MB 이하 파일만 가능합니다.'); return; }
+  const reader = new FileReader();
+  reader.onloadend = () => {
+    if (type==='ppt') {
+      state.pptDataUrl=reader.result; state.pptFilename=file.name;
+      document.getElementById('updatePptArea').classList.add('has-file');
+      document.getElementById('updatePptText').textContent='✓ '+file.name;
+    } else {
+      state.wsDataUrl=reader.result; state.wsFilename=file.name;
+      document.getElementById('updateWsArea').classList.add('has-file');
+      document.getElementById('updateWsText').textContent='✓ '+file.name;
+    }
+  };
+  reader.readAsDataURL(file);
+}
+
+async function submitFileUpdate() {
+  showLoading('자료 수정 중...');
+  await saveSubmission(true, false); // PPT 포함, 최종제출 플래그는 유지
+  hideLoading();
+  document.getElementById('updateFilesModal').remove();
+  // 현재 제출 데이터 새로고침
+  await refreshCurrentSubmission();
+  showMySubmission();
+  alert('✅ 자료가 수정되었습니다!');
+}
+
+async function refreshCurrentSubmission() {
+  try {
+    const res = await fetch(`/api/submit?studentId=${state.user.id}`);
+    const data = await res.json();
+    if (Array.isArray(data) && data.length) {
+      state.currentSubmissionData = data[0];
+    }
+  } catch(err) { console.error(err); }
 }
 
 // ── 유틸 ──
