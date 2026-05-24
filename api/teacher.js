@@ -40,13 +40,18 @@ module.exports = async (req, res) => {
       return res.status(200).json(data);
     }
 
-    // 제출 목록 (반별)
+// 제출 목록 (반별)
     if (action === 'submissions') {
-      const { classId, search } = req.query;
+      const { classId, search, classIds } = req.query;
       let params = '?select=*&order=submitted_at.desc';
-      if (classId) params += `&class_id=eq.${classId}`;
+      if (classId) {
+        params += `&class_id=eq.${classId}`;
+      } else if (classIds) {
+        // 담당 반 전체
+        const ids = classIds.split(',');
+        params += `&class_id=in.(${ids.join(',')})`;
+      }
       const data = await sb('GET', 'submissions', null, params);
-      // 검색 필터
       if (search) {
         const q = search.toLowerCase();
         return res.status(200).json(data.filter(s =>
@@ -56,6 +61,42 @@ module.exports = async (req, res) => {
         ));
       }
       return res.status(200).json(data);
+    }
+
+    // 전체 명단 (담당 반 학생 + 제출 현황)
+    if (action === 'roster') {
+      const { classIds, classId } = req.query;
+      let studentParams = '?select=*,classes(name)&order=student_number.asc';
+      if (classId) {
+        studentParams += `&class_id=eq.${classId}`;
+      } else if (classIds) {
+        const ids = classIds.split(',');
+        studentParams += `&class_id=in.(${ids.join(',')})`;
+      }
+      const students = await sb('GET', 'students', null, studentParams);
+
+      // 제출 현황
+      let subParams = '?select=student_id,is_passed,is_final_submitted,attempt_count,submitted_at,final_submitted_at&order=submitted_at.desc';
+      if (classId) {
+        subParams += `&class_id=eq.${classId}`;
+      } else if (classIds) {
+        const ids = classIds.split(',');
+        subParams += `&class_id=in.(${ids.join(',')})`;
+      }
+      const submissions = await sb('GET', 'submissions', null, subParams);
+      const subMap = {};
+      submissions.forEach(s => { subMap[s.student_id] = s; });
+
+      // 합산
+      const roster = students.map(s => ({
+        id: s.id,
+        name: s.name,
+        studentNumber: s.student_number,
+        className: s.classes?.name || '',
+        classId: s.class_id,
+        submission: subMap[s.id] || null
+      }));
+      return res.status(200).json(roster);
     }
 
     // 시도 기록 (학생별)
