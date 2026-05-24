@@ -749,8 +749,8 @@ async function submitRecording(){
     hideLoading();
     renderResults();
     goToStep(3);
-    // 백그라운드 저장
-    saveSubmission();
+    // 채점 즉시 저장 (PPT 제외, 실시간 반영)
+    await saveSubmission(false);
   } catch(err){
     hideLoading();
     alert('채점 오류: '+err.message);
@@ -1025,7 +1025,7 @@ async function finalSubmit(){
   const okCount=state.sentenceStatuses.filter(s=>s==='ok').length;
   if(okCount<state.sentences.length){alert('아직 통과하지 못한 문장이 있어요!');return;}
   showLoading('최종 제출 중...');
-  await saveSubmission();
+  await saveSubmission(true);
   hideLoading();
   alert('🎉 제출 완료! 수고했어요!');
   // 초기화
