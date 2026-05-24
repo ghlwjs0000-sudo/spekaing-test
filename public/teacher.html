@@ -177,7 +177,10 @@ h2{font-size:20px;font-weight:700;color:var(--text);margin-bottom:4px;}
   <!-- 사이드바 -->
   <aside class="sidebar">
     <div class="sidebar-section">메뉴</div>
-    <div class="sidebar-item active" onclick="showTab('submissions')" id="tab-submissions">
+    <div class="sidebar-item active" onclick="showTab('roster')" id="tab-roster">
+      <span class="icon">📋</span> 전체 명단
+    </div>
+    <div class="sidebar-item" onclick="showTab('submissions')" id="tab-submissions">
       <span class="icon">📊</span> 제출 현황
     </div>
     <div class="sidebar-item" onclick="showTab('students')" id="tab-students">
@@ -195,8 +198,56 @@ h2{font-size:20px;font-weight:700;color:var(--text);margin-bottom:4px;}
   <!-- 콘텐츠 -->
   <main class="content">
 
+<!-- 전체 명단 탭 -->
+    <div id="panel-roster">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:10px;">
+        <div>
+          <h2>전체 명단</h2>
+          <p class="text-muted">담당 반 학생 명단 및 제출 현황을 확인하세요.</p>
+        </div>
+        <button class="btn btn-primary btn-sm" onclick="loadRoster()">🔄 새로고침</button>
+      </div>
+
+      <!-- 반 필터 -->
+      <div class="class-tabs mb-3" id="rosterClassTabs"></div>
+
+      <!-- 검색 -->
+      <div class="search-bar">
+        <input class="search-input" id="rosterSearch" placeholder="이름, 학번으로 검색..." oninput="filterRoster()"/>
+        <select class="form-select" style="width:160px;" id="rosterStatusFilter" onchange="filterRoster()">
+          <option value="">전체 상태</option>
+          <option value="submitted">제출완료</option>
+          <option value="passed">통과완료</option>
+          <option value="not_submitted">미제출</option>
+        </select>
+      </div>
+
+      <!-- 통계 -->
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px;" id="rosterStats">
+        <div class="stat-card"><div class="stat-num" id="roster-total">0</div><div class="stat-label">전체 학생</div></div>
+        <div class="stat-card"><div class="stat-num" id="roster-submitted">0</div><div class="stat-label">제출</div></div>
+        <div class="stat-card"><div class="stat-num" id="roster-passed">0</div><div class="stat-label">통과완료</div></div>
+        <div class="stat-card"><div class="stat-num" id="roster-not">0</div><div class="stat-label">미제출</div></div>
+      </div>
+
+      <div class="card" style="padding:0;overflow:hidden;">
+        <div class="table-wrap">
+          <table>
+            <thead><tr>
+              <th>이름</th><th>학번</th><th>반</th>
+              <th>제출 상태</th><th>통과 여부</th><th>시도 횟수</th>
+              <th>최초 제출</th><th>최종 제출</th>
+            </tr></thead>
+            <tbody id="rosterTable">
+              <tr><td colspan="8" style="text-align:center;color:var(--text3);padding:40px;">로딩 중...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
     <!-- 제출 현황 탭 -->
-    <div id="panel-submissions">
+    <div id="panel-submissions" style="display:none;">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:10px;">
         <div>
           <h2>제출 현황</h2>
@@ -427,7 +478,7 @@ async function teacherLogin() {
     document.getElementById('logoutBtn').style.display = 'block';
     showScreen('main');
     buildClassTabs();
-    loadSubmissions();
+    loadRoster();
     loadClassDropdowns();
   } catch(err) { hideLoading(); showErr('loginError','서버 오류: '+err.message); }
 }
@@ -446,12 +497,100 @@ function showScreen(name) {
 
 // ── 탭 ──
 function showTab(name) {
-  ['submissions','students','classes'].forEach(t=>{
-    document.getElementById('panel-'+t).style.display = t===name?'block':'none';
-    document.getElementById('tab-'+t).classList.toggle('active', t===name);
+  ['roster','submissions','students','classes'].forEach(t=>{
+    const panel = document.getElementById('panel-'+t);
+    const tab = document.getElementById('tab-'+t);
+    if(panel) panel.style.display = t===name?'block':'none';
+    if(tab) tab.classList.toggle('active', t===name);
   });
+  if (name==='roster') loadRoster();
   if (name==='students') loadStudents();
   if (name==='classes') loadClasses();
+}
+
+// 전체 명단
+let rosterData = [];
+let rosterClassFilter = '';
+
+async function loadRoster() {
+  showLoading('전체 명단 로딩 중...');
+  try {
+    const classIds = state.teacher?.classIds || [];
+    let url = '/api/teacher?action=roster';
+    if (classIds.length) url += `&classIds=${classIds.join(',')}`;
+    const res = await fetch(url);
+    rosterData = await res.json();
+    hideLoading();
+    buildRosterClassTabs();
+    filterRoster();
+  } catch(err) { hideLoading(); alert('로딩 오류: '+err.message); }
+}
+
+function buildRosterClassTabs() {
+  const classes = [...new Set(rosterData.map(s=>s.className))].sort();
+  const el = document.getElementById('rosterClassTabs');
+  el.innerHTML = `<button class="class-tab active" onclick="setRosterClass('',this)">전체</button>` +
+    classes.map(c=>`<button class="class-tab" onclick="setRosterClass('${c}',this)">${c}</button>`).join('');
+}
+
+function setRosterClass(cls, el) {
+  rosterClassFilter = cls;
+  document.querySelectorAll('#rosterClassTabs .class-tab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  filterRoster();
+}
+
+function filterRoster() {
+  let data = rosterData;
+  if (rosterClassFilter) data = data.filter(s=>s.className===rosterClassFilter);
+  const q = (document.getElementById('rosterSearch')?.value||'').toLowerCase();
+  if (q) data = data.filter(s=>s.name?.toLowerCase().includes(q)||s.studentNumber?.toLowerCase().includes(q));
+  const status = document.getElementById('rosterStatusFilter')?.value||'';
+  if (status==='submitted') data = data.filter(s=>s.submission);
+  else if (status==='passed') data = data.filter(s=>s.submission?.is_passed);
+  else if (status==='not_submitted') data = data.filter(s=>!s.submission);
+
+  // 통계
+  document.getElementById('roster-total').textContent = data.length;
+  document.getElementById('roster-submitted').textContent = data.filter(s=>s.submission).length;
+  document.getElementById('roster-passed').textContent = data.filter(s=>s.submission?.is_passed).length;
+  document.getElementById('roster-not').textContent = data.filter(s=>!s.submission).length;
+
+  renderRoster(data);
+}
+
+function renderRoster(data) {
+  const tbody = document.getElementById('rosterTable');
+  if (!data.length) {
+    tbody.innerHTML=`<tr><td colspan="8" style="text-align:center;color:var(--text3);padding:40px;">해당 학생이 없습니다.</td></tr>`;
+    return;
+  }
+  tbody.innerHTML = data.map(s=>{
+    const sub = s.submission;
+    let statusBadge, passBadge;
+    if (!sub) {
+      statusBadge = `<span class="badge badge-gray">미제출</span>`;
+      passBadge = `<span style="color:var(--text3);">-</span>`;
+    } else if (sub.is_passed) {
+      statusBadge = `<span class="badge badge-green">제출완료</span>`;
+      passBadge = `<span class="badge badge-green">✅ 통과</span>`;
+    } else {
+      statusBadge = `<span class="badge badge-blue">진행중</span>`;
+      passBadge = `<span class="badge badge-red">미통과</span>`;
+    }
+    const submittedAt = sub?.submitted_at ? new Date(sub.submitted_at).toLocaleString('ko-KR',{month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'}) : '-';
+    const finalAt = sub?.final_submitted_at ? new Date(sub.final_submitted_at).toLocaleString('ko-KR',{month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'}) : '-';
+    return `<tr>
+      <td style="font-weight:600;">${s.name}</td>
+      <td style="font-family:'DM Mono',monospace;font-size:12px;color:var(--text2);">${s.studentNumber}</td>
+      <td><span class="badge badge-blue">${s.className}</span></td>
+      <td>${statusBadge}</td>
+      <td>${passBadge}</td>
+      <td style="text-align:center;font-family:'DM Mono',monospace;">${sub?.attempt_count||0}회</td>
+      <td style="color:var(--text3);font-size:11px;">${submittedAt}</td>
+      <td style="color:var(--green);font-size:11px;font-weight:${sub?.final_submitted_at?'700':'400'};">${finalAt}</td>
+    </tr>`;
+  }).join('');
 }
 
 // ── 반 탭 ──
