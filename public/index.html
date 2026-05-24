@@ -1116,7 +1116,6 @@ async function saveSubmission(includePpt, isFinalSubmitted){
       attemptCount:state.attemptCount,
       isPassed:state.sentenceStatuses.every(s=>s==='ok'),
       isFinalSubmitted: isFinalSubmitted || false,
-    };
       pronunciationFeedback:r.pronunciationFeedback||'',
       contentFeedback:r.contentFeedback||'',
       fluencyFeedback:r.fluencyFeedback||'',
