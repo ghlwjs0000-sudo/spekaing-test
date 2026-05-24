@@ -2,6 +2,7 @@
   "rewrites": [
     { "source": "/api/(.*)", "destination": "/api/$1" },
     { "source": "/teacher", "destination": "/public/teacher.html" },
+    { "source": "/teacher/(.*)", "destination": "/public/teacher.html" },
     { "source": "/(.*)", "destination": "/public/index.html" }
   ]
 }
