@@ -123,6 +123,16 @@ module.exports = async (req, res) => {
       return res.status(200).json({ success: true, count: data.length });
     }
 
+   // 학생 정보 수정 (아이디/비밀번호)
+    if (action === 'updateStudent' && req.method === 'PATCH') {
+      const { studentId, password, classId } = req.body;
+      const patch = {};
+      if (password) patch.password = password;
+      if (classId) patch.class_id = classId;
+      await sb('PATCH', 'students', patch, `?id=eq.${studentId}`);
+      return res.status(200).json({ success: true });
+    }
+
     // 학생 삭제
     if (action === 'deleteStudent' && req.method === 'DELETE') {
       const { studentId } = req.query;
