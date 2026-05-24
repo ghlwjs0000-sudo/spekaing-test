@@ -1147,6 +1147,19 @@ async function finalSubmit(){
   if(!confirm('최종 제출하시겠습니까?\n제출 후에도 제출 내역 보기에서 확인할 수 있어요.')) return;
  showLoading('최종 제출 중...');
   await saveSubmission(true, true);
+  // PPT/활동지는 saveSubmission에서 이미 state에 있으므로
+  // DB에서 다시 불러오기 전에 currentSubmissionData에 직접 세팅
+  state.currentSubmissionData = {
+    ...( state.currentSubmissionData || {} ),
+    ppt_url: state.pptDataUrl,
+    ppt_filename: state.pptFilename,
+    worksheet_url: state.wsDataUrl,
+    worksheet_filename: state.wsFilename,
+    submitted_at: state.currentSubmissionData?.submitted_at || new Date().toISOString(),
+    final_submitted_at: new Date().toISOString(),
+    ppt_updated_at: state.pptDataUrl ? new Date().toISOString() : null,
+    worksheet_updated_at: state.wsDataUrl ? new Date().toISOString() : null,
+  };
   await refreshCurrentSubmission();
   hideLoading();
   document.getElementById('mySubmitViewBtn').style.display='inline-flex';
