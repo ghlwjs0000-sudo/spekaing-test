@@ -700,14 +700,23 @@ function navigateToStep(n) {
   if (n === 2 && !state.script) { alert('먼저 스크립트를 제출해주세요.'); return; }
   // 3단계로 이동: 이전 결과가 있어야 함
   if (n === 3 && !state.lastResult) { alert('먼저 녹음을 완료해주세요.'); return; }
-  if (n === 2) {
+ if (n === 2) {
     document.getElementById('audioPlayback').style.display='none';
     document.getElementById('recordStatus').textContent='버튼을 눌러 녹음을 시작하세요';
     document.getElementById('recordTimer').textContent='00:00';
     document.getElementById('waveform').classList.remove('active');
     state.audioBlob=null;
     document.getElementById('scriptDisplay').textContent = state.script||'';
+    // attemptCount 유지
     updateAttemptUI();
+    if(state.lastResult){
+      const retry=state.sentenceStatuses.filter(s=>s==='retry').length;
+      const ok=state.sentenceStatuses.length-retry;
+      if(retry>0){
+        document.getElementById('prevSummary').style.display='block';
+        document.getElementById('prevSummary').textContent=`이전 결과: ${ok}개 통과 · ${retry}개 재도전 필요 — 빨간 문장에 집중해서 다시 말해보세요!`;
+      }
+    }
   }
   if (n === 3 && state.lastResult) {
     renderResults();
@@ -883,6 +892,8 @@ function goToStep2Again(){
   document.getElementById('recordTimer').textContent='00:00';
   document.getElementById('waveform').classList.remove('active');
   state.audioBlob=null;
+  // attemptCount 유지 (초기화하지 않음)
+  updateAttemptUI();
   if(state.lastResult){
     const retry=state.sentenceStatuses.filter(s=>s==='retry').length;
     const ok=state.sentenceStatuses.length-retry;
