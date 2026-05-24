@@ -561,12 +561,73 @@ async function login() {
     document.getElementById('userBadge').style.display = 'flex';
     document.getElementById('userBadgeText').textContent = `${data.user.name} · ${data.user.className}`;
     showScreen('student');
+    // 이전 제출 데이터 불러오기
+    await loadPreviousSubmission();
     goToStep(1);
   } catch(err) {
     hideLoading();
     showLoginError('서버 오류: ' + err.message);
   }
 }
+async function loadPreviousSubmission() {
+  try {
+    const res = await fetch(`/api/submit?studentId=${state.user.id}`);
+    const data = await res.json();
+    if (!Array.isArray(data) || !data.length) return;
+    const prev = data[0];
+    if (!prev) return;
+
+    // 이전 데이터 복원
+    state.submissionId = prev.id;
+    state.currentBook = { book: prev.book_title||'', author: prev.book_author||'' };
+    state.script = prev.script||'';
+    state.sentences = prev.sentences||[];
+    state.attemptCount = prev.attempt_count||0;
+    state.lastResult = prev;
+
+    // 문장 상태 복원
+    if (prev.sentence_results && prev.sentence_results.length) {
+      state.sentenceStatuses = prev.sentence_results.map(sr =>
+        sr.status === 'ok' ? 'ok' : 'retry'
+      );
+    }
+
+    // 입력 폼 복원
+    const bookTitleEl = document.getElementById('bookTitle');
+    const bookAuthorEl = document.getElementById('bookAuthor');
+    const scriptTextEl = document.getElementById('scriptText');
+    if (bookTitleEl) bookTitleEl.value = prev.book_title||'';
+    if (bookAuthorEl) bookAuthorEl.value = prev.book_author||'';
+    if (scriptTextEl) {
+      scriptTextEl.value = prev.script||'';
+      const w = (prev.script||'').trim().split(/\s+/).filter(x=>x).length;
+      document.getElementById('wordCount').textContent = `단어 수: ${w} / 50`;
+      document.getElementById('scriptProgress').style.width = Math.min(w/50*100,100)+'%';
+    }
+
+    // 이전 결과가 있으면 안내 메시지 표시
+    if (prev.attempt_count > 0) {
+      const okCount = (state.sentenceStatuses||[]).filter(s=>s==='ok').length;
+      const total = (state.sentences||[]).length;
+      const allClear = okCount === total && total > 0;
+      setTimeout(()=>{
+        const banner = document.createElement('div');
+        banner.style.cssText = 'position:fixed;top:70px;right:20px;z-index:200;background:#fff;border:1.5px solid #2563eb;border-radius:12px;padding:14px 18px;box-shadow:0 4px 12px rgba(0,0,0,.1);font-size:13px;max-width:280px;';
+        banner.innerHTML = `
+          <div style="font-weight:700;color:#2563eb;margin-bottom:4px;">이전 기록이 있어요 📋</div>
+          <div style="color:#64748b;">${prev.attempt_count}번 도전 · ${okCount}/${total}문장 통과</div>
+          <div style="color:#64748b;margin-top:4px;">${allClear ? '✅ 모든 문장 통과 완료! 최종 제출하세요.' : '❌ 아직 통과 못한 문장이 있어요.'}</div>
+          <button onclick="this.parentElement.remove()" style="margin-top:8px;background:none;border:none;color:#94a3b8;font-size:11px;cursor:pointer;font-family:inherit;">닫기</button>
+        `;
+        document.body.appendChild(banner);
+        setTimeout(()=>banner.remove(), 8000);
+      }, 500);
+    }
+  } catch(err) {
+    console.error('이전 데이터 로딩 오류:', err);
+  }
+}
+
 function showLoginError(msg) {
   const el = document.getElementById('loginError');
   el.textContent = msg; el.style.display = 'block';
