@@ -41,7 +41,8 @@ module.exports = async (req, res) => {
       pronunciation, content, fluency, completeness,
       sentences, sentenceResults, attemptCount, isPassed,
       pptDataUrl, pptFilename, worksheetDataUrl, worksheetFilename,
-      pronunciationFeedback, contentFeedback, fluencyFeedback, overallFeedback, transcript
+      pronunciationFeedback, contentFeedback, fluencyFeedback, overallFeedback, transcript,
+      teacherApprovedSentences
     } = req.body;
 
     // 기존 제출 확인
@@ -71,12 +72,13 @@ module.exports = async (req, res) => {
       ppt_filename: pptFilename || null,
       worksheet_url: worksheetDataUrl || null,
       worksheet_filename: worksheetFilename || null,
-      pronunciation_feedback: pronunciationFeedback || null,
+     pronunciation_feedback: pronunciationFeedback || null,
       content_feedback: contentFeedback || null,
       fluency_feedback: fluencyFeedback || null,
       overall_feedback: overallFeedback || null,
       transcript: transcript || null,
-      updated_at: new Date().toISOString()
+      updated_at: new Date().toISOString(),
+      teacher_approved_sentences: teacherApprovedSentences || []
     };
 
     let result;
@@ -91,7 +93,7 @@ module.exports = async (req, res) => {
 
   // PATCH: 교사 점수 조정 / 통과 처리
   if (req.method === 'PATCH') {
-    const { id, finalScore, teacherNote, teacherOverride, isPassed } = req.body;
+    const { id, finalScore, teacherNote, teacherOverride, isPassed, teacherApprovedSentences } = req.body;
     const patch = {
       final_score: finalScore,
       teacher_note: teacherNote || null,
@@ -99,6 +101,9 @@ module.exports = async (req, res) => {
       is_passed: isPassed,
       updated_at: new Date().toISOString()
     };
+    if (teacherApprovedSentences !== undefined) {
+      patch.teacher_approved_sentences = teacherApprovedSentences;
+    }
     await supabaseReq('PATCH', 'submissions', patch, `?id=eq.${id}`);
     return res.status(200).json({ success: true });
   }
