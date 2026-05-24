@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>영어 말하기 수행평가</title>
+<title>덕인고 영어 말하기 수행평가</title>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root {
@@ -608,7 +608,7 @@ async function loadPreviousSubmission() {
 // 이전 결과가 있으면 결과 화면으로 바로 이동
     if (prev.attempt_count > 0 && prev.sentence_results && prev.sentence_results.length) {
       // lastResult 형식 맞추기
-      state.lastResult = {
+     state.lastResult = {
         total: prev.ai_score,
         grade: prev.grade,
         pronunciation: prev.pronunciation,
@@ -617,11 +617,11 @@ async function loadPreviousSubmission() {
         completeness: prev.completeness,
         sentenceResults: prev.sentence_results,
         sentences: prev.sentences,
-        transcript: '',
-        pronunciationFeedback: prev.pronunciation_feedback||'이전 분석 결과입니다.',
-        contentFeedback: prev.content_feedback||'이전 분석 결과입니다.',
-        fluencyFeedback: prev.fluency_feedback||'이전 분석 결과입니다.',
-        overallFeedback: prev.overall_feedback||'다시 도전하거나 최종 제출하세요.',
+        transcript: prev.transcript||'',
+        pronunciationFeedback: prev.pronunciation_feedback||'',
+        contentFeedback: prev.content_feedback||'',
+        fluencyFeedback: prev.fluency_feedback||'',
+        overallFeedback: prev.overall_feedback||'',
       };
       state.attemptCount = prev.attempt_count||0;
       updateAttemptUI();
@@ -1077,6 +1077,11 @@ async function saveSubmission(includePpt){
       sentences:state.sentences, sentenceResults:r.sentenceResults,
       attemptCount:state.attemptCount,
       isPassed:state.sentenceStatuses.every(s=>s==='ok'),
+      pronunciationFeedback:r.pronunciationFeedback||'',
+      contentFeedback:r.contentFeedback||'',
+      fluencyFeedback:r.fluencyFeedback||'',
+      overallFeedback:r.overallFeedback||'',
+      transcript:r.transcript||'',
     };
     // PPT는 최종 제출 시에만 포함 (파일 크기 문제 방지)
     if(includePpt){
