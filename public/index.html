@@ -586,14 +586,23 @@ function showScreen(name) {
 // ── 단계 이동 ──
 function goToStep(n) {
   [1,2,3].forEach(i => {
-    document.getElementById('step'+i).style.display = i===n ? 'block' : 'none';
+    const step = document.getElementById('step'+i);
+    if(step) step.style.display = i===n ? 'block' : 'none';
     const dot = document.getElementById('dot'+i);
     const lbl = document.getElementById('lbl'+i);
-    if (i < n) { dot.className='step-dot done'; lbl.className='step-label'; }
-    else if (i===n) { dot.className='step-dot active'; lbl.className='step-label active'; }
-    else { dot.className='step-dot'; lbl.className='step-label'; }
-    if (i < n && i < 3) document.getElementById('line1'+(i+1)).className = 'step-line done';
-    else if (i < 3) document.getElementById('line1'+(i+1)).className = 'step-line';
+    if(dot) {
+      if (i < n) { dot.className='step-dot done'; }
+      else if (i===n) { dot.className='step-dot active'; }
+      else { dot.className='step-dot'; }
+    }
+    if(lbl) {
+      if (i===n) { lbl.className='step-label active'; }
+      else { lbl.className='step-label'; }
+    }
+    if (i < 3) {
+      const line = document.getElementById('line1'+(i+1));
+      if(line) line.className = i < n ? 'step-line done' : 'step-line';
+    }
   });
   window.scrollTo(0,0);
 }
