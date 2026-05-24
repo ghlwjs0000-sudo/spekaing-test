@@ -13,7 +13,7 @@ const handler = async (req, res) => {
   }
 
   try {
-    // 1단계: Whisper로 음성 → 텍스트 변환
+    // 1단계: Whisper STT
     const audioBuffer = Buffer.from(audioBase64, 'base64');
     const ext = (mimeType || 'audio/webm').includes('mp4') ? 'mp4'
               : (mimeType || '').includes('ogg') ? 'ogg' : 'webm';
@@ -38,38 +38,48 @@ const handler = async (req, res) => {
     const whisperData = await whisperRes.json();
     const transcript = whisperData.text || '';
 
-    // 2단계: GPT-4o로 채점
-    const prompt = `You are an English speaking assessment AI for Korean high school students.
+    // 2단계: GPT-4o 문장별 분석 + 채점
+    const sentences = script.split(/(?<=[.!?])\s+/).filter(s => s.trim().length > 3);
 
-The student was asked to introduce a book they read in English.
+    const prompt = `You are a strict English speaking assessment AI for Korean high school students.
 
-STUDENT INFO:
-- Name: ${name} / ID: ${id}
-- Book: "${book}" by ${author || 'unknown'}
+STUDENT INFO: ${name} / Book: "${book}" by ${author || 'unknown'}
 
-STUDENT'S PLANNED SCRIPT:
-"""
-${script}
-"""
+PLANNED SCRIPT (split into sentences):
+${sentences.map((s, i) => `[${i+1}] ${s}`).join('\n')}
 
-STUDENT'S ACTUAL SPEECH (transcribed by Whisper):
-"""
-${transcript || '(no speech detected)'}
-"""
+ACTUAL SPEECH (Whisper transcript):
+"${transcript || '(no speech detected)'}"
 
-Compare the actual speech to the planned script and assess the student's performance.
+TASK:
+1. For each sentence [1] to [${sentences.length}], determine if the student said it correctly.
+   - "ok": said clearly and correctly
+   - "partial": said but with errors or incomplete
+   - "missed": not said at all
 
-Scoring criteria:
-- pronunciation (0-40): accuracy of pronunciation based on transcription quality and likely errors
-- content (0-30): how well the actual speech covers the planned script content
-- fluency (0-20): smoothness, pace, and natural delivery
-- completeness (0-10): whether the student finished the full introduction
+2. Score STRICTLY:
+- pronunciation (0-40): Korean students typically score 15-28. Only give 35+ for near-native pronunciation.
+- content (0-30): coverage of planned script
+- fluency (0-20): natural delivery without long pauses
+- completeness (0-10): finished the full introduction
+- If transcript under 10 words: total must be under 15
+- Average: 40-58, Good: 59-72, Excellent: 73-85. Above 85 is exceptional.
 
-If transcript is empty or very short (under 10 words), give very low scores (total under 20).
-
-Respond ONLY in this exact JSON format with NO markdown fences:
-{"transcript":"${transcript}","pronunciation":INT_0_40,"content":INT_0_30,"fluency":INT_0_20,"completeness":INT_0_10,"total":INT_0_100,"grade":"A+ or A or B+ or B or C+ or C or D","pronunciationFeedback":"Korean 2-sentence feedback","contentFeedback":"Korean 2-sentence feedback","fluencyFeedback":"Korean 2-sentence feedback","overallFeedback":"Korean 2-sentence encouraging comment"}
-
+Respond ONLY in this exact JSON (no markdown):
+{
+  "transcript": "${transcript.replace(/"/g, "'")}",
+  "sentenceResults": [${sentences.map((_, i) => `{"index":${i+1},"status":"ok|partial|missed","issue":"brief note in Korean if partial/missed, else null"}`).join(',')}],
+  "pronunciation": INT_0_40,
+  "content": INT_0_30,
+  "fluency": INT_0_20,
+  "completeness": INT_0_10,
+  "total": INT_0_100,
+  "grade": "A+ or A or B+ or B or C+ or C or D",
+  "pronunciationFeedback": "Korean 2-sentence feedback",
+  "contentFeedback": "Korean 2-sentence feedback",
+  "fluencyFeedback": "Korean 2-sentence feedback",
+  "overallFeedback": "Korean 2-sentence encouraging comment"
+}
 total must equal pronunciation+content+fluency+completeness exactly.`;
 
     const gptRes = await fetch('https://api.openai.com/v1/chat/completions', {
@@ -80,7 +90,7 @@ total must equal pronunciation+content+fluency+completeness exactly.`;
       },
       body: JSON.stringify({
         model: 'gpt-4o',
-        max_tokens: 1000,
+        max_tokens: 2000,
         response_format: { type: 'json_object' },
         messages: [{ role: 'user', content: prompt }]
       })
@@ -93,7 +103,7 @@ total must equal pronunciation+content+fluency+completeness exactly.`;
 
     const gptData = await gptRes.json();
     const result = JSON.parse(gptData.choices[0].message.content);
-    result.simulatedTranscript = transcript;
+    result.sentences = sentences;
 
     return res.status(200).json(result);
 
