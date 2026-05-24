@@ -1111,6 +1111,29 @@ function updateGoalUI(){
 }
 
 // ── 저장 ──
+async function uploadFile(fileDataUrl, filename, fileType) {
+  if (!fileDataUrl || !filename) return null;
+  try {
+    const res = await fetch('/api/upload', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        fileBase64: fileDataUrl,
+        filename,
+        studentId: state.user.id,
+        fileType
+      })
+    });
+    const data = await res.json();
+    if (data.success) return data.url;
+    console.error('업로드 실패:', data.error);
+    return null;
+  } catch(err) {
+    console.error('업로드 오류:', err);
+    return null;
+  }
+}
+
 async function saveSubmission(includePpt, isFinalSubmitted){
   if(!state.user||!state.lastResult) return;
   const r=state.lastResult;
@@ -1136,13 +1159,35 @@ async function saveSubmission(includePpt, isFinalSubmitted){
       overallFeedback:r.overallFeedback||'',
       transcript:r.transcript||'',
     };
-    // PPT는 최종 제출 시에만 포함 (파일 크기 문제 방지)
+
+    // PPT/활동지는 Storage에 업로드 후 URL만 저장
     if(includePpt){
-      body.pptDataUrl=state.pptDataUrl;
-      body.pptFilename=state.pptFilename;
-      body.worksheetDataUrl=state.wsDataUrl;
-      body.worksheetFilename=state.wsFilename;
+      setLoadingStep('발표 자료 업로드 중...');
+      if(state.pptDataUrl && state.pptFilename && !state.pptDataUrl.startsWith('http')) {
+        const pptUrl = await uploadFile(state.pptDataUrl, state.pptFilename, 'ppt');
+        if(pptUrl) {
+          state.pptDataUrl = pptUrl; // URL로 교체
+          body.pptDataUrl = pptUrl;
+          body.pptFilename = state.pptFilename;
+        }
+      } else if(state.pptDataUrl) {
+        body.pptDataUrl = state.pptDataUrl;
+        body.pptFilename = state.pptFilename;
+      }
+
+      if(state.wsDataUrl && state.wsFilename && !state.wsDataUrl.startsWith('http')) {
+        const wsUrl = await uploadFile(state.wsDataUrl, state.wsFilename, 'worksheet');
+        if(wsUrl) {
+          state.wsDataUrl = wsUrl; // URL로 교체
+          body.worksheetDataUrl = wsUrl;
+          body.worksheetFilename = state.wsFilename;
+        }
+      } else if(state.wsDataUrl) {
+        body.worksheetDataUrl = state.wsDataUrl;
+        body.worksheetFilename = state.wsFilename;
+      }
     }
+
     const res=await fetch('/api/submit',{
       method:'POST',headers:{'Content-Type':'application/json'},
       body:JSON.stringify(body)
