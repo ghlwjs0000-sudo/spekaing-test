@@ -856,7 +856,13 @@ async function loadStudents() {
   const classId = document.getElementById('studentClassFilter')?.value||'';
   showLoading('학생 목록 로딩 중...');
   try {
-    const url = classId?`/api/teacher?action=students&classId=${classId}`:'/api/teacher?action=students';
+    const classIds = state.teacher?.classIds || [];
+    let url = '/api/teacher?action=students';
+    if (classId) {
+      url += `&classId=${classId}`;
+    } else if (classIds.length > 0) {
+      url += `&classIds=${classIds.join(',')}`;
+    }
     const res = await fetch(url);
     state.students = await res.json();
     hideLoading();
