@@ -1,3 +1,4 @@
+cat > /mnt/user-data/outputs/index_v4.html << 'HTMLEOF'
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -30,7 +31,7 @@ body{font-family:'Pretendard',-apple-system,sans-serif;background:var(--bg);colo
 .nav-tab:hover{color:var(--text);background:var(--surface2);}
 .nav-tab.active{background:var(--accent);color:#000;}
 .secure-badge{display:inline-flex;align-items:center;gap:6px;padding:5px 12px;border-radius:999px;background:var(--green-bg);border:1px solid rgba(76,175,130,0.25);font-size:11px;color:var(--green);font-weight:600;}
-.main{flex:1;padding:40px 32px;max-width:880px;margin:0 auto;width:100%;}
+.main{flex:1;padding:40px 32px;max-width:900px;margin:0 auto;width:100%;}
 .main-wide{flex:1;padding:32px;width:100%;}
 .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:26px;margin-bottom:18px;}
 .card-title{font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--text3);margin-bottom:14px;}
@@ -45,6 +46,8 @@ body{font-family:'Pretendard',-apple-system,sans-serif;background:var(--bg);colo
 .btn-primary:hover{background:var(--accent2);}
 .btn-ghost{background:var(--surface2);color:var(--text);border:1px solid var(--border);}
 .btn-ghost:hover{border-color:var(--border2);}
+.btn-green{background:var(--green);color:#fff;}
+.btn-green:hover{opacity:.9;}
 .btn:disabled{opacity:.4;cursor:not-allowed;}
 .btn-lg{padding:13px 32px;font-size:15px;}
 .btn-sm{padding:6px 14px;font-size:12px;}
@@ -52,7 +55,9 @@ body{font-family:'Pretendard',-apple-system,sans-serif;background:var(--bg);colo
 .badge-green{background:var(--green-bg);color:var(--green);}
 .badge-amber{background:var(--amber-bg);color:var(--accent2);}
 .badge-red{background:var(--red-bg);color:var(--red);}
-.record-area{display:flex;flex-direction:column;align-items:center;gap:22px;padding:40px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);text-align:center;}
+
+/* 녹음 */
+.record-area{display:flex;flex-direction:column;align-items:center;gap:20px;padding:36px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);text-align:center;}
 .record-btn{width:90px;height:90px;border-radius:50%;border:3px solid var(--border2);background:var(--surface2);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .3s;font-size:32px;}
 .record-btn:hover{border-color:var(--accent);transform:scale(1.04);}
 .record-btn.recording{border-color:var(--red);background:var(--red-bg);animation:pulse 1.5s infinite;}
@@ -62,34 +67,62 @@ body{font-family:'Pretendard',-apple-system,sans-serif;background:var(--bg);colo
 .waveform{display:flex;align-items:center;gap:3px;height:40px;opacity:0;transition:opacity .3s;}
 .waveform.active{opacity:1;}
 .wave-bar{width:4px;border-radius:2px;background:var(--accent);min-height:4px;transition:height .1s;}
-.script-display{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:18px;font-size:15px;line-height:1.8;color:var(--text);max-height:190px;overflow-y:auto;text-align:left;}
+.script-display{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:18px;font-size:15px;line-height:1.8;color:var(--text);max-height:200px;overflow-y:auto;text-align:left;}
 audio{width:100%;border-radius:var(--radius-sm);margin-top:8px;}
+
+/* 업로드 */
 .upload-area{border:2px dashed var(--border2);border-radius:var(--radius);padding:28px;text-align:center;cursor:pointer;transition:all .2s;}
 .upload-area:hover{border-color:var(--accent);background:var(--amber-bg);}
 .upload-area.has-file{border-color:var(--green);background:var(--green-bg);}
-.upload-icon{font-size:32px;margin-bottom:8px;}
 .upload-filename{font-size:13px;color:var(--green);margin-top:6px;font-weight:500;}
-.sentence-list{display:flex;flex-direction:column;gap:10px;}
-.sentence-item{display:flex;align-items:flex-start;gap:12px;padding:12px 16px;border-radius:var(--radius-sm);border:1px solid var(--border);}
-.sentence-item.ok{background:var(--green-bg);border-color:rgba(76,175,130,0.25);}
-.sentence-item.partial{background:var(--yellow-bg);border-color:rgba(232,192,106,0.25);}
-.sentence-item.missed{background:var(--red-bg);border-color:rgba(224,90,90,0.2);}
-.sentence-icon{font-size:18px;flex-shrink:0;margin-top:1px;}
+
+/* 진행 바 */
+.progress-wrap{background:var(--surface2);border-radius:4px;height:3px;overflow:hidden;margin-top:10px;}
+.progress-bar{height:100%;background:var(--accent);width:0;transition:width .4s;border-radius:4px;}
+
+/* 목표 달성 진행 표시 */
+.goal-bar-wrap{background:var(--surface2);border-radius:8px;height:14px;overflow:hidden;margin:10px 0;}
+.goal-bar{height:100%;border-radius:8px;transition:width .6s cubic-bezier(.25,.46,.45,.94);}
+.goal-status{display:flex;align-items:center;justify-content:space-between;font-size:13px;margin-bottom:6px;}
+
+/* 문장별 결과 */
+.sentence-list{display:flex;flex-direction:column;gap:8px;}
+.sentence-item{display:flex;align-items:flex-start;gap:12px;padding:14px 16px;border-radius:var(--radius-sm);border:1px solid var(--border);transition:all .3s;}
+.sentence-item.ok{background:var(--green-bg);border-color:rgba(76,175,130,0.3);}
+.sentence-item.retry{background:var(--red-bg);border-color:rgba(224,90,90,0.25);}
+.sentence-icon{font-size:18px;flex-shrink:0;margin-top:2px;}
+.sentence-content{flex:1;}
+.sentence-text{font-size:14px;line-height:1.6;}
 .sentence-item.ok .sentence-text{color:var(--green);}
-.sentence-item.partial .sentence-text{color:var(--yellow);}
-.sentence-item.missed .sentence-text{color:var(--red);}
-.sentence-text{font-size:14px;line-height:1.6;flex:1;}
-.sentence-issue{font-size:12px;margin-top:4px;opacity:.8;}
-.result-banner{padding:20px 24px;border-radius:var(--radius);margin-bottom:18px;text-align:center;}
-.result-banner.good{background:var(--green-bg);border:1px solid rgba(76,175,130,0.25);}
-.result-banner.retry{background:var(--red-bg);border:1px solid rgba(224,90,90,0.2);}
-.result-banner-title{font-family:'DM Serif Display',serif;font-size:22px;margin-bottom:6px;}
+.sentence-item.retry .sentence-text{color:var(--red);}
+.sentence-issue{font-size:12px;margin-top:4px;color:var(--text3);}
+.sentence-retry-btn{flex-shrink:0;padding:5px 12px;border-radius:999px;font-size:11px;font-weight:600;cursor:pointer;border:1px solid rgba(224,90,90,0.3);background:var(--red-bg);color:var(--red);transition:all .2s;font-family:inherit;}
+.sentence-retry-btn:hover{background:var(--red);color:#fff;}
+.sentence-retry-btn.recording-sent{border-color:var(--red);background:var(--red);color:#fff;animation:pulse-sm 1s infinite;}
+@keyframes pulse-sm{0%,100%{opacity:1;}50%{opacity:.6;}}
+
+/* 결과 배너 */
+.result-banner{padding:22px 26px;border-radius:var(--radius);margin-bottom:20px;text-align:center;}
+.result-banner.all-clear{background:var(--green-bg);border:1px solid rgba(76,175,130,0.3);}
+.result-banner.has-retry{background:var(--red-bg);border:1px solid rgba(224,90,90,0.2);}
+.result-banner-title{font-family:'DM Serif Display',serif;font-size:24px;margin-bottom:6px;}
 .result-banner-sub{font-size:14px;color:var(--text2);}
+
+/* 피드백 */
 .feedback-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px;}
 .feedback-item{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:16px;}
 .feedback-icon{font-size:20px;margin-bottom:7px;}
 .feedback-title{font-size:13px;font-weight:600;color:var(--text);margin-bottom:5px;}
 .feedback-text{font-size:12px;color:var(--text2);line-height:1.65;}
+
+/* 시도 횟수 배지 */
+.attempt-info{display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
+.attempt-badge{display:inline-flex;align-items:center;gap:6px;padding:5px 14px;border-radius:999px;background:var(--amber-bg);border:1px solid rgba(212,168,67,0.2);font-size:13px;color:var(--accent2);}
+.attempt-dots{display:flex;gap:4px;align-items:center;}
+.attempt-dot{width:8px;height:8px;border-radius:50%;background:var(--surface2);border:1px solid var(--border2);transition:all .3s;}
+.attempt-dot.done{background:var(--accent);}
+
+/* 교사 대시보드 */
 .stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:26px;}
 .stat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:20px;}
 .stat-num{font-family:'DM Serif Display',serif;font-size:30px;color:var(--accent);}
@@ -100,27 +133,35 @@ tbody tr{border-bottom:1px solid var(--border);transition:background .15s;}
 tbody tr:hover{background:var(--surface2);}
 tbody td{padding:12px 14px;font-size:14px;}
 .score-chip{display:inline-flex;align-items:center;justify-content:center;width:44px;height:26px;border-radius:6px;font-family:'DM Mono',monospace;font-size:13px;font-weight:500;}
-.progress-wrap{background:var(--surface2);border-radius:4px;height:3px;overflow:hidden;margin-top:10px;}
-.progress-bar{height:100%;background:var(--accent);width:0;transition:width .4s;border-radius:4px;}
-.loading-overlay{display:none;position:fixed;inset:0;z-index:999;background:rgba(15,15,17,.9);align-items:center;justify-content:center;flex-direction:column;gap:20px;}
+.tab-bar{display:flex;gap:2px;margin-bottom:22px;background:var(--surface2);padding:4px;border-radius:10px;}
+.tab-item{flex:1;text-align:center;padding:8px;border-radius:8px;font-size:13px;font-weight:500;cursor:pointer;color:var(--text2);transition:all .2s;}
+.tab-item.active{background:var(--surface);color:var(--text);box-shadow:0 1px 4px rgba(0,0,0,.3);}
+.ppt-link{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:6px;background:var(--blue-bg);color:var(--blue);font-size:12px;text-decoration:none;border:1px solid rgba(90,157,224,0.2);}
+
+/* 로딩 */
+.loading-overlay{display:none;position:fixed;inset:0;z-index:999;background:rgba(15,15,17,.92);align-items:center;justify-content:center;flex-direction:column;gap:20px;}
 .loading-overlay.active{display:flex;}
 .loading-spinner{width:38px;height:38px;border:3px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite;}
 @keyframes spin{to{transform:rotate(360deg);}}
 .loading-text{font-size:14px;color:var(--text2);}
 .loading-step{font-size:12px;color:var(--text3);font-family:'DM Mono',monospace;}
-.tab-bar{display:flex;gap:2px;margin-bottom:22px;background:var(--surface2);padding:4px;border-radius:10px;}
-.tab-item{flex:1;text-align:center;padding:8px;border-radius:8px;font-size:13px;font-weight:500;cursor:pointer;color:var(--text2);transition:all .2s;}
-.tab-item.active{background:var(--surface);color:var(--text);box-shadow:0 1px 4px rgba(0,0,0,.3);}
+
 h2{font-family:'DM Serif Display',serif;font-size:26px;font-weight:400;margin-bottom:6px;}
 p{color:var(--text2);font-size:14px;}
 .text-muted{color:var(--text2);font-size:13px;}
-.mt-2{margin-top:8px;}.mb-4{margin-bottom:24px;}
+.mt-2{margin-top:8px;}.mt-3{margin-top:16px;}.mb-4{margin-bottom:24px;}
 .login-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;}
 .login-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:40px;width:100%;max-width:400px;text-align:center;}
 .login-card h2{margin-bottom:8px;}.login-card p{margin-bottom:28px;}
 #editModal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:500;align-items:center;justify-content:center;}
-.ppt-link{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:6px;background:var(--blue-bg);color:var(--blue);font-size:12px;text-decoration:none;border:1px solid rgba(90,157,224,0.2);}
-.attempt-badge{display:inline-flex;align-items:center;gap:6px;padding:4px 12px;border-radius:999px;background:var(--amber-bg);border:1px solid rgba(212,168,67,0.2);font-size:12px;color:var(--accent2);}
+
+/* 문장별 녹음 모달 */
+#sentenceModal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:600;align-items:center;justify-content:center;}
+.sent-modal-box{background:var(--surface);border:1px solid var(--border2);border-radius:var(--radius);padding:32px;max-width:520px;width:90%;text-align:center;}
+.sent-modal-sentence{font-size:17px;color:var(--text);line-height:1.7;margin:16px 0 24px;padding:16px;background:var(--surface2);border-radius:var(--radius-sm);border:1px solid var(--border);}
+
+/* 전체 완료 축하 */
+.confetti-banner{background:linear-gradient(135deg,rgba(76,175,130,0.15),rgba(212,168,67,0.1));border:1px solid rgba(76,175,130,0.3);border-radius:var(--radius);padding:28px;text-align:center;margin-bottom:20px;}
 </style>
 </head>
 <body>
@@ -145,6 +186,7 @@ p{color:var(--text2);font-size:14px;}
 <!-- 학생 화면 -->
 <div class="screen active" id="screen-student">
 <div class="main">
+  <!-- 단계 표시 -->
   <div style="display:flex;align-items:center;gap:10px;margin-bottom:32px;">
     <div id="dot1" style="width:28px;height:28px;border-radius:50%;background:var(--accent);color:#000;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">1</div>
     <div style="flex:1;height:1px;background:var(--border);"></div>
@@ -154,21 +196,19 @@ p{color:var(--text2);font-size:14px;}
     <span class="text-muted" style="margin-left:8px;" id="stepLabel">정보 입력 및 스크립트 제출</span>
   </div>
 
-  <!-- STEP 1: 스크립트 + PPT 제출 -->
+  <!-- ── STEP 1: 스크립트 + PPT ── -->
   <div id="step1">
     <h2>스크립트 및 발표 자료 제출</h2>
-    <p class="mb-4">읽은 책 소개 스크립트와 발표 자료(PPT)를 함께 제출하세요.</p>
-
+    <p class="mb-4">책 소개 스크립트와 발표 자료를 함께 제출하세요.</p>
     <div class="card">
       <div class="card-title">학생 정보</div>
       <div class="form-row">
         <div class="form-group"><label class="form-label">이름</label><input class="form-input" id="studentName" placeholder="홍길동"/></div>
         <div class="form-group"><label class="form-label">학번</label><input class="form-input" id="studentId" placeholder="3학년 2반 15번"/></div>
       </div>
-      <div class="form-group"><label class="form-label">읽은 책 제목</label><input class="form-input" id="bookTitle" placeholder="예: The Little Prince / 어린왕자"/></div>
+      <div class="form-group"><label class="form-label">읽은 책 제목</label><input class="form-input" id="bookTitle" placeholder="예: The Little Prince"/></div>
       <div class="form-group"><label class="form-label">저자</label><input class="form-input" id="bookAuthor" placeholder="예: Antoine de Saint-Exupéry"/></div>
     </div>
-
     <div class="card">
       <div class="card-title">말하기 스크립트 (영어)</div>
       <div class="form-group">
@@ -178,37 +218,40 @@ p{color:var(--text2);font-size:14px;}
       <div class="progress-wrap"><div class="progress-bar" id="scriptProgress"></div></div>
       <div class="text-muted mt-2" id="wordCount">단어 수: 0 / 50</div>
     </div>
-
     <div class="card">
-      <div class="card-title">발표 자료 업로드 <span style="font-size:11px;color:var(--text3);font-weight:400;">(선택 — ppt, pptx, pdf, jpg, png 등 모든 파일)</span></div>
+      <div class="card-title">발표 자료 업로드 <span style="font-size:11px;color:var(--text3);font-weight:400;">(선택 — ppt, pdf, 이미지 등 모든 파일 · 최대 30MB)</span></div>
       <div class="upload-area" id="uploadArea" onclick="document.getElementById('pptFile').click()">
-        <div class="upload-icon">📎</div>
-        <div class="upload-text" id="uploadText">클릭하여 발표 자료 선택<br><span style="font-size:12px;opacity:.6;">모든 파일 형식 지원 · 최대 30MB</span></div>
+        <div style="font-size:32px;margin-bottom:8px;">📎</div>
+        <div style="font-size:14px;color:var(--text2);" id="uploadText">클릭하여 발표 자료 선택</div>
         <div class="upload-filename" id="uploadFilename" style="display:none;"></div>
       </div>
       <input type="file" id="pptFile" accept="*/*" style="display:none;" onchange="handleFileSelect(this)"/>
       <div id="uploadedPreview" style="display:none;margin-top:12px;"></div>
     </div>
-
     <div style="display:flex;justify-content:flex-end;">
-      <button class="btn btn-primary btn-lg" onclick="submitScript()">제출 후 녹음하기 →</button>
+      <button class="btn btn-primary btn-lg" onclick="submitScript()">제출 후 녹음 시작 →</button>
     </div>
   </div>
 
-  <!-- STEP 2: 녹음 -->
+  <!-- ── STEP 2: 전체 녹음 ── -->
   <div id="step2" style="display:none;">
     <h2>음성 녹음</h2>
-    <p class="mb-4">스크립트를 보며 자연스럽게 영어로 말해보세요. 만족스러울 때까지 다시 녹음할 수 있습니다.</p>
+    <p class="mb-4">스크립트 전체를 자연스럽게 읽어보세요. 모든 문장을 통과할 때까지 반복 도전할 수 있어요.</p>
 
     <div class="card">
       <div class="card-title">나의 스크립트</div>
       <div class="script-display" id="scriptDisplay"></div>
     </div>
 
-    <div id="prevResultSummary" style="display:none;margin-bottom:18px;">
-      <div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:14px 18px;font-size:13px;color:var(--text2);">
-        이전 시도 결과 — <span id="prevOkCount" style="color:var(--green);font-weight:600;"></span> 확인 후 다시 도전해보세요.
+    <!-- 시도 횟수 표시 -->
+    <div class="card" style="padding:18px 22px;">
+      <div class="attempt-info">
+        <div class="attempt-badge">🎯 <span id="attemptCount">0</span>번째 도전</div>
+        <div id="attemptDots" class="attempt-dots"></div>
+        <div class="text-muted" style="font-size:12px;">횟수 제한 없이 도전하세요!</div>
       </div>
+      <!-- 이전 결과 요약 -->
+      <div id="prevSummary" style="display:none;margin-top:12px;padding:10px 14px;background:var(--surface2);border-radius:var(--radius-sm);font-size:13px;color:var(--text2);border-left:3px solid var(--red);"></div>
     </div>
 
     <div class="record-area">
@@ -232,42 +275,86 @@ p{color:var(--text2);font-size:14px;}
           <button class="btn btn-primary" onclick="submitRecording()">AI 분석 받기 →</button>
         </div>
       </div>
-      <div class="attempt-badge">🔄 시도 횟수 제한 없음 — <span id="attemptCount">0</span>회 시도</div>
     </div>
   </div>
 
-  <!-- STEP 3: 발화 분석 결과 -->
+  <!-- ── STEP 3: 결과 ── -->
   <div id="step3" style="display:none;">
     <h2>발화 분석 결과</h2>
     <p class="mb-4" id="resultInfo"></p>
 
+    <!-- 목표 달성 진행 바 -->
+    <div class="card" style="padding:20px 24px;">
+      <div class="goal-status">
+        <span style="font-size:13px;font-weight:600;color:var(--text);">✅ 통과 문장</span>
+        <span style="font-family:'DM Mono',monospace;font-size:13px;" id="goalCount"></span>
+      </div>
+      <div class="goal-bar-wrap">
+        <div class="goal-bar" id="goalBar" style="background:var(--green);"></div>
+      </div>
+      <div style="font-size:12px;color:var(--text3);margin-top:8px;" id="goalHint"></div>
+    </div>
+
+    <!-- 결과 배너 -->
     <div class="result-banner" id="resultBanner">
       <div class="result-banner-title" id="resultBannerTitle"></div>
       <div class="result-banner-sub" id="resultBannerSub"></div>
     </div>
 
+    <!-- 문장별 결과 -->
     <div class="card">
       <div class="card-title">문장별 발화 확인</div>
+      <div style="font-size:12px;color:var(--text3);margin-bottom:12px;">❌ 표시 문장은 개별 재도전하거나, 아래 전체 다시 녹음으로 도전할 수 있어요.</div>
       <div class="sentence-list" id="sentenceList"></div>
     </div>
 
+    <!-- AI 피드백 -->
     <div class="card">
       <div class="card-title">AI 피드백</div>
       <div class="feedback-grid" id="feedbackGrid"></div>
+      <div style="font-size:11px;color:var(--text3);margin-top:8px;padding:10px 14px;background:var(--surface2);border-radius:var(--radius-sm);">
+        ⏱️ 유창성 팁: 멈춤 없이 자연스러운 속도로 말하는 것이 중요해요. 너무 빠르거나 너무 느리지 않게 연습해보세요.
+      </div>
     </div>
 
+    <!-- 인식된 발화 -->
     <div class="card">
       <div class="card-title">인식된 발화 내용</div>
       <div class="script-display" id="transcriptDisplay" style="min-height:50px;"></div>
     </div>
 
-    <div style="display:flex;gap:10px;flex-wrap:wrap;">
-      <button class="btn btn-ghost" onclick="goToStep2Again()">🔄 다시 발화하기</button>
-      <button class="btn btn-primary btn-lg" onclick="finalSubmit()">✓ 최종 제출 완료</button>
+    <!-- 버튼 영역 -->
+    <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
+      <button class="btn btn-ghost" onclick="goToStep2Again()">🔄 전체 다시 녹음</button>
+      <button class="btn btn-green btn-lg" id="submitBtn" onclick="finalSubmit()" disabled>
+        ✓ 최종 제출 완료
+      </button>
+      <div id="submitHint" style="font-size:12px;color:var(--text3);"></div>
     </div>
   </div>
 
 </div>
+</div>
+
+<!-- 문장별 개별 녹음 모달 -->
+<div id="sentenceModal">
+  <div class="sent-modal-box">
+    <div style="font-size:13px;color:var(--text3);margin-bottom:4px;">이 문장만 다시 말해보세요</div>
+    <div class="sent-modal-sentence" id="modalSentenceText"></div>
+    <div style="display:flex;flex-direction:column;align-items:center;gap:16px;">
+      <div class="record-timer" id="modalTimer">00:00</div>
+      <button class="record-btn" id="modalRecordBtn" onclick="toggleModalRecording()"><span id="modalRecordIcon">🎙️</span></button>
+      <div class="record-status" id="modalRecordStatus">버튼을 눌러 이 문장 녹음 시작</div>
+      <div id="modalAudioPlayback" style="display:none;width:100%;">
+        <audio id="modalAudioPlayer" controls style="width:100%;"></audio>
+        <div style="display:flex;gap:10px;justify-content:center;margin-top:10px;">
+          <button class="btn btn-ghost btn-sm" onclick="retryModalRecording()">🔄 다시</button>
+          <button class="btn btn-primary btn-sm" onclick="submitModalRecording()">이 문장 분석 →</button>
+        </div>
+      </div>
+      <button class="btn btn-ghost btn-sm" onclick="closeModal()">취소</button>
+    </div>
+  </div>
 </div>
 
 <!-- 교사 로그인 -->
@@ -301,7 +388,7 @@ p{color:var(--text2);font-size:14px;}
   <div class="stats-grid">
     <div class="stat-card"><div class="stat-num" id="stat-total">0</div><div class="stat-label">전체 제출</div></div>
     <div class="stat-card"><div class="stat-num" id="stat-avg">-</div><div class="stat-label">평균 점수</div></div>
-    <div class="stat-card"><div class="stat-num" id="stat-high">-</div><div class="stat-label">최고 점수</div></div>
+    <div class="stat-card"><div class="stat-num" id="stat-avgAttempt">-</div><div class="stat-label">평균 시도 횟수</div></div>
     <div class="stat-card"><div class="stat-num" id="stat-ppt">0</div><div class="stat-label">자료 제출</div></div>
   </div>
   <div class="tab-bar">
@@ -314,8 +401,8 @@ p{color:var(--text2);font-size:14px;}
     <table>
       <thead><tr>
         <th>이름</th><th>학번</th><th>책 제목</th>
-        <th>점수</th><th>등급</th><th>시도횟수</th><th>발표자료</th>
-        <th>제출시각</th><th>관리</th>
+        <th>점수</th><th>등급</th><th>시도 횟수</th><th>발표 자료</th>
+        <th>제출 시각</th><th>관리</th>
       </tr></thead>
       <tbody id="studentTable">
         <tr><td colspan="9" style="text-align:center;color:var(--text3);padding:40px;">아직 제출한 학생이 없습니다.</td></tr>
@@ -360,10 +447,18 @@ const state = {
   submissions: [], currentEditIdx: null,
   teacherLoggedIn: false, currentTab: 'all',
   lastResult: null,
+  sentenceStatuses: [], // 각 문장의 현재 상태 ('ok' | 'retry')
   pptFile: null, pptDataUrl: null, pptFileName: null,
+  // 문장별 개별 녹음
+  modalSentenceIdx: null,
+  modalMediaRecorder: null, modalAudioChunks: [],
+  modalRecordingInterval: null, modalWaveInterval: null,
+  modalRecordSeconds: 0, modalIsRecording: false,
+  modalAudioBlob: null,
 };
 try { const s = localStorage.getItem('speakingTestData'); if (s) state.submissions = JSON.parse(s); } catch(e) {}
 
+// ── 네비게이션 ──
 function showScreen(name, el) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.getElementById('screen-' + name).classList.add('active');
@@ -387,12 +482,7 @@ function checkTeacherPw() {
 }
 function teacherLogout() { state.teacherLoggedIn = false; showScreen('student', document.getElementById('tabStudent')); }
 
-document.getElementById('scriptText').addEventListener('input', function() {
-  const w = this.value.trim().split(/\s+/).filter(x => x).length;
-  document.getElementById('wordCount').textContent = `단어 수: ${w} / 50`;
-  document.getElementById('scriptProgress').style.width = Math.min(w / 50 * 100, 100) + '%';
-});
-
+// ── 단계 이동 ──
 function goToStep(n) {
   [1,2,3].forEach(i => {
     const el = document.getElementById('step'+i);
@@ -407,30 +497,35 @@ function goToStep(n) {
   document.getElementById('stepLabel').textContent = labels[n-1];
 }
 
-// PPT 파일 처리
+// ── 스크립트 입력 ──
+document.getElementById('scriptText').addEventListener('input', function() {
+  const w = this.value.trim().split(/\s+/).filter(x => x).length;
+  document.getElementById('wordCount').textContent = `단어 수: ${w} / 50`;
+  document.getElementById('scriptProgress').style.width = Math.min(w / 50 * 100, 100) + '%';
+});
+
+// ── PPT 파일 ──
 function handleFileSelect(input) {
   const file = input.files[0];
   if (!file) return;
   if (file.size > 30 * 1024 * 1024) { alert('파일 크기가 30MB를 초과합니다.'); return; }
-  state.pptFile = file;
-  state.pptFileName = file.name;
+  state.pptFile = file; state.pptFileName = file.name;
   document.getElementById('uploadArea').classList.add('has-file');
   document.getElementById('uploadFilename').style.display = 'block';
   document.getElementById('uploadFilename').textContent = '✓ ' + file.name;
   document.getElementById('uploadText').style.display = 'none';
-
   const reader = new FileReader();
   reader.onloadend = () => {
     state.pptDataUrl = reader.result;
-    // 이미지 파일이면 미리보기
     if (file.type.startsWith('image/')) {
       document.getElementById('uploadedPreview').style.display = 'block';
-      document.getElementById('uploadedPreview').innerHTML = `<img src="${reader.result}" style="max-width:100%;max-height:200px;border-radius:var(--radius-sm);border:1px solid var(--border);">`;
+      document.getElementById('uploadedPreview').innerHTML = `<img src="${reader.result}" style="max-width:100%;max-height:180px;border-radius:var(--radius-sm);border:1px solid var(--border);">`;
     }
   };
   reader.readAsDataURL(file);
 }
 
+// ── STEP1 제출 ──
 function submitScript() {
   const name = document.getElementById('studentName').value.trim();
   const id = document.getElementById('studentId').value.trim();
@@ -441,9 +536,11 @@ function submitScript() {
   if (script.split(/\s+/).filter(x=>x).length < 10) { alert('스크립트가 너무 짧습니다.'); return; }
   state.currentStudent = { name, id, book, author, script };
   state.attemptCount = 0;
+  state.sentenceStatuses = [];
+  state.lastResult = null;
   document.getElementById('scriptDisplay').textContent = script;
-  document.getElementById('attemptCount').textContent = state.attemptCount;
-  document.getElementById('prevResultSummary').style.display = 'none';
+  document.getElementById('prevSummary').style.display = 'none';
+  updateAttemptDots();
   goToStep(2);
 }
 
@@ -453,36 +550,27 @@ function goToStep2Again() {
   document.getElementById('recordTimer').textContent = '00:00';
   document.getElementById('waveform').classList.remove('active');
   state.audioBlob = null;
-
-  // 이전 결과 요약 표시
+  // 이전 결과 요약
   if (state.lastResult) {
-    const results = state.lastResult.sentenceResults || [];
-    const okCount = results.filter(s => s.status === 'ok').length;
-    const total = results.length;
-    document.getElementById('prevResultSummary').style.display = 'block';
-    document.getElementById('prevOkCount').textContent = `${total}개 문장 중 ${okCount}개 성공`;
+    const retryCount = state.sentenceStatuses.filter(s => s === 'retry').length;
+    const total = state.sentenceStatuses.length;
+    const okCount = total - retryCount;
+    document.getElementById('prevSummary').style.display = 'block';
+    document.getElementById('prevSummary').innerHTML = `이전 결과: <strong style="color:var(--green)">${okCount}개 통과</strong> · <strong style="color:var(--red)">${retryCount}개 재도전 필요</strong> — 빨간 문장에 집중해서 다시 말해보세요!`;
   }
   goToStep(2);
 }
 
-function finalSubmit() {
-  saveSubmission(state.lastResult);
-  // 초기화
-  ['studentName','studentId','bookTitle','bookAuthor','scriptText'].forEach(id => { document.getElementById(id).value = ''; });
-  document.getElementById('wordCount').textContent = '단어 수: 0 / 50';
-  document.getElementById('scriptProgress').style.width = '0%';
-  document.getElementById('uploadArea').classList.remove('has-file');
-  document.getElementById('uploadFilename').style.display = 'none';
-  document.getElementById('uploadText').style.display = 'block';
-  document.getElementById('uploadedPreview').style.display = 'none';
-  document.getElementById('pptFile').value = '';
-  state.currentStudent = {}; state.lastResult = null;
-  state.pptFile = null; state.pptDataUrl = null; state.pptFileName = null;
-  goToStep(1);
-  alert('제출이 완료되었습니다! 수고했어요 😊');
+function updateAttemptDots() {
+  document.getElementById('attemptCount').textContent = state.attemptCount;
+  const dots = document.getElementById('attemptDots');
+  const show = Math.min(state.attemptCount, 10);
+  dots.innerHTML = Array.from({length: show}, (_, i) =>
+    `<div class="attempt-dot done"></div>`).join('') +
+    `<div class="attempt-dot"></div>`;
 }
 
-// 녹음
+// ── 녹음 ──
 function getMimeType() {
   const types = ['audio/webm;codecs=opus','audio/webm','audio/ogg;codecs=opus','audio/mp4'];
   for (const t of types) if (MediaRecorder.isTypeSupported(t)) return t;
@@ -538,20 +626,15 @@ function retryRecording() {
   state.audioBlob = null;
 }
 
-// AI 채점
+// ── 전체 AI 채점 ──
 async function submitRecording() {
   if (!state.audioBlob) { alert('먼저 녹음해주세요.'); return; }
   state.attemptCount++;
-  document.getElementById('attemptCount').textContent = state.attemptCount;
+  updateAttemptDots();
   showLoading('AI 분석 시작...', '음성을 텍스트로 변환 중');
   await sleep(300);
   try {
-    const base64 = await new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onloadend = () => resolve(reader.result.split(',')[1]);
-      reader.onerror = reject;
-      reader.readAsDataURL(state.audioBlob);
-    });
+    const base64 = await toBase64(state.audioBlob);
     setLoadingStep('문장별 발화 분석 중');
     await sleep(300);
     const { name, id, book, author, script } = state.currentStudent;
@@ -560,55 +643,75 @@ async function submitRecording() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ name, id, book, author, script, audioBase64: base64, mimeType: state.audioBlob.type })
     });
-    if (!res.ok) {
-      const e = await res.json().catch(() => ({}));
-      throw new Error(e.error || `서버 오류 ${res.status}`);
-    }
+    if (!res.ok) { const e = await res.json().catch(()=>({})); throw new Error(e.error || `서버 오류 ${res.status}`); }
     const result = await res.json();
-    result.attemptCount = state.attemptCount;
     state.lastResult = result;
+    // 문장 상태 업데이트: ok만 ok, partial/missed는 retry
+    state.sentenceStatuses = (result.sentenceResults || []).map(sr =>
+      sr.status === 'ok' ? 'ok' : 'retry'
+    );
     hideLoading();
-    renderResults(result);
+    renderResults();
     goToStep(3);
   } catch(err) {
     hideLoading();
     alert('채점 오류: ' + err.message);
     state.attemptCount--;
-    document.getElementById('attemptCount').textContent = state.attemptCount;
+    updateAttemptDots();
   }
 }
 
-function renderResults(r) {
+// ── 결과 렌더링 ──
+function renderResults() {
+  const r = state.lastResult;
   const { name, id, book } = state.currentStudent;
   document.getElementById('resultInfo').textContent = `${name} (${id}) · 《${book}》 · ${state.attemptCount}번째 시도`;
 
-  const okCount = (r.sentenceResults || []).filter(s => s.status === 'ok').length;
-  const total = (r.sentenceResults || []).length;
+  const sentences = r.sentences || [];
+  const okCount = state.sentenceStatuses.filter(s => s === 'ok').length;
+  const total = sentences.length;
+  const allClear = okCount === total;
   const pct = total > 0 ? Math.round(okCount / total * 100) : 0;
-  const banner = document.getElementById('resultBanner');
 
-  if (pct >= 70) {
-    banner.className = 'result-banner good';
-    document.getElementById('resultBannerTitle').textContent = '잘 했어요! 👏';
-    document.getElementById('resultBannerSub').textContent = `${total}개 문장 중 ${okCount}개를 정확하게 발화했습니다.`;
+  // 목표 바
+  document.getElementById('goalCount').textContent = `${okCount} / ${total}`;
+  document.getElementById('goalBar').style.width = pct + '%';
+  document.getElementById('goalBar').style.background = allClear ? 'var(--green)' : pct >= 70 ? 'var(--accent)' : 'var(--red)';
+  document.getElementById('goalHint').textContent = allClear
+    ? '🎉 모든 문장 통과! 최종 제출이 가능합니다.'
+    : `아직 ${total - okCount}개 문장이 남았어요. 재도전하거나 문장별 연습을 해보세요.`;
+
+  // 결과 배너
+  const banner = document.getElementById('resultBanner');
+  if (allClear) {
+    banner.className = 'result-banner all-clear';
+    document.getElementById('resultBannerTitle').textContent = '🎉 모든 문장 통과!';
+    document.getElementById('resultBannerSub').textContent = `${state.attemptCount}번 만에 완성했어요. 최종 제출 버튼을 눌러주세요.`;
   } else {
-    banner.className = 'result-banner retry';
-    document.getElementById('resultBannerTitle').textContent = '다시 도전해보세요 💪';
-    document.getElementById('resultBannerSub').textContent = `${total}개 문장 중 ${okCount}개 성공. 빨간 문장을 다시 연습하고 재도전하세요.`;
+    banner.className = 'result-banner has-retry';
+    document.getElementById('resultBannerTitle').textContent = '💪 계속 도전해보세요!';
+    document.getElementById('resultBannerSub').textContent = `빨간 문장을 집중 연습하고 다시 도전하거나, 문장별 재도전 버튼을 눌러보세요.`;
   }
 
-  const sentences = r.sentences || [];
-  const results = r.sentenceResults || [];
+  // 문장별 목록
   document.getElementById('sentenceList').innerHTML = sentences.map((sent, i) => {
-    const sr = results[i] || { status: 'missed', issue: null };
-    const icon = sr.status === 'ok' ? '✅' : sr.status === 'partial' ? '⚠️' : '❌';
+    const status = state.sentenceStatuses[i] || 'retry';
+    const sr = (r.sentenceResults || [])[i] || {};
+    const isOk = status === 'ok';
+    const icon = isOk ? '✅' : '❌';
     const issue = sr.issue ? `<div class="sentence-issue">${sr.issue}</div>` : '';
-    return `<div class="sentence-item ${sr.status}">
+    const retryBtn = isOk ? '' : `<button class="sentence-retry-btn" onclick="openSentenceModal(${i})" id="sentRetryBtn${i}">🎙️ 이 문장만 재도전</button>`;
+    return `<div class="sentence-item ${isOk ? 'ok' : 'retry'}" id="sentItem${i}">
       <div class="sentence-icon">${icon}</div>
-      <div><div class="sentence-text">${sent}</div>${issue}</div>
+      <div class="sentence-content">
+        <div class="sentence-text">${sent}</div>
+        ${issue}
+      </div>
+      ${retryBtn}
     </div>`;
   }).join('');
 
+  // 피드백
   document.getElementById('feedbackGrid').innerHTML = `
     <div class="feedback-item"><div class="feedback-icon">🔊</div><div class="feedback-title">발음 피드백</div><div class="feedback-text">${r.pronunciationFeedback||''}</div></div>
     <div class="feedback-item"><div class="feedback-icon">📖</div><div class="feedback-title">내용 피드백</div><div class="feedback-text">${r.contentFeedback||''}</div></div>
@@ -616,9 +719,182 @@ function renderResults(r) {
     <div class="feedback-item"><div class="feedback-icon">⭐</div><div class="feedback-title">종합 의견</div><div class="feedback-text">${r.overallFeedback||''}</div></div>`;
 
   document.getElementById('transcriptDisplay').textContent = r.transcript || r.simulatedTranscript || '';
+
+  // 제출 버튼
+  const submitBtn = document.getElementById('submitBtn');
+  submitBtn.disabled = !allClear;
+  document.getElementById('submitHint').textContent = allClear ? '' : `모든 문장(${total}개)을 통과해야 제출할 수 있어요.`;
 }
 
-function saveSubmission(r) {
+// ── 문장별 개별 녹음 모달 ──
+function openSentenceModal(idx) {
+  state.modalSentenceIdx = idx;
+  state.modalAudioBlob = null;
+  state.modalIsRecording = false;
+  const sentences = state.lastResult?.sentences || [];
+  document.getElementById('modalSentenceText').textContent = sentences[idx] || '';
+  document.getElementById('modalRecordStatus').textContent = '버튼을 눌러 이 문장 녹음 시작';
+  document.getElementById('modalTimer').textContent = '00:00';
+  document.getElementById('modalAudioPlayback').style.display = 'none';
+  document.getElementById('modalRecordBtn').classList.remove('recording');
+  document.getElementById('modalRecordIcon').textContent = '🎙️';
+  document.getElementById('sentenceModal').style.display = 'flex';
+}
+function closeModal() {
+  if (state.modalIsRecording) stopModalRecording();
+  document.getElementById('sentenceModal').style.display = 'none';
+  state.modalSentenceIdx = null;
+}
+
+async function toggleModalRecording() {
+  if (!state.modalIsRecording) await startModalRecording(); else stopModalRecording();
+}
+async function startModalRecording() {
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    state.modalMediaRecorder = new MediaRecorder(stream, { mimeType: getMimeType() });
+    state.modalAudioChunks = [];
+    state.modalMediaRecorder.ondataavailable = e => { if (e.data.size > 0) state.modalAudioChunks.push(e.data); };
+    state.modalMediaRecorder.onstop = () => {
+      state.modalAudioBlob = new Blob(state.modalAudioChunks, { type: getMimeType() });
+      document.getElementById('modalAudioPlayer').src = URL.createObjectURL(state.modalAudioBlob);
+      document.getElementById('modalAudioPlayback').style.display = 'block';
+    };
+    state.modalMediaRecorder.start(100);
+    state.modalIsRecording = true; state.modalRecordSeconds = 0;
+    document.getElementById('modalRecordBtn').classList.add('recording');
+    document.getElementById('modalRecordIcon').textContent = '⏹️';
+    document.getElementById('modalRecordStatus').textContent = '녹음 중...';
+    document.getElementById('modalAudioPlayback').style.display = 'none';
+    state.modalRecordingInterval = setInterval(() => {
+      state.modalRecordSeconds++;
+      const m = String(Math.floor(state.modalRecordSeconds/60)).padStart(2,'0');
+      const s = String(state.modalRecordSeconds%60).padStart(2,'0');
+      document.getElementById('modalTimer').textContent = `${m}:${s}`;
+      if (state.modalRecordSeconds >= 30) stopModalRecording();
+    }, 1000);
+  } catch(err) { alert('마이크 접근 권한이 필요합니다.'); }
+}
+function stopModalRecording() {
+  if (!state.modalMediaRecorder) return;
+  state.modalMediaRecorder.stop();
+  state.modalMediaRecorder.stream.getTracks().forEach(t => t.stop());
+  clearInterval(state.modalRecordingInterval);
+  state.modalIsRecording = false;
+  document.getElementById('modalRecordBtn').classList.remove('recording');
+  document.getElementById('modalRecordIcon').textContent = '🎙️';
+  document.getElementById('modalRecordStatus').textContent = '녹음 완료! 재생 후 제출하세요.';
+}
+function retryModalRecording() {
+  document.getElementById('modalAudioPlayback').style.display = 'none';
+  document.getElementById('modalRecordStatus').textContent = '버튼을 눌러 이 문장 녹음 시작';
+  document.getElementById('modalTimer').textContent = '00:00';
+  state.modalAudioBlob = null;
+}
+
+async function submitModalRecording() {
+  if (!state.modalAudioBlob) { alert('먼저 녹음해주세요.'); return; }
+  const idx = state.modalSentenceIdx;
+  const sentence = (state.lastResult?.sentences || [])[idx];
+  if (!sentence) return;
+
+  showLoading('이 문장 분석 중...', '음성 인식 중');
+  try {
+    const base64 = await toBase64(state.modalAudioBlob);
+    const { name, id, book, author } = state.currentStudent;
+    const res = await fetch('/api/score', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        name, id, book, author,
+        script: sentence,   // 이 문장만 스크립트로
+        audioBase64: base64,
+        mimeType: state.modalAudioBlob.type,
+        singleSentence: true
+      })
+    });
+    if (!res.ok) { const e = await res.json().catch(()=>({})); throw new Error(e.error || `서버 오류 ${res.status}`); }
+    const result = await res.json();
+    hideLoading();
+    closeModal();
+
+    // 이 문장 결과 업데이트
+    const sr = (result.sentenceResults || [])[0];
+    const newStatus = sr && sr.status === 'ok' ? 'ok' : 'retry';
+    state.sentenceStatuses[idx] = newStatus;
+
+    // UI 업데이트
+    updateSentenceItem(idx, newStatus, sr);
+    updateGoalBar();
+  } catch(err) {
+    hideLoading();
+    alert('분석 오류: ' + err.message);
+  }
+}
+
+function updateSentenceItem(idx, status, sr) {
+  const item = document.getElementById('sentItem' + idx);
+  if (!item) return;
+  const isOk = status === 'ok';
+  item.className = `sentence-item ${isOk ? 'ok' : 'retry'}`;
+  const issue = sr?.issue ? `<div class="sentence-issue">${sr.issue}</div>` : '';
+  const retryBtn = isOk ? '' : `<button class="sentence-retry-btn" onclick="openSentenceModal(${idx})" id="sentRetryBtn${idx}">🎙️ 이 문장만 재도전</button>`;
+  const sentence = (state.lastResult?.sentences || [])[idx] || '';
+  item.innerHTML = `
+    <div class="sentence-icon">${isOk ? '✅' : '❌'}</div>
+    <div class="sentence-content">
+      <div class="sentence-text">${sentence}</div>
+      ${issue}
+    </div>
+    ${retryBtn}`;
+}
+
+function updateGoalBar() {
+  const total = state.sentenceStatuses.length;
+  const okCount = state.sentenceStatuses.filter(s => s === 'ok').length;
+  const allClear = okCount === total;
+  const pct = total > 0 ? Math.round(okCount / total * 100) : 0;
+  document.getElementById('goalCount').textContent = `${okCount} / ${total}`;
+  document.getElementById('goalBar').style.width = pct + '%';
+  document.getElementById('goalBar').style.background = allClear ? 'var(--green)' : pct >= 70 ? 'var(--accent)' : 'var(--red)';
+  document.getElementById('goalHint').textContent = allClear
+    ? '🎉 모든 문장 통과! 최종 제출이 가능합니다.'
+    : `아직 ${total - okCount}개 문장이 남았어요.`;
+
+  const submitBtn = document.getElementById('submitBtn');
+  submitBtn.disabled = !allClear;
+  document.getElementById('submitHint').textContent = allClear ? '' : `모든 문장(${total}개)을 통과해야 제출할 수 있어요.`;
+
+  if (allClear) {
+    document.getElementById('resultBanner').className = 'result-banner all-clear';
+    document.getElementById('resultBannerTitle').textContent = '🎉 모든 문장 통과!';
+    document.getElementById('resultBannerSub').textContent = '최종 제출 버튼을 눌러주세요.';
+  }
+}
+
+// ── 최종 제출 ──
+function finalSubmit() {
+  const okCount = state.sentenceStatuses.filter(s => s === 'ok').length;
+  const total = state.sentenceStatuses.length;
+  if (okCount < total) { alert('아직 통과하지 못한 문장이 있어요!'); return; }
+  saveSubmission();
+  // 초기화
+  ['studentName','studentId','bookTitle','bookAuthor','scriptText'].forEach(id => { document.getElementById(id).value = ''; });
+  document.getElementById('wordCount').textContent = '단어 수: 0 / 50';
+  document.getElementById('scriptProgress').style.width = '0%';
+  document.getElementById('uploadArea').classList.remove('has-file');
+  document.getElementById('uploadFilename').style.display = 'none';
+  document.getElementById('uploadText').style.display = 'block';
+  document.getElementById('uploadedPreview').style.display = 'none';
+  document.getElementById('pptFile').value = '';
+  state.currentStudent = {}; state.lastResult = null; state.sentenceStatuses = [];
+  state.pptFile = null; state.pptDataUrl = null; state.pptFileName = null;
+  goToStep(1);
+  alert('제출 완료! 수고했어요 🎉');
+}
+
+function saveSubmission() {
+  const r = state.lastResult;
   if (!r) return;
   const { name, id, book, author, script } = state.currentStudent;
   const rec = {
@@ -639,19 +915,20 @@ function saveSubmission(r) {
   renderTeacher();
 }
 
+// ── 교사 대시보드 ──
 function switchTab(tab, el) {
   state.currentTab = tab;
   document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
   el.classList.add('active');
   renderTeacher();
 }
-
 function renderTeacher() {
   const subs = state.submissions;
   const scores = subs.map(s => s.finalScore);
+  const attempts = subs.map(s => s.attemptCount || 1);
   document.getElementById('stat-total').textContent = subs.length;
   document.getElementById('stat-avg').textContent = scores.length ? Math.round(scores.reduce((a,b)=>a+b,0)/scores.length) : '-';
-  document.getElementById('stat-high').textContent = scores.length ? Math.max(...scores) : '-';
+  document.getElementById('stat-avgAttempt').textContent = attempts.length ? (attempts.reduce((a,b)=>a+b,0)/attempts.length).toFixed(1) : '-';
   document.getElementById('stat-ppt').textContent = subs.filter(s => s.pptFileName).length;
 
   let filtered = subs;
@@ -671,13 +948,14 @@ function renderTeacher() {
     const pptCell = s.pptFileName
       ? `<a class="ppt-link" href="${s.pptDataUrl}" download="${s.pptFileName}">📎 ${s.pptFileName}</a>`
       : `<span style="color:var(--text3);font-size:12px;">미제출</span>`;
+    const effortColor = s.attemptCount >= 5 ? 'var(--green)' : s.attemptCount >= 3 ? 'var(--accent)' : 'var(--text2)';
     return `<tr>
       <td style="font-weight:500;">${s.name}</td>
       <td style="color:var(--text2);font-size:13px;">${s.id}</td>
       <td style="color:var(--text2);">《${s.book}》</td>
       <td><span class="score-chip" style="background:${bg};color:${c};${s.adjusted?'border:1px solid '+c:''}">${s.finalScore}${s.adjusted?' ✎':''}</span></td>
       <td><span class="badge badge-${s.finalScore>=75?'green':s.finalScore>=55?'amber':'red'}">${s.grade||'-'}</span></td>
-      <td style="color:var(--text2);font-size:13px;text-align:center;">${s.attemptCount||1}회</td>
+      <td style="font-weight:600;color:${effortColor};text-align:center;">${s.attemptCount||1}회</td>
       <td>${pptCell}</td>
       <td style="color:var(--text3);font-size:12px;">${s.submittedAt}</td>
       <td><button class="btn btn-ghost btn-sm" onclick="openEdit(${realIdx})">점수 조정</button></td>
@@ -718,6 +996,16 @@ function clearAll() {
   try { localStorage.removeItem('speakingTestData'); } catch(e) {}
   renderTeacher();
 }
+
+// ── 유틸 ──
+function toBase64(blob) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onloadend = () => resolve(reader.result.split(',')[1]);
+    reader.onerror = reject;
+    reader.readAsDataURL(blob);
+  });
+}
 function showLoading(t,s){document.getElementById('loadingOverlay').classList.add('active');document.getElementById('loadingText').textContent=t;document.getElementById('loadingStep').textContent=s;}
 function setLoadingStep(s){document.getElementById('loadingStep').textContent=s;}
 function hideLoading(){document.getElementById('loadingOverlay').classList.remove('active');}
@@ -725,3 +1013,5 @@ function sleep(ms){return new Promise(r=>setTimeout(r,ms));}
 </script>
 </body>
 </html>
+HTMLEOF
+echo "완료 $(wc -l < /mnt/user-data/outputs/index_v4.html)줄"
