@@ -74,19 +74,27 @@ ${sentences.map((s, i) => `[${i+1}] ${s}`).join('\n')}
 ACTUAL SPEECH (Whisper transcript):
 "${transcript || '(no speech detected)'}"
 
-TASK: For each sentence, determine status:
-- "ok": said clearly and correctly
-- "partial": said but with notable errors
-- "missed": not said at all
+TASK: For each sentence, determine status strictly:
+- "ok": ONLY if the student clearly said the sentence with correct meaning and most words present
+- "partial": said the sentence but with significant errors, missing words, or unclear pronunciation
+- "missed": not said at all, or so different that it cannot be matched
+
+CRITICAL RULES:
+1. Compare the transcript word by word against each sentence.
+2. If the transcript has NO words matching a sentence, it MUST be "missed".
+3. If less than 50% of the sentence words are present in the transcript, it MUST be "missed" or "partial".
+4. Do NOT mark a sentence as "ok" if it was clearly not spoken.
+5. An empty or very short transcript (<5 words) means ALL sentences are "missed".
+6. Do not guess or assume the student said something they did not say.
 
 STRICT scoring:
 - pronunciation (0-40): Korean students typically 15-28. 35+ only near-native.
-- content (0-30): coverage of script
+- content (0-30): only give high scores if most sentences are "ok"
 - fluency (0-20): natural delivery, no long pauses
-- completeness (0-10): finished introduction
-- Empty/short transcript (<10 words): total < 15
+- completeness (0-10): finished introduction fully
+- Empty/short transcript (<5 words): total < 10, all sentences "missed"
 - Average: 40-58, Good: 59-72, Excellent: 73-85. Above 85 is exceptional.
-- partial and missed both count as needing retry.
+- partial and missed both count as needing retry. Student must retry these sentences.
 
 Respond ONLY in JSON (no markdown):
 {
