@@ -581,6 +581,9 @@ async function loadPreviousSubmission() {
     // 이전 데이터 복원
     state.submissionId = prev.id;
     state.currentSubmissionData = prev;
+    // PPT/활동지 URL 복원
+    if (prev.ppt_url) { state.pptDataUrl = prev.ppt_url; state.pptFilename = prev.ppt_filename; }
+    if (prev.worksheet_url) { state.wsDataUrl = prev.worksheet_url; state.wsFilename = prev.worksheet_filename; }
     state.currentBook = { book: prev.book_title||'', author: prev.book_author||'' };
     state.script = prev.script||'';
     state.sentences = prev.sentences||[];
@@ -1315,7 +1318,11 @@ async function refreshCurrentSubmission() {
     const res = await fetch(`/api/submit?studentId=${state.user.id}`);
     const data = await res.json();
     if (Array.isArray(data) && data.length) {
-      state.currentSubmissionData = data[0];
+      const prev = data[0];
+      state.currentSubmissionData = prev;
+      // PPT/활동지 URL 복원
+      if (prev.ppt_url) { state.pptDataUrl = prev.ppt_url; state.pptFilename = prev.ppt_filename; }
+      if (prev.worksheet_url) { state.wsDataUrl = prev.worksheet_url; state.wsFilename = prev.worksheet_filename; }
     }
   } catch(err) { console.error(err); }
 }
