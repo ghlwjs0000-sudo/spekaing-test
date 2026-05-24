@@ -48,17 +48,22 @@ module.exports = async (req, res) => {
       if (!teachers.length) return res.status(401).json({ error: '아이디를 확인해주세요.' });
       const teacher = teachers[0];
       if (teacher.password_hash !== password) return res.status(401).json({ error: '비밀번호가 틀렸습니다.' });
-      // 반 목록 가져오기
-      const classes = await query('classes', { select: '*', order: 'name.asc' });
+// 담당 반만 가져오기
+      const allClasses = await query('classes', { select: '*', order: 'name.asc' });
+      const classIds = teacher.class_ids || [];
+      // 담당 반 필터링 (class_ids가 비어있으면 전체)
+      const myClasses = classIds.length > 0
+        ? allClasses.filter(c => classIds.includes(c.id))
+        : allClasses;
       return res.status(200).json({
         success: true,
         user: {
           id: teacher.id,
           name: teacher.name,
           username: teacher.username,
-          classIds: teacher.class_ids || [],
+          classIds,
         },
-        classes
+        classes: myClasses
       });
     }
 
