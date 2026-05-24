@@ -553,17 +553,29 @@ async function openDetail(id) {
   document.getElementById('detailNote').value = s.teacher_note||'';
   document.getElementById('detailOverride').checked = s.teacher_override||false;
 
-  // 자료
-  const files = [];
-  if(s.ppt_url) files.push(`<a class="file-link" href="${s.ppt_url}" download="${s.ppt_filename}">📎 ${s.ppt_filename}</a>`);
-  if(s.worksheet_url) files.push(`<a class="file-link" href="${s.worksheet_url}" download="${s.worksheet_filename}">📄 ${s.worksheet_filename}</a>`);
-  document.getElementById('detailFiles').innerHTML = files.length?files.join(''):'-';
+// 자료 미리보기 + 다운로드
+  function renderFileSection(url, filename, label) {
+    if (!url) return `<div style="color:var(--text3);font-size:13px;">제출 없음</div>`;
+    const isImage = filename?.match(/\.(jpg|jpeg|png|gif|webp)$/i);
+    const isPdf = filename?.toLowerCase().endsWith('.pdf');
+    const ext = filename?.split('.').pop()?.toUpperCase() || 'FILE';
+    return `
+      <div style="border:1.5px solid var(--border);border-radius:var(--radius-sm);overflow:hidden;">
+        <div style="padding:10px 14px;background:var(--surface2);display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);">
+          <span style="font-size:13px;font-weight:600;color:var(--text);">${label}: ${filename||'-'}</span>
+          <a class="file-link" href="${url}" download="${filename}">📥 다운로드</a>
+        </div>
+        ${isImage ? `<img src="${url}" style="width:100%;max-height:300px;object-fit:contain;background:#f8fafc;">` : ''}
+        ${isPdf ? `<embed src="${url}" type="application/pdf" width="100%" height="300px">` : ''}
+        ${!isImage && !isPdf ? `<div style="padding:20px;text-align:center;color:var(--text2);font-size:13px;">📄 ${ext} 파일 — 다운로드 후 확인해주세요.</div>` : ''}
+      </div>`;
+  }
 
-  // PDF 미리보기
-  const previews = [];
-  if(s.ppt_url&&s.ppt_filename?.endsWith('.pdf')) previews.push(`<embed src="${s.ppt_url}" type="application/pdf" width="100%" height="200px" style="border-radius:6px;border:1px solid var(--border);margin-top:8px;">`);
-  if(s.worksheet_url&&s.worksheet_filename?.endsWith('.pdf')) previews.push(`<embed src="${s.worksheet_url}" type="application/pdf" width="100%" height="200px" style="border-radius:6px;border:1px solid var(--border);margin-top:8px;">`);
-  if(previews.length) document.getElementById('detailFilesCard').innerHTML+=previews.join('');
+  document.getElementById('detailFiles').innerHTML = `
+    <div style="display:flex;flex-direction:column;gap:12px;width:100%;">
+      ${renderFileSection(s.ppt_url, s.ppt_filename, '📊 발표 자료')}
+      ${renderFileSection(s.worksheet_url, s.worksheet_filename, '📝 활동지')}
+    </div>`;
 
   // 문장별
   // 문장별
