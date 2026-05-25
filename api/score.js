@@ -110,6 +110,7 @@ Respond ONLY in JSON (no markdown):
   "overallFeedback": "Korean 2-sentence"
 }
 total = pronunciation+content+fluency+completeness exactly.` :
+    `You are a strict English speaking assessment AI for Korean high school students.
 
 PLANNED SCRIPT (sentences):
 ${sentences.map((s, i) => `[${i+1}] ${s}`).join('\n')}
