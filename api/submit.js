@@ -123,7 +123,12 @@ module.exports = async (req, res) => {
           mime: finalSpeakingMimeType,
           at: finalSpeakingAt || new Date().toISOString()
         });
-        payload.final_speaking_history = history2;
+        payload.final_speaking_history = history;
+        payload.sentence_results = [];
+        payload.attempt_count = (prev.attempt_count || 0) + 1;
+        payload.is_passed = false;
+        payload.teacher_approved_sentences = [];
+        payload.transcript = null;
       }
       result = await supabaseReq('PATCH', 'submissions', payload, `?id=eq.${existingId}`);
     } else {
