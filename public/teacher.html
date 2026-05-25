@@ -1022,7 +1022,6 @@ async function saveFinalScore() {
   } catch(err) { hideLoading(); alert('저장 오류: ' + err.message); }
 }
 async function loadFinalSpeaking() {
-  showLoading('최종 말하기 로딩 중...');
   try {
     const isMaster = state.teacher?.isMaster || false;
     const classIds = state.teacher?.classIds || [];
