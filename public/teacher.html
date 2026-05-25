@@ -988,7 +988,32 @@ async function loadClasses(){
 }
 // ── 최종 말하기 ──
 var finalData = [];
-
+async function saveFinalScore() {
+  var id = document.getElementById('finalModal').dataset.submissionId;
+  var score = parseInt(document.getElementById('finalScoreInput').value);
+  var note = document.getElementById('finalScoreNote').value;
+  if (isNaN(score) || score < 0 || score > 100) { alert('0-100 사이의 점수를 입력하세요.'); return; }
+  showLoading('저장 중...');
+  try {
+    var grade = score >= 90 ? 'A+' : score >= 80 ? 'A' : score >= 70 ? 'B+' : score >= 60 ? 'B' : score >= 50 ? 'C+' : score >= 40 ? 'C' : 'D';
+    var res = await fetch('/api/teacher?action=updateSubmission', {
+      method: 'PATCH', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        id: id,
+        finalScore: score,
+        teacherNote: note,
+        teacherOverride: true,
+        isPassed: score >= 50,
+        finalSpeakingResult: { total: score, grade: grade }
+      })
+    });
+    var data = await res.json();
+    if (!data.success) throw new Error(data.error || '저장 실패');
+    hideLoading();
+    document.getElementById('finalScoreSaved').style.display = 'block';
+    await loadFinalSpeaking();
+  } catch(err) { hideLoading(); alert('저장 오류: ' + err.message); }
+}
 async function loadFinalSpeaking() {
   showLoading('최종 말하기 로딩 중...');
   try {
