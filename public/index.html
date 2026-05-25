@@ -301,7 +301,7 @@
             </div>
             <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
                 <button class="btn btn-ghost" onclick="goToStep2Again()">🔄 전체 다시 녹음</button>
-                <button class="btn btn-success btn-lg" id="submitBtn" onclick="finalSubmit()" disabled>✓ 최종 제출 완료</button>
+                <button class="btn btn-success btn-lg" id="submitBtn" onclick="finalSubmit()" disabled>✓ 제출하기</button>
                 <button class="btn btn-ghost" id="mySubmitViewBtn" onclick="showMySubmission()" style="display:none;">📋 제출 내역 보기</button>
 <button class="btn" id="sosBtn" onclick="sendSOS()" style="background:#ff4444;color:#fff;font-size:13px;">🆘 선생님 호출</button>
 <span id="sosStatus" style="font-size:12px;color:var(--text2);"></span>
@@ -1080,6 +1080,7 @@ function showMySubmission() {
         '<div><h2 style="font-size:22px;font-weight:700;color:var(--text);">📋 나의 제출 내역</h2>' +
         '<p style="font-size:13px;color:var(--text2);margin-top:4px;">' + userName + ' · 《' + bookName + '》</p></div>' +
         '<button class="btn btn-ghost" onclick="document.getElementById(\'mySubmissionWrap\').remove();goToStep(3);" style="font-size:13px;">← 결과로 돌아가기</button>' +
+'<button class="btn btn-primary" onclick="openFinalSpeaking()" style="font-size:13px;">🎤 최종 말하기 제출하기</button>' +
         '</div>' +
         '<div class="card" style="margin-bottom:16px;"><div class="card-title">제출 정보</div>' +
         '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;font-size:13px;">' +
