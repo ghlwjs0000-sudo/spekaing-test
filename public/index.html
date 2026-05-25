@@ -1160,6 +1160,7 @@ async function sendSOS() {
             throw new Error(data.error || '요청 실패');
         }
     } catch (err) { alert('❌ 요청 실패: ' + err.message); }
+}
 // ── 최종 말하기 ──
 function openFinalSpeaking() {
     var existingWrap = document.getElementById('mySubmissionWrap');
