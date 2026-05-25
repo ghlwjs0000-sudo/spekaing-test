@@ -783,8 +783,17 @@ async function submitRecording() {
                 script: state.script, audioBase64: base64, mimeType: state.audioBlob.type
             })
         });
-        if (!res.ok) { var e = await res.json(); throw new Error(e.error || '서버 오류'); }
-        var result = await res.json();
+        if (!res.ok) {
+          var errText = await res.text();
+          throw new Error(errText);
+        }
+        var resultText = await res.text();
+        var result;
+        try {
+          result = JSON.parse(resultText);
+        } catch(e) {
+          throw new Error('응답 파싱 오류: ' + resultText.substring(0, 300));
+        }
         state.lastResult = result;
         state.sentences = result.sentences || state.sentences;
         var approvedList = state.teacherApprovedSentences || [];
