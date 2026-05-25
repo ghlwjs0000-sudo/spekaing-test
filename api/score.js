@@ -36,7 +36,7 @@ module.exports = async (req, res) => {
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
-  const { studentId, submissionId, script, audioBase64, mimeType, singleSentence, sentenceIdx } = req.body;
+ const { studentId, submissionId, script, audioBase64, mimeType, singleSentence, sentenceIdx, isFinalSpeaking } = req.body;
 
   if (!script || !audioBase64) return res.status(400).json({ error: '스크립트와 녹음이 필요합니다.' });
 
@@ -66,7 +66,50 @@ module.exports = async (req, res) => {
       : script.split(/(?<=[.!?])\s+/).filter(s => s.trim().length > 3);
 
     // 3단계: GPT-4o 채점
-    const prompt = `You are a strict English speaking assessment AI for Korean high school students.
+    const prompt = isFinalSpeaking ? `You are a VERY STRICT English speaking examiner for Korean high school students. This is a FINAL SPEAKING TEST, not practice.
+
+PLANNED SCRIPT (sentences):
+${sentences.map((s, i) => `[${i+1}] ${s}`).join('\n')}
+
+ACTUAL SPEECH (Whisper transcript):
+"${transcript || '(no speech detected)'}"
+
+TASK: For each sentence, determine status VERY STRICTLY:
+- "ok": ONLY if the student said the sentence fluently with correct pronunciation, meaning, and nearly all words present (90%+)
+- "partial": said the sentence but with noticeable errors, missing words, or unclear pronunciation
+- "missed": not said at all, or less than 50% words match
+
+CRITICAL RULES:
+1. This is a FINAL TEST. Be extremely strict.
+2. Any hesitation, filler words (um, uh, like), or long pauses must lower fluency score significantly.
+3. Mispronounced words must lower pronunciation score significantly.
+4. Missing or wrong words must lower content score significantly.
+5. Do NOT give benefit of the doubt. If unclear, mark as "partial" or "missed".
+6. An empty or very short transcript (<5 words) means ALL sentences are "missed".
+
+VERY STRICT scoring (final exam standard):
+- pronunciation (0-40): 30+ only for near-native. Korean accent with errors: 15-22. Clear but accented: 23-28.
+- content (0-30): all sentences ok = 25-30. Missing sentences = proportionally lower.
+- fluency (0-20): smooth delivery = 15-20. Any pauses/fillers = 8-12. Many pauses = 5-8.
+- completeness (0-10): all sentences completed = 8-10. Missing any = proportionally lower.
+- Average Korean student final: 35-52. Good: 53-65. Excellent: 66-78. Above 78 is exceptional.
+
+Respond ONLY in JSON (no markdown):
+{
+  "transcript": "${(transcript||'').replace(/"/g,"'")}",
+  "sentenceResults": [${sentences.map((_,i) => `{"index":${i+1},"status":"ok|partial|missed","issue":"Korean note if not ok, else null","score":INT_0_10}`).join(',')}],
+  "pronunciation": INT_0_40,
+  "content": INT_0_30,
+  "fluency": INT_0_20,
+  "completeness": INT_0_10,
+  "total": INT_0_100,
+  "grade": "A+ or A or B+ or B or C+ or C or D",
+  "pronunciationFeedback": "Korean 2-sentence",
+  "contentFeedback": "Korean 2-sentence",
+  "fluencyFeedback": "Korean 2-sentence",
+  "overallFeedback": "Korean 2-sentence"
+}
+total = pronunciation+content+fluency+completeness exactly.` :
 
 PLANNED SCRIPT (sentences):
 ${sentences.map((s, i) => `[${i+1}] ${s}`).join('\n')}
