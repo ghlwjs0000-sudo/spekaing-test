@@ -155,7 +155,7 @@ module.exports = async (req, res) => {
     // 교사 점수 조정 / 통과 처리
     // 교사 점수 조정 / 통과 처리
     if (action === 'updateSubmission' && req.method === 'PATCH') {
-      const { id, finalScore, teacherNote, teacherOverride, isPassed, teacherApprovedSentences } = req.body;
+      const { id, finalScore, teacherNote, teacherOverride, isPassed, teacherApprovedSentences, finalSpeakingResult } = req.body;
       const patch = {
         final_score: finalScore,
         teacher_note: teacherNote || null,
@@ -165,6 +165,9 @@ module.exports = async (req, res) => {
       };
       if (teacherApprovedSentences !== undefined) {
         patch.teacher_approved_sentences = teacherApprovedSentences;
+      }
+      if (finalSpeakingResult !== undefined) {
+        patch.final_speaking_result = finalSpeakingResult;
       }
       await sb('PATCH', 'submissions', patch, `?id=eq.${id}`);
       return res.status(200).json({ success: true });
