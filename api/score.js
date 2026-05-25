@@ -170,7 +170,10 @@ total = pronunciation+content+fluency+completeness exactly.`;
       return res.status(500).json({ error: e.error?.message || `GPT 오류` });
     }
     const gptData = await gptRes.json();
-    const result = JSON.parse(gptData.choices[0].message.content);
+    let rawContent = gptData.choices[0].message.content;
+    // 백틱 마크다운 제거
+    rawContent = rawContent.replace(/```json/g, '').replace(/```/g, '').trim();
+    const result = JSON.parse(rawContent);
     result.sentences = sentences;
 
     // 4단계: 시도 기록 저장
