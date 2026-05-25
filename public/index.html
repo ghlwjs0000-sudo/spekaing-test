@@ -303,6 +303,8 @@
                 <button class="btn btn-ghost" onclick="goToStep2Again()">🔄 전체 다시 녹음</button>
                 <button class="btn btn-success btn-lg" id="submitBtn" onclick="finalSubmit()" disabled>✓ 최종 제출 완료</button>
                 <button class="btn btn-ghost" id="mySubmitViewBtn" onclick="showMySubmission()" style="display:none;">📋 제출 내역 보기</button>
+<button class="btn" id="sosBtn" onclick="sendSOS()" style="background:#ff4444;color:#fff;font-size:13px;">🆘 선생님 호출</button>
+<span id="sosStatus" style="font-size:12px;color:var(--text2);"></span>
                 <span id="submitHint" style="font-size:12px;color:var(--text2);"></span>
             </div>
         </div>
@@ -1104,7 +1106,37 @@ function showMySubmission() {
     wrap.innerHTML = html;
     document.body.appendChild(wrap);
 }
-
+async function sendSOS() {
+    if (!state.user) return;
+    var btn = document.getElementById('sosBtn');
+    var status = document.getElementById('sosStatus');
+    btn.disabled = true;
+    status.textContent = '호출 중...';
+    try {
+        var res = await fetch('/api/sos', {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                studentId: state.user.id,
+                studentName: state.user.name,
+                classId: state.user.classId,
+                submissionId: state.submissionId
+            })
+        });
+        var data = await res.json();
+        if (data.success) {
+            status.textContent = '✅ 선생님께 호출됐어요!';
+            setTimeout(function() {
+                btn.disabled = false;
+                status.textContent = '';
+            }, 30000); // 30초 후 재호출 가능
+        } else {
+            throw new Error(data.error || '호출 실패');
+        }
+    } catch (err) {
+        status.textContent = '❌ 호출 실패: ' + err.message;
+        btn.disabled = false;
+    }
+}
 function toBase64(blob) {
     return new Promise(function(resolve, reject) {
         var reader = new FileReader();
