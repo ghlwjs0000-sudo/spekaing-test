@@ -787,9 +787,9 @@ async function submitRecording() {
         state.lastResult = result;
         state.sentences = result.sentences || state.sentences;
         var approvedList = state.teacherApprovedSentences || [];
-        state.sentenceStatuses = (result.sentenceResults || []).map(function(sr, i) {
-            return sr.status === 'ok' || approvedList.includes(i) ? 'ok' : 'retry';
-        });
+state.sentenceStatuses = (result.sentenceResults || []).map(function(sr) {
+    return sr.status === 'ok' ? 'ok' : 'retry';
+});
         hideLoading();
         renderResults();
         goToStep(3);
@@ -813,6 +813,7 @@ function updateAttemptUI() {
 }
 
 function goToStep2Again() {
+    state.sentenceStatuses = state.sentences.map(function() { return 'retry'; });
     document.getElementById('audioPlayback').style.display = 'none';
     document.getElementById('recordStatus').textContent = '버튼을 눌러 녹음을 시작하세요';
     document.getElementById('recordTimer').textContent = '00:00';
