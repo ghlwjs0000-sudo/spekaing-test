@@ -149,6 +149,7 @@ h2{font-size:20px;font-weight:700;color:var(--text);margin-bottom:4px;}
     </div>
     <div class="sidebar-item active" onclick="showTab('roster')" id="tab-roster"><span>📋</span> 전체 명단</div>
     <div class="sidebar-item" onclick="showTab('submissions')" id="tab-submissions"><span>📊</span> 제출 현황</div>
+    <div class="sidebar-item" onclick="showTab('final')" id="tab-final"><span>🎤</span> 최종 말하기</div>
     <div class="sidebar-item" onclick="showTab('students')" id="tab-students"><span>👥</span> 학생 관리</div>
     <div class="sidebar-item" onclick="showTab('classes')" id="tab-classes"><span>🏫</span> 반 관리</div>
     <div class="sidebar-section">내보내기</div>
@@ -240,7 +241,24 @@ h2{font-size:20px;font-weight:700;color:var(--text);margin-bottom:4px;}
         </div>
       </div>
     </div>
-
+<!-- 최종 말하기 -->
+<div id="panel-final" style="display:none;">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:10px;">
+    <div><h2>최종 말하기</h2><p class="text-muted">학생별 최종 말하기 결과를 확인하고 문장별 승인하세요.</p></div>
+    <button class="btn btn-primary btn-sm" onclick="loadFinalSpeaking()">🔄 새로고침</button>
+  </div>
+  <div class="class-tabs" id="finalClassTabs"></div>
+  <div class="card" style="padding:0;overflow:hidden;">
+    <div class="table-wrap">
+      <table>
+        <thead><tr>
+          <th>이름</th><th>학번</th><th>반</th><th>책 제목</th><th>제출 시각</th><th>상세</th>
+        </tr></thead>
+        <tbody id="finalTable"><tr><td colspan="6" style="text-align:center;color:var(--text3);padding:40px;">로딩 중...</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+</div>
     <!-- 학생 관리 -->
     <div id="panel-students" style="display:none;">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:10px;">
@@ -316,7 +334,27 @@ h2{font-size:20px;font-weight:700;color:var(--text);margin-bottom:4px;}
   </div>
 </div>
 </div>
-
+<!-- 최종 말하기 상세 모달 -->
+<div class="modal" id="finalModal">
+<div class="modal-box" style="max-width:640px;">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+    <div class="modal-title" id="finalModalTitle">최종 말하기 상세</div>
+    <button onclick="closeModal('finalModal')" style="background:none;border:none;font-size:20px;cursor:pointer;color:var(--text3);">×</button>
+  </div>
+  <div class="card" style="margin-bottom:14px;">
+    <div class="card-title">AI 채점 결과</div>
+    <div id="finalModalScore" style="font-size:13px;color:var(--text2);">-</div>
+  </div>
+  <div class="card" style="margin-bottom:14px;">
+    <div class="card-title">전체 음성 듣기</div>
+    <audio id="finalModalAudio" controls style="width:100%;"></audio>
+  </div>
+  <div class="card">
+    <div class="card-title">문장별 결과 및 승인</div>
+    <div id="finalModalSentences"></div>
+  </div>
+</div>
+</div>
 <!-- 학생 추가 모달 -->
 <div class="modal" id="addStudentModal">
 <div class="modal-box">
@@ -424,7 +462,7 @@ function showScreen(name) {
 
 // ── 탭 ──
 function showTab(name) {
-  ['help','roster','submissions','students','classes'].forEach(t=>{
+  ['help','roster','submissions','final','students','classes'].forEach(t=>{
     const panel = document.getElementById('panel-'+t);
     const tab = document.getElementById('tab-'+t);
     if(panel) panel.style.display = t===name?'block':'none';
@@ -436,6 +474,7 @@ function showTab(name) {
   if (name==='submissions') loadSubmissions();
   if (name==='students') loadStudents();
   if (name==='classes') loadClasses();
+if (name==='final') loadFinalSpeaking();
 }
 
 // ── 반 탭 ──
@@ -930,7 +969,108 @@ async function loadClasses(){
     }).join('');
   }catch(err){hideLoading();alert('오류: '+err.message);}
 }
+// ── 최종 말하기 ──
+var finalData = [];
 
+async function loadFinalSpeaking() {
+  showLoading('최종 말하기 로딩 중...');
+  try {
+    const isMaster = state.teacher?.isMaster || false;
+    const classIds = state.teacher?.classIds || [];
+    let url = '/api/teacher?action=submissions';
+    if (!isMaster && classIds.length > 0) url += '&classIds=' + classIds.join(',');
+    const res = await fetch(url);
+    const data = await res.json();
+    finalData = Array.isArray(data) ? data.filter(function(s) { return s.is_final_speaking_submitted; }) : [];
+    hideLoading();
+    renderFinalTable(finalData);
+  } catch(err) { hideLoading(); alert('로딩 오류: ' + err.message); }
+}
+
+function renderFinalTable(data) {
+  var tbody = document.getElementById('finalTable');
+  if (!data.length) {
+    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--text3);padding:40px;">최종 말하기 제출이 없습니다.</td></tr>';
+    return;
+  }
+  tbody.innerHTML = data.map(function(s) {
+    var cls = state.classes.find(function(c) { return c.id === s.class_id; });
+    var t = s.final_speaking_at ? new Date(s.final_speaking_at).toLocaleString('ko-KR', {month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'}) : '-';
+    return '<tr>' +
+      '<td style="font-weight:600;">' + (s.student_name||'-') + '</td>' +
+      '<td style="font-family:\'DM Mono\',monospace;font-size:12px;color:var(--text2);">' + (s.student_number||'-') + '</td>' +
+      '<td>' + (cls ? '<span class="badge badge-blue">' + cls.name + '</span>' : '-') + '</td>' +
+      '<td>《' + (s.book_title||'-') + '》</td>' +
+      '<td style="color:var(--text3);font-size:12px;">' + t + '</td>' +
+      '<td><button class="btn btn-ghost btn-sm" onclick="openFinalDetail(\'' + s.id + '\')">상세보기</button></td>' +
+      '</tr>';
+  }).join('');
+}
+
+function openFinalDetail(id) {
+  var s = finalData.find(function(x) { return x.id === id; });
+  if (!s) return;
+  document.getElementById('finalModalTitle').textContent = (s.student_name||'') + ' · 《' + (s.book_title||'') + '》 최종 말하기';
+
+  // AI 채점 결과
+  var result = s.final_speaking_result || {};
+  var scoreHtml =
+    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;">' +
+    '<div class="feedback-item"><div class="feedback-icon">🔊</div><div class="feedback-title">발음</div><div class="feedback-text">' + (result.pronunciationFeedback||result.pronunciation_feedback||'-') + '</div></div>' +
+    '<div class="feedback-item"><div class="feedback-icon">📖</div><div class="feedback-title">내용</div><div class="feedback-text">' + (result.contentFeedback||result.content_feedback||'-') + '</div></div>' +
+    '<div class="feedback-item"><div class="feedback-icon">💬</div><div class="feedback-title">유창성</div><div class="feedback-text">' + (result.fluencyFeedback||result.fluency_feedback||'-') + '</div></div>' +
+    '<div class="feedback-item"><div class="feedback-icon">⭐</div><div class="feedback-title">종합</div><div class="feedback-text">' + (result.overallFeedback||result.overall_feedback||'-') + '</div></div>' +
+    '</div>' +
+    '<div style="font-size:13px;color:var(--text2);margin-top:8px;"><strong>인식된 발화:</strong> ' + (result.transcript||result.simulatedTranscript||'-') + '</div>';
+  document.getElementById('finalModalScore').innerHTML = scoreHtml;
+
+  // 전체 음성
+  if (s.final_speaking_audio) {
+    var mime = s.final_speaking_mime || 'audio/webm';
+    document.getElementById('finalModalAudio').src = 'data:' + mime + ';base64,' + s.final_speaking_audio;
+  } else {
+    document.getElementById('finalModalAudio').src = '';
+  }
+
+  // 문장별 결과
+  var sents = (result.sentences || s.sentences) || [];
+  var srs = result.sentenceResults || result.sentence_results || [];
+  var approvedList = s.teacher_approved_sentences || [];
+  document.getElementById('finalModalSentences').innerHTML = sents.map(function(sent, i) {
+    var sr = srs[i] || {};
+    var aiOk = sr.status === 'ok';
+    var teacherOk = approvedList.includes(i);
+    var isOk = aiOk || teacherOk;
+    var label = aiOk ? '✅ AI 통과' : teacherOk ? '✅ 교사 승인' : '❌ 미통과';
+    var btnLabel = teacherOk ? '승인 취소' : '교사 승인';
+    var btnColor = teacherOk ? 'var(--red)' : 'var(--green)';
+    return '<div style="display:flex;align-items:flex-start;gap:8px;padding:10px;border-radius:6px;background:' + (isOk?'var(--green-bg)':'var(--red-bg)') + ';border:1.5px solid ' + (isOk?'var(--green-border)':'var(--red-border)') + ';font-size:12px;margin-bottom:6px;">' +
+      '<div style="flex:1;">' +
+      '<div style="font-weight:700;color:' + (isOk?'var(--green)':'var(--red)') + ';">' + label + '</div>' +
+      '<div style="margin-top:3px;">' + sent + '</div>' +
+      (sr.issue ? '<div style="color:var(--text3);margin-top:2px;">' + sr.issue + '</div>' : '') +
+      '</div>' +
+      (!aiOk ? '<button onclick="toggleFinalSentenceApproval(\'' + s.id + '\',' + i + ',' + !teacherOk + ',this)" style="flex-shrink:0;padding:4px 10px;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer;border:1.5px solid;background:transparent;color:' + btnColor + ';border-color:' + btnColor + ';font-family:inherit;">' + btnLabel + '</button>' : '') +
+      '</div>';
+  }).join('') || '<span style="color:var(--text3);font-size:13px;">문장 데이터 없음</span>';
+
+  document.getElementById('finalModal').style.display = 'flex';
+}
+
+async function toggleFinalSentenceApproval(submissionId, sentenceIndex, approve, btn) {
+  var orig = btn.textContent; btn.disabled = true; btn.textContent = '처리 중...';
+  try {
+    var res = await fetch('/api/teacher?action=approveSentence', {
+      method: 'PATCH', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id: submissionId, sentenceIndex: sentenceIndex, approved: approve })
+    });
+    var data = await res.json();
+    if (!data.success) throw new Error('처리 실패');
+    await loadFinalSpeaking();
+    openFinalDetail(submissionId);
+    if (data.allPassed) alert('🎉 모든 문장이 통과되었습니다!');
+  } catch(err) { alert('오류: ' + err.message); btn.disabled = false; btn.textContent = orig; }
+}
 // ── CSV ──
 function exportCSV(){
   if(!state.submissions.length){alert('데이터가 없습니다.');return;}
