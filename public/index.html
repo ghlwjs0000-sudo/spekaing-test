@@ -1160,6 +1160,187 @@ async function sendSOS() {
             throw new Error(data.error || '요청 실패');
         }
     } catch (err) { alert('❌ 요청 실패: ' + err.message); }
+// ── 최종 말하기 ──
+function openFinalSpeaking() {
+    var existingWrap = document.getElementById('mySubmissionWrap');
+    if (existingWrap) existingWrap.remove();
+
+    var html =
+        '<div style="max-width:840px;margin:0 auto;padding:32px;">' +
+        '<div style="margin-bottom:24px;">' +
+        '<h2 style="font-size:22px;font-weight:700;color:var(--text);">🎤 최종 말하기</h2>' +
+        '<p style="font-size:14px;color:var(--text2);margin-top:6px;">스크립트를 보며 쉬지 않고 처음부터 끝까지 말해주세요.</p>' +
+        '</div>' +
+        '<div class="card">' +
+        '<div class="card-title">나의 스크립트</div>' +
+        '<div class="script-display">' + (state.script || '') + '</div>' +
+        '</div>' +
+        '<div class="record-area" style="margin-bottom:24px;">' +
+        '<div class="waveform" id="finalWaveform">' +
+        '<div class="wave-bar" style="height:6px"></div><div class="wave-bar" style="height:14px"></div>' +
+        '<div class="wave-bar" style="height:22px"></div><div class="wave-bar" style="height:10px"></div>' +
+        '<div class="wave-bar" style="height:28px"></div><div class="wave-bar" style="height:18px"></div>' +
+        '<div class="wave-bar" style="height:24px"></div><div class="wave-bar" style="height:8px"></div>' +
+        '<div class="wave-bar" style="height:20px"></div><div class="wave-bar" style="height:6px"></div>' +
+        '<div class="wave-bar" style="height:16px"></div><div class="wave-bar" style="height:30px"></div>' +
+        '<div class="wave-bar" style="height:12px"></div><div class="wave-bar" style="height:22px"></div>' +
+        '<div class="wave-bar" style="height:8px"></div>' +
+        '</div>' +
+        '<div class="record-timer" id="finalTimer">00:00</div>' +
+        '<button class="record-btn" id="finalRecordBtn" onclick="toggleFinalRecording()"><span id="finalRecordIcon">🎙️</span></button>' +
+        '<div class="record-status" id="finalRecordStatus">버튼을 눌러 최종 말하기를 시작하세요</div>' +
+        '<div id="finalAudioPlayback" style="display:none;width:100%;max-width:420px;">' +
+        '<audio id="finalAudioPlayer" controls></audio>' +
+        '<div class="mt-2" style="display:flex;gap:10px;justify-content:center;">' +
+        '<button class="btn btn-ghost btn-sm" onclick="retryFinalRecording()">🔄 다시 녹음</button>' +
+        '<button class="btn btn-primary" onclick="submitFinalRecording()">✓ 최종 제출하기</button>' +
+        '</div></div>' +
+        '</div>' +
+        '<div style="display:flex;justify-content:flex-start;">' +
+        '<button class="btn btn-ghost" onclick="closeFinalSpeaking()">← 뒤로가기</button>' +
+        '</div>' +
+        '</div>';
+
+    var wrap = document.createElement('div');
+    wrap.id = 'finalSpeakingWrap';
+    wrap.style.cssText = 'position:fixed;inset:0;background:var(--white);z-index:300;overflow-y:auto;';
+    wrap.innerHTML = html;
+    document.body.appendChild(wrap);
+
+    state.finalAudioBlob = null;
+    state.finalIsRecording = false;
+    state.finalRecordSeconds = 0;
+    state.finalMediaRecorder = null;
+    state.finalAudioChunks = [];
+    state.finalRecordingInterval = null;
+    state.finalWaveInterval = null;
+}
+
+function closeFinalSpeaking() {
+    var wrap = document.getElementById('finalSpeakingWrap');
+    if (wrap) wrap.remove();
+    showMySubmission();
+}
+
+async function toggleFinalRecording() {
+    state.finalIsRecording ? stopFinalRecording() : await startFinalRecording();
+}
+
+async function startFinalRecording() {
+    try {
+        var stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        state.finalMediaRecorder = new MediaRecorder(stream, { mimeType: getMime() });
+        state.finalAudioChunks = [];
+        state.finalMediaRecorder.ondataavailable = function(e) {
+            if (e.data.size > 0) state.finalAudioChunks.push(e.data);
+        };
+        state.finalMediaRecorder.onstop = function() {
+            state.finalAudioBlob = new Blob(state.finalAudioChunks, { type: getMime() });
+            document.getElementById('finalAudioPlayer').src = URL.createObjectURL(state.finalAudioBlob);
+            document.getElementById('finalAudioPlayback').style.display = 'block';
+        };
+        state.finalMediaRecorder.start(100);
+        state.finalIsRecording = true;
+        state.finalRecordSeconds = 0;
+        document.getElementById('finalRecordBtn').classList.add('recording');
+        document.getElementById('finalRecordIcon').textContent = '⏹️';
+        document.getElementById('finalRecordStatus').textContent = '녹음 중... 다시 누르면 중지';
+        document.getElementById('finalWaveform').classList.add('active');
+        document.getElementById('finalAudioPlayback').style.display = 'none';
+        state.finalRecordingInterval = setInterval(function() {
+            state.finalRecordSeconds++;
+            var m = String(Math.floor(state.finalRecordSeconds / 60)).padStart(2, '0');
+            var s = String(state.finalRecordSeconds % 60).padStart(2, '0');
+            document.getElementById('finalTimer').textContent = m + ':' + s;
+            if (state.finalRecordSeconds >= 300) stopFinalRecording();
+        }, 1000);
+        state.finalWaveInterval = setInterval(function() {
+            document.querySelectorAll('#finalWaveform .wave-bar').forEach(function(b) {
+                b.style.height = (Math.random() * 26 + 4) + 'px';
+            });
+        }, 100);
+    } catch (err) { alert('마이크 접근 권한이 필요합니다.'); }
+}
+
+function stopFinalRecording() {
+    if (!state.finalMediaRecorder) return;
+    state.finalMediaRecorder.stop();
+    state.finalMediaRecorder.stream.getTracks().forEach(function(t) { t.stop(); });
+    clearInterval(state.finalRecordingInterval);
+    clearInterval(state.finalWaveInterval);
+    state.finalIsRecording = false;
+    document.getElementById('finalRecordBtn').classList.remove('recording');
+    document.getElementById('finalRecordIcon').textContent = '🎙️';
+    document.getElementById('finalWaveform').classList.remove('active');
+    document.getElementById('finalRecordStatus').textContent = '녹음 완료! 재생 후 제출하세요.';
+}
+
+function retryFinalRecording() {
+    document.getElementById('finalAudioPlayback').style.display = 'none';
+    document.getElementById('finalRecordStatus').textContent = '버튼을 눌러 최종 말하기를 시작하세요';
+    document.getElementById('finalTimer').textContent = '00:00';
+    state.finalAudioBlob = null;
+}
+
+async function submitFinalRecording() {
+    if (!state.finalAudioBlob) { alert('먼저 녹음해주세요.'); return; }
+    if (!confirm('최종 말하기를 제출하시겠습니까?\n제출 후에는 수정할 수 없어요.')) return;
+    showLoading('최종 말하기 제출 중...', 'AI 채점 중');
+    try {
+        var base64 = await toBase64(state.finalAudioBlob);
+        var res = await fetch('/api/score', {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                studentId: state.user.id,
+                submissionId: state.submissionId,
+                script: state.script,
+                audioBase64: base64,
+                mimeType: state.finalAudioBlob.type,
+                isFinalSpeaking: true
+            })
+        });
+        if (!res.ok) { var e = await res.json(); throw new Error(e.error || '서버 오류'); }
+        var result = await res.json();
+
+        // 최종 말하기 결과 저장
+        var saveRes = await fetch('/api/submit', {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                studentId: state.user.id,
+                studentName: state.user.name,
+                studentNumber: state.user.studentNumber,
+                classId: state.user.classId,
+                submissionId: state.submissionId,
+                isFinalSpeakingSubmitted: true,
+                finalSpeakingAudio: base64,
+                finalSpeakingMimeType: state.finalAudioBlob.type,
+                finalSpeakingResult: result,
+                finalSpeakingAt: new Date().toISOString()
+            })
+        });
+
+        hideLoading();
+        var wrap = document.getElementById('finalSpeakingWrap');
+        if (wrap) wrap.remove();
+
+        // 완료 알림 후 로그아웃
+        var doneWrap = document.createElement('div');
+        doneWrap.style.cssText = 'position:fixed;inset:0;background:var(--white);z-index:400;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:20px;';
+        doneWrap.innerHTML =
+            '<div style="font-size:64px;">🎉</div>' +
+            '<h2 style="font-size:24px;font-weight:700;color:var(--green);">제출이 완료되었습니다!</h2>' +
+            '<p style="font-size:15px;color:var(--text2);">수고하셨습니다. 잠시 후 자동으로 로그아웃됩니다.</p>';
+        document.body.appendChild(doneWrap);
+
+        setTimeout(function() {
+            doneWrap.remove();
+            logout();
+        }, 3000);
+
+    } catch (err) {
+        hideLoading();
+        alert('제출 오류: ' + err.message);
+    }
 }
 function toBase64(blob) {
     return new Promise(function(resolve, reject) {
