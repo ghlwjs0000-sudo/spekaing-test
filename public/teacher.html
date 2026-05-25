@@ -349,6 +349,23 @@ h2{font-size:20px;font-weight:700;color:var(--text);margin-bottom:4px;}
     <div class="card-title">전체 음성 듣기</div>
     <audio id="finalModalAudio" controls style="width:100%;"></audio>
   </div>
+  <div class="card" style="margin-bottom:14px;">
+    <div class="card-title">교사 점수 조정</div>
+    <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+      <div>
+        <label class="form-label">최종 점수 (0-100)</label>
+        <input class="form-input" type="number" id="finalScoreInput" min="0" max="100" style="width:120px;" placeholder="점수 입력"/>
+      </div>
+      <div style="flex:1;min-width:200px;">
+        <label class="form-label">조정 사유</label>
+        <input class="form-input" id="finalScoreNote" placeholder="예: 발음은 좋으나 내용 누락"/>
+      </div>
+      <div style="padding-top:18px;">
+        <button class="btn btn-primary btn-sm" onclick="saveFinalScore()">저장</button>
+      </div>
+    </div>
+    <div id="finalScoreSaved" style="display:none;font-size:12px;color:var(--green);margin-top:8px;">✅ 저장되었습니다.</div>
+  </div>
   <div class="card">
     <div class="card-title">문장별 결과 및 승인</div>
     <div id="finalModalSentences"></div>
@@ -1074,7 +1091,12 @@ function openFinalDetail(id) {
       '</div>' +
       '</div>';
   }).join('') || '<span style="color:var(--text3);font-size:13px;">문장 데이터 없음</span>');
-
+// 점수 조정 입력란 초기화
+  var currentTotal = (s.final_speaking_result || {}).total || 0;
+  document.getElementById('finalScoreInput').value = currentTotal;
+  document.getElementById('finalScoreNote').value = s.final_score_note || '';
+  document.getElementById('finalScoreSaved').style.display = 'none';
+  document.getElementById('finalModal').dataset.submissionId = s.id;
   document.getElementById('finalModal').style.display = 'flex';
 }
 
