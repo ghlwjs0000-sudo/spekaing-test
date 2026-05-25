@@ -462,13 +462,6 @@ async function teacherLogin() {
     loadRoster();
     loadHelpBadge();
     setInterval(loadHelpBadge, 30000);
-    // 30초마다 현재 탭 자동 새로고침
-    setInterval(function() {
-      if (state.currentTab === 'roster') loadRoster();
-      else if (state.currentTab === 'submissions') loadSubmissions();
-      else if (state.currentTab === 'final') loadFinalSpeaking();
-      else if (state.currentTab === 'help') loadHelpRequests();
-    }, 30000);
   } catch(err) { hideLoading(); showErr('loginError','서버 오류: '+err.message); }
 }
 
