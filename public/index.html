@@ -868,6 +868,7 @@ function renderResults() {
             '<div class="sentence-actions">' +
             '<button class="tts-btn" onclick="playTTS(\'' + sent.replace(/'/g, "\\'") + '\')">🔊</button>' +
             (isOk ? '' : '<button class="retry-sent-btn" onclick="openSentModal(' + i + ')">🎙️ 재도전</button>') +
+(isOk ? '' : '<button class="tts-btn" style="border-color:#ff4444;color:#ff4444;" onclick="sendSOS(' + i + ', \'' + sent.replace(/'/g, "\\'") + '\')">🆘</button>') +
             '</div></div>';
     }).join('');
     var pfb = r.pronunciationFeedback || r.pronunciation_feedback || '';
@@ -1136,6 +1137,27 @@ async function sendSOS() {
         status.textContent = '❌ 호출 실패: ' + err.message;
         btn.disabled = false;
     }
+}async function sendSOS(sentenceIndex, sentenceText) {
+    if (!state.user || !state.submissionId) { alert('먼저 제출을 완료해주세요.'); return; }
+    try {
+        var res = await fetch('/api/help', {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                submissionId: state.submissionId,
+                studentId: state.user.id,
+                studentName: state.user.name,
+                classId: state.user.classId,
+                sentenceIndex: sentenceIndex,
+                sentenceText: sentenceText
+            })
+        });
+        var data = await res.json();
+        if (data.success) {
+            alert('✅ 선생님께 도움 요청했어요!');
+        } else {
+            throw new Error(data.error || '요청 실패');
+        }
+    } catch (err) { alert('❌ 요청 실패: ' + err.message); }
 }
 function toBase64(blob) {
     return new Promise(function(resolve, reject) {
