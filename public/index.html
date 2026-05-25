@@ -688,6 +688,7 @@ async function saveSubmissionLight() {
             attemptCount: state.attemptCount,
             isPassed: state.sentenceStatuses.every(function(s) { return s === 'ok'; }),
             isFinalSubmitted: false,
+            teacherApprovedSentences: state.teacherApprovedSentences || [],
             pronunciationFeedback: r.pronunciationFeedback || '',
             contentFeedback: r.contentFeedback || '',
             fluencyFeedback: r.fluencyFeedback || '',
