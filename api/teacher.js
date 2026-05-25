@@ -191,12 +191,113 @@ module.exports = async (req, res) => {
         const teacherOk = approved_list.includes(i);
         return aiOk || teacherOk;
       });
+     // 현재 점수 및 최종 말하기 결과 가져오기
+      const scoreData = await sb('GET', 'submissions', null, `?id=eq.${id}&select=pronunciation,fluency,content,final_speaking_result`);
+      const scoreRow = Array.isArray(scoreData) && scoreData[0] ? scoreData[0] : {};
+      const finalResult = scoreRow.final_speaking_result || {};
+      const pronunciation = finalResult.pronunciation || scoreRow.pronunciation || 0;
+      const fluency = finalResult.fluency || scoreRow.fluency || 0;
+      const baseContent = finalResult.content || scoreRow.content || 0;
+
+      // 승인 문장 비율로 점수 보정
+      const totalSents = sentences.length;
+      const aiOkCount = srs.filter(sr => sr && sr.status === 'ok').length;
+      const totalOk = Math.min(totalSents, aiOkCount + approved_list.length);
+      const completenessScore = totalSents > 0 ? Math.round((totalOk / totalSents) * 10) : 0;
+      const contentBonus = totalSents > 0 ? Math.round((approved_list.length / totalSents) * 10) : 0;
+      const newContent = Math.min(30, baseContent + contentBonus);
+      const newTotal = pronunciation + newContent + fluency + completenessScore;
+      const newGrade = newTotal >= 90 ? 'A+' : newTotal >= 80 ? 'A' : newTotal >= 70 ? 'B+' : newTotal >= 60 ? 'B' : newTotal >= 50 ? 'C+' : newTotal >= 40 ? 'C' : 'D';
+
+      const updatedResult = Object.assign({}, finalResult, {
+        content: newContent,
+        completeness: completenessScore,
+        total: newTotal,
+        grade: newGrade
+      });
+
+      // 현재 점수 및 최종 말하기 결과 가져오기
+      const scoreData = await sb('GET', 'submissions', null, `?id=eq.${id}&select=pronunciation,fluency,content,final_speaking_result`);
+      const scoreRow = Array.isArray(scoreData) && scoreData[0] ? scoreData[0] : {};
+      const finalResult = scoreRow.final_speaking_result || {};
+      const pronunciation = finalResult.pronunciation || scoreRow.pronunciation || 0;
+      const fluency = finalResult.fluency || scoreRow.fluency || 0;
+      const baseContent = finalResult.content || scoreRow.content || 0;
+
+      // 승인 문장 비율로 점수 보정
+      const totalSents = sentences.length;
+      const aiOkCount = srs.filter(sr => sr && sr.status === 'ok').length;
+      const totalOk = Math.min(totalSents, aiOkCount + approved_list.length);
+      const completenessScore = totalSents > 0 ? Math.round((totalOk / totalSents) * 10) : 0;
+      const contentBonus = totalSents > 0 ? Math.round((approved_list.length / totalSents) * 10) : 0;
+      const newContent = Math.min(30, baseContent + contentBonus);
+      const newTotal = pronunciation + newContent + fluency + completenessScore;
+      const newGrade = newTotal >= 90 ? 'A+' : newTotal >= 80 ? 'A' : newTotal >= 70 ? 'B+' : newTotal >= 60 ? 'B' : newTotal >= 50 ? 'C+' : newTotal >= 40 ? 'C' : 'D';
+
+      const updatedResult = Object.assign({}, finalResult, {
+        content: newContent,
+        completeness: completenessScore,
+        total: newTotal,
+        grade: newGrade
+      });
+
+      // 현재 점수 및 최종 말하기 결과 가져오기
+      const scoreData = await sb('GET', 'submissions', null, `?id=eq.${id}&select=pronunciation,fluency,content,final_speaking_result`);
+      const scoreRow = Array.isArray(scoreData) && scoreData[0] ? scoreData[0] : {};
+      const finalResult = scoreRow.final_speaking_result || {};
+      const pronunciation = finalResult.pronunciation || scoreRow.pronunciation || 0;
+      const fluency = finalResult.fluency || scoreRow.fluency || 0;
+      const baseContent = finalResult.content || scoreRow.content || 0;
+
+      // 승인 문장 비율로 점수 보정
+      const totalSents = sentences.length;
+      const aiOkCount = srs.filter(sr => sr && sr.status === 'ok').length;
+      const totalOk = Math.min(totalSents, aiOkCount + approved_list.length);
+      const completenessScore = totalSents > 0 ? Math.round((totalOk / totalSents) * 10) : 0;
+      const contentBonus = totalSents > 0 ? Math.round((approved_list.length / totalSents) * 10) : 0;
+      const newContent = Math.min(30, baseContent + contentBonus);
+      const newTotal = pronunciation + newContent + fluency + completenessScore;
+      const newGrade = newTotal >= 90 ? 'A+' : newTotal >= 80 ? 'A' : newTotal >= 70 ? 'B+' : newTotal >= 60 ? 'B' : newTotal >= 50 ? 'C+' : newTotal >= 40 ? 'C' : 'D';
+
+      const updatedResult = Object.assign({}, finalResult, {
+        content: newContent,
+        completeness: completenessScore,
+        total: newTotal,
+        grade: newGrade
+      });
+
+    // 현재 점수 및 최종 말하기 결과 가져오기
+      const scoreData = await sb('GET', 'submissions', null, `?id=eq.${id}&select=pronunciation,fluency,content,final_speaking_result`);
+      const scoreRow = Array.isArray(scoreData) && scoreData[0] ? scoreData[0] : {};
+      const finalResult = scoreRow.final_speaking_result || {};
+      const pronunciation = finalResult.pronunciation || scoreRow.pronunciation || 0;
+      const fluency = finalResult.fluency || scoreRow.fluency || 0;
+      const baseContent = finalResult.content || scoreRow.content || 0;
+
+      // 승인 문장 비율로 점수 보정
+      const totalSents = sentences.length;
+      const aiOkCount = srs.filter(sr => sr && sr.status === 'ok').length;
+      const totalOk = Math.min(totalSents, aiOkCount + approved_list.length);
+      const completenessScore = totalSents > 0 ? Math.round((totalOk / totalSents) * 10) : 0;
+      const contentBonus = totalSents > 0 ? Math.round((approved_list.length / totalSents) * 10) : 0;
+      const newContent = Math.min(30, baseContent + contentBonus);
+      const newTotal = pronunciation + newContent + fluency + completenessScore;
+      const newGrade = newTotal >= 90 ? 'A+' : newTotal >= 80 ? 'A' : newTotal >= 70 ? 'B+' : newTotal >= 60 ? 'B' : newTotal >= 50 ? 'C+' : newTotal >= 40 ? 'C' : 'D';
+
+      const updatedResult = Object.assign({}, finalResult, {
+        content: newContent,
+        completeness: completenessScore,
+        total: newTotal,
+        grade: newGrade
+      });
+
       await sb('PATCH', 'submissions', {
         teacher_approved_sentences: approved_list,
         is_passed: allPassed,
+        final_speaking_result: updatedResult,
         updated_at: new Date().toISOString()
       }, `?id=eq.${id}`);
-      return res.status(200).json({ success: true, approvedList: approved_list, allPassed });
+      return res.status(200).json({ success: true, approvedList: approved_list, allPassed, newTotal, newGrade });
     }
 
     return res.status(400).json({ error: '알 수 없는 action' });
