@@ -1024,8 +1024,14 @@ function openFinalDetail(id) {
     '<div style="font-size:13px;color:var(--text2);margin-top:8px;"><strong>인식된 발화:</strong> ' + (result.transcript||result.simulatedTranscript||'-') + '</div>';
   document.getElementById('finalModalScore').innerHTML = scoreHtml;
 
-  document.getElementById('finalModalAudio').src = '';
-  document.getElementById('finalModalAudio').style.display = 'none';
+  if (s.final_speaking_audio) {
+    var mime = s.final_speaking_mime || 'audio/webm';
+    document.getElementById('finalModalAudio').src = 'data:' + mime + ';base64,' + s.final_speaking_audio;
+    document.getElementById('finalModalAudio').style.display = 'block';
+  } else {
+    document.getElementById('finalModalAudio').src = '';
+    document.getElementById('finalModalAudio').style.display = 'none';
+  }
 
   // 문장별 결과
   var sents = (result.sentences || s.sentences) || [];
@@ -1066,7 +1072,6 @@ function openFinalDetail(id) {
       '</div>' +
       (!aiOk ? '<button onclick="toggleFinalSentenceApproval(\'' + s.id + '\',' + i + ',' + !teacherOk + ',this)" style="flex-shrink:0;padding:4px 10px;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer;border:1.5px solid;background:transparent;color:' + btnColor + ';border-color:' + btnColor + ';font-family:inherit;">' + btnLabel + '</button>' : '') +
       '</div>' +
-      (audioSrc ? '<audio controls style="width:100%;margin-top:6px;height:32px;" src="' + audioSrc + '"></audio>' : '') +
       '</div>';
   }).join('') || '<span style="color:var(--text3);font-size:13px;">문장 데이터 없음</span>');
 
