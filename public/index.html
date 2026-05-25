@@ -1,1474 +1,1116 @@
 <!DOCTYPE html>
 <html lang="ko">
+
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>영어 말하기 수행평가</title>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
-<style>
-:root {
-  --bg:#f0f4f8;--white:#ffffff;--surface2:#f8fafc;
-  --border:#e2e8f0;--border2:#cbd5e1;--text:#1e293b;--text2:#64748b;--text3:#94a3b8;
-  --blue:#2563eb;--blue2:#1d4ed8;--blue-light:#eff6ff;--blue-mid:#bfdbfe;
-  --green:#16a34a;--green-bg:#f0fdf4;--green-border:#86efac;
-  --red:#dc2626;--red-bg:#fef2f2;--red-border:#fca5a5;
-  --yellow:#d97706;--yellow-bg:#fffbeb;
-  --radius:12px;--radius-sm:8px;
-  --shadow:0 1px 3px rgba(0,0,0,.1),0 1px 2px rgba(0,0,0,.06);
-  --shadow-md:0 4px 6px rgba(0,0,0,.07),0 2px 4px rgba(0,0,0,.06);
-  --shadow-lg:0 10px 15px rgba(0,0,0,.1),0 4px 6px rgba(0,0,0,.05);
-}
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
-body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
-.header{background:var(--blue);padding:0 32px;height:60px;display:flex;align-items:center;justify-content:space-between;box-shadow:var(--shadow-md);position:sticky;top:0;z-index:100;}
-.logo{font-size:18px;font-weight:700;color:#fff;letter-spacing:-.3px;}
-.logo span{opacity:.7;font-weight:400;}
-.user-badge{display:flex;align-items:center;gap:10px;background:rgba(255,255,255,.15);border-radius:999px;padding:6px 14px;font-size:13px;color:#fff;}
-.screen{display:none;min-height:calc(100vh - 60px);}
-.screen.active{display:flex;flex-direction:column;}
-.login-wrap{flex:1;display:flex;align-items:center;justify-content:center;padding:40px 20px;}
-.login-card{background:var(--white);border-radius:16px;box-shadow:var(--shadow-lg);padding:48px 40px;width:100%;max-width:420px;text-align:center;}
-.login-icon{font-size:48px;margin-bottom:16px;}
-.login-card h2{font-size:22px;font-weight:700;margin-bottom:6px;}
-.login-card p{font-size:14px;color:var(--text2);margin-bottom:28px;}
-.main{flex:1;padding:32px;max-width:840px;margin:0 auto;width:100%;}
-.step-bar{display:flex;align-items:center;gap:0;margin-bottom:28px;}
-.step-item{display:flex;align-items:center;gap:8px;flex:1;}
-.step-dot{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex-shrink:0;background:var(--border);color:var(--text3);transition:all .3s;cursor:pointer;}
-.step-dot.active{background:var(--blue);color:#fff;}
-.step-dot.done{background:var(--green);color:#fff;}
-.step-label{font-size:12px;color:var(--text3);white-space:nowrap;cursor:pointer;}
-.step-label.active{color:var(--blue);font-weight:600;}
-.step-line{flex:1;height:2px;background:var(--border);margin:0 8px;}
-.step-line.done{background:var(--green);}
-.card{background:var(--white);border-radius:var(--radius);box-shadow:var(--shadow);padding:24px;margin-bottom:16px;border:1px solid var(--border);}
-.card-title{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--text3);margin-bottom:14px;}
-.form-label{font-size:13px;color:var(--text2);margin-bottom:5px;display:block;font-weight:500;}
-.form-input,.form-textarea{width:100%;background:var(--surface2);border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:10px 14px;color:var(--text);font-family:inherit;font-size:14px;transition:border-color .2s;outline:none;}
-.form-input:focus,.form-textarea:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(37,99,235,.1);}
-.form-textarea{resize:vertical;min-height:140px;line-height:1.75;}
-.form-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px;}
-.form-group{margin-bottom:14px;}
-.btn{display:inline-flex;align-items:center;gap:8px;padding:10px 22px;border-radius:var(--radius-sm);font-size:14px;font-weight:600;cursor:pointer;border:none;transition:all .2s;font-family:inherit;text-decoration:none;}
-.btn-primary{background:var(--blue);color:#fff;box-shadow:var(--shadow);}
-.btn-primary:hover{background:var(--blue2);transform:translateY(-1px);}
-.btn-success{background:var(--green);color:#fff;box-shadow:var(--shadow);}
-.btn-success:hover{opacity:.9;transform:translateY(-1px);}
-.btn-ghost{background:var(--white);color:var(--text);border:1.5px solid var(--border);}
-.btn-ghost:hover{border-color:var(--blue);color:var(--blue);}
-.btn:disabled{opacity:.45;cursor:not-allowed;transform:none!important;}
-.btn-lg{padding:13px 28px;font-size:15px;border-radius:var(--radius);}
-.btn-sm{padding:6px 14px;font-size:12px;}
-.progress-wrap{background:var(--border);border-radius:4px;height:4px;overflow:hidden;margin-top:10px;}
-.progress-bar{height:100%;background:var(--blue);width:0;transition:width .4s;border-radius:4px;}
-.goal-wrap{background:var(--border);border-radius:8px;height:16px;overflow:hidden;margin:10px 0;}
-.goal-bar{height:100%;border-radius:8px;transition:width .6s cubic-bezier(.25,.46,.45,.94),background .3s;}
-.upload-area{border:2px dashed var(--border2);border-radius:var(--radius);padding:28px;text-align:center;cursor:pointer;transition:all .2s;background:var(--surface2);}
-.upload-area:hover{border-color:var(--blue);background:var(--blue-light);}
-.upload-area.has-file{border-color:var(--green);background:var(--green-bg);border-style:solid;}
-.record-area{display:flex;flex-direction:column;align-items:center;gap:20px;padding:36px;background:var(--surface2);border-radius:var(--radius);border:1.5px solid var(--border);}
-.record-btn{width:88px;height:88px;border-radius:50%;border:3px solid var(--border2);background:var(--white);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .3s;font-size:30px;box-shadow:var(--shadow-md);}
-.record-btn:hover{border-color:var(--blue);transform:scale(1.05);}
-.record-btn.recording{border-color:var(--red);background:var(--red-bg);animation:pulse 1.5s infinite;}
-@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(220,38,38,.35);}70%{box-shadow:0 0 0 16px rgba(220,38,38,0);}100%{box-shadow:0 0 0 0 rgba(220,38,38,0);}}
-.record-timer{font-family:'DM Mono',monospace;font-size:28px;color:var(--text);letter-spacing:.06em;}
-.record-status{font-size:14px;color:var(--text2);}
-.waveform{display:flex;align-items:center;gap:3px;height:36px;opacity:0;transition:opacity .3s;}
-.waveform.active{opacity:1;}
-.wave-bar{width:4px;border-radius:2px;background:var(--blue);min-height:4px;transition:height .1s;}
-.script-display{background:var(--blue-light);border:1.5px solid var(--blue-mid);border-radius:var(--radius-sm);padding:16px;font-size:15px;line-height:1.8;color:var(--text);max-height:180px;overflow-y:auto;text-align:left;}
-audio{width:100%;border-radius:var(--radius-sm);margin-top:8px;}
-.sentence-list{display:flex;flex-direction:column;gap:8px;}
-.sentence-item{display:flex;align-items:flex-start;gap:12px;padding:14px 16px;border-radius:var(--radius-sm);border:1.5px solid var(--border);transition:all .3s;background:var(--white);}
-.sentence-item.ok{background:var(--green-bg);border-color:var(--green-border);}
-.sentence-item.retry{background:var(--red-bg);border-color:var(--red-border);}
-.sentence-icon{font-size:18px;flex-shrink:0;margin-top:2px;}
-.sentence-content{flex:1;}
-.sentence-text{font-size:14px;line-height:1.6;color:var(--text);}
-.sentence-item.ok .sentence-text{color:var(--green);}
-.sentence-item.retry .sentence-text{color:var(--red);}
-.sentence-issue{font-size:12px;color:var(--text3);margin-top:4px;}
-.sentence-actions{display:flex;gap:6px;flex-shrink:0;align-items:center;}
-.tts-btn{padding:4px 10px;border-radius:var(--radius-sm);font-size:11px;font-weight:600;cursor:pointer;border:1.5px solid var(--blue-mid);background:var(--blue-light);color:var(--blue);transition:all .2s;font-family:inherit;}
-.tts-btn:hover{background:var(--blue);color:#fff;}
-.retry-sent-btn{padding:4px 10px;border-radius:var(--radius-sm);font-size:11px;font-weight:600;cursor:pointer;border:1.5px solid var(--red-border);background:var(--red-bg);color:var(--red);transition:all .2s;font-family:inherit;}
-.retry-sent-btn:hover{background:var(--red);color:#fff;}
-.result-banner{padding:20px 24px;border-radius:var(--radius);margin-bottom:18px;text-align:center;border:1.5px solid;}
-.result-banner.all-clear{background:var(--green-bg);border-color:var(--green-border);}
-.result-banner.has-retry{background:var(--red-bg);border-color:var(--red-border);}
-.result-banner-title{font-size:20px;font-weight:700;margin-bottom:4px;}
-.result-banner.all-clear .result-banner-title{color:var(--green);}
-.result-banner.has-retry .result-banner-title{color:var(--red);}
-.result-banner-sub{font-size:13px;color:var(--text2);}
-.feedback-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
-.feedback-item{background:var(--surface2);border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:14px;}
-.feedback-icon{font-size:18px;margin-bottom:6px;}
-.feedback-title{font-size:12px;font-weight:700;color:var(--text);margin-bottom:4px;}
-.feedback-text{font-size:12px;color:var(--text2);line-height:1.6;}
-.attempt-info{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:12px 16px;background:var(--blue-light);border-radius:var(--radius-sm);border:1.5px solid var(--blue-mid);margin-bottom:14px;}
-.attempt-num{font-size:14px;font-weight:700;color:var(--blue);}
-.attempt-dots{display:flex;gap:4px;}
-.attempt-dot{width:8px;height:8px;border-radius:50%;background:var(--border2);transition:all .3s;}
-.attempt-dot.done{background:var(--blue);}
-.loading-overlay{display:none;position:fixed;inset:0;z-index:999;background:rgba(255,255,255,.85);backdrop-filter:blur(4px);align-items:center;justify-content:center;flex-direction:column;gap:16px;}
-.loading-overlay.active{display:flex;}
-.loading-spinner{width:40px;height:40px;border:3px solid var(--border);border-top-color:var(--blue);border-radius:50%;animation:spin .8s linear infinite;}
-@keyframes spin{to{transform:rotate(360deg);}}
-.loading-text{font-size:15px;color:var(--text);font-weight:500;}
-.loading-step{font-size:12px;color:var(--text2);font-family:'DM Mono',monospace;}
-.modal{display:none;position:fixed;inset:0;background:rgba(15,23,42,.5);z-index:500;align-items:center;justify-content:center;backdrop-filter:blur(2px);}
-.modal-box{background:var(--white);border-radius:16px;padding:32px;max-width:500px;width:90%;box-shadow:var(--shadow-lg);text-align:center;}
-.modal-sentence{font-size:16px;line-height:1.7;color:var(--text);margin:14px 0 22px;padding:14px;background:var(--blue-light);border-radius:var(--radius-sm);border:1.5px solid var(--blue-mid);}
-.badge{display:inline-flex;align-items:center;gap:4px;padding:2px 10px;border-radius:999px;font-size:11px;font-weight:700;}
-.badge-blue{background:var(--blue-light);color:var(--blue);border:1px solid var(--blue-mid);}
-.badge-green{background:var(--green-bg);color:var(--green);border:1px solid var(--green-border);}
-.badge-red{background:var(--red-bg);color:var(--red);border:1px solid var(--red-border);}
-.alert-info{background:var(--blue-light);border:1.5px solid var(--blue-mid);border-radius:var(--radius-sm);padding:12px 16px;font-size:13px;color:var(--blue);margin-bottom:14px;}
-.alert-warn{background:var(--yellow-bg);border:1.5px solid #fcd34d;border-radius:var(--radius-sm);padding:12px 16px;font-size:13px;color:var(--yellow);margin-bottom:14px;}
-h2{font-size:22px;font-weight:700;color:var(--text);margin-bottom:4px;}
-p{color:var(--text2);font-size:14px;}
-.text-muted{color:var(--text2);font-size:13px;}
-.mt-2{margin-top:8px;}.mt-3{margin-top:16px;}.mb-4{margin-bottom:24px;}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>영어 말하기 수행평가</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #f0f4f8; --white: #ffffff; --surface2: #f8fafc;
+            --border: #e2e8f0; --border2: #cbd5e1; --text: #1e293b; --text2: #64748b; --text3: #94a3b8;
+            --blue: #2563eb; --blue2: #1d4ed8; --blue-light: #eff6ff; --blue-mid: #bfdbfe;
+            --green: #16a34a; --green-bg: #f0fdf4; --green-border: #86efac;
+            --red: #dc2626; --red-bg: #fef2f2; --red-border: #fca5a5;
+            --yellow: #d97706; --yellow-bg: #fffbeb;
+            --radius: 12px; --radius-sm: 8px;
+            --shadow: 0 1px 3px rgba(0,0,0,.1),0 1px 2px rgba(0,0,0,.06);
+            --shadow-md: 0 4px 6px rgba(0,0,0,.07),0 2px 4px rgba(0,0,0,.06);
+            --shadow-lg: 0 10px 15px rgba(0,0,0,.1),0 4px 6px rgba(0,0,0,.05);
+        }
+        *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+        body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
+        .header{background:var(--blue);padding:0 32px;height:60px;display:flex;align-items:center;justify-content:space-between;box-shadow:var(--shadow-md);position:sticky;top:0;z-index:100;}
+        .logo{font-size:18px;font-weight:700;color:#fff;letter-spacing:-.3px;}
+        .logo span{opacity:.7;font-weight:400;}
+        .user-badge{display:flex;align-items:center;gap:10px;background:rgba(255,255,255,.15);border-radius:999px;padding:6px 14px;font-size:13px;color:#fff;}
+        .screen{display:none;min-height:calc(100vh - 60px);}
+        .screen.active{display:flex;flex-direction:column;}
+        .login-wrap{flex:1;display:flex;align-items:center;justify-content:center;padding:40px 20px;}
+        .login-card{background:var(--white);border-radius:16px;box-shadow:var(--shadow-lg);padding:48px 40px;width:100%;max-width:420px;text-align:center;}
+        .login-icon{font-size:48px;margin-bottom:16px;}
+        .login-card h2{font-size:22px;font-weight:700;margin-bottom:6px;}
+        .login-card p{font-size:14px;color:var(--text2);margin-bottom:28px;}
+        .main{flex:1;padding:32px;max-width:840px;margin:0 auto;width:100%;}
+        .step-bar{display:flex;align-items:center;gap:0;margin-bottom:28px;}
+        .step-item{display:flex;align-items:center;gap:8px;flex:1;}
+        .step-dot{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex-shrink:0;background:var(--border);color:var(--text3);transition:all .3s;cursor:pointer;}
+        .step-dot.active{background:var(--blue);color:#fff;}
+        .step-dot.done{background:var(--green);color:#fff;}
+        .step-label{font-size:12px;color:var(--text3);white-space:nowrap;cursor:pointer;}
+        .step-label.active{color:var(--blue);font-weight:600;}
+        .step-line{flex:1;height:2px;background:var(--border);margin:0 8px;}
+        .step-line.done{background:var(--green);}
+        .card{background:var(--white);border-radius:var(--radius);box-shadow:var(--shadow);padding:24px;margin-bottom:16px;border:1px solid var(--border);}
+        .card-title{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--text3);margin-bottom:14px;}
+        .form-label{font-size:13px;color:var(--text2);margin-bottom:5px;display:block;font-weight:500;}
+        .form-input,.form-textarea{width:100%;background:var(--surface2);border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:10px 14px;color:var(--text);font-family:inherit;font-size:14px;transition:border-color .2s;outline:none;}
+        .form-input:focus,.form-textarea:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(37,99,235,.1);}
+        .form-textarea{resize:vertical;min-height:140px;line-height:1.75;}
+        .form-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px;}
+        .form-group{margin-bottom:14px;}
+        .btn{display:inline-flex;align-items:center;gap:8px;padding:10px 22px;border-radius:var(--radius-sm);font-size:14px;font-weight:600;cursor:pointer;border:none;transition:all .2s;font-family:inherit;text-decoration:none;}
+        .btn-primary{background:var(--blue);color:#fff;box-shadow:var(--shadow);}
+        .btn-primary:hover{background:var(--blue2);transform:translateY(-1px);}
+        .btn-success{background:var(--green);color:#fff;box-shadow:var(--shadow);}
+        .btn-success:hover{opacity:.9;transform:translateY(-1px);}
+        .btn-ghost{background:var(--white);color:var(--text);border:1.5px solid var(--border);}
+        .btn-ghost:hover{border-color:var(--blue);color:var(--blue);}
+        .btn:disabled{opacity:.45;cursor:not-allowed;transform:none!important;}
+        .btn-lg{padding:13px 28px;font-size:15px;border-radius:var(--radius);}
+        .btn-sm{padding:6px 14px;font-size:12px;}
+        .progress-wrap{background:var(--border);border-radius:4px;height:4px;overflow:hidden;margin-top:10px;}
+        .progress-bar{height:100%;background:var(--blue);width:0;transition:width .4s;border-radius:4px;}
+        .goal-wrap{background:var(--border);border-radius:8px;height:16px;overflow:hidden;margin:10px 0;}
+        .goal-bar{height:100%;border-radius:8px;transition:width .6s cubic-bezier(.25,.46,.45,.94),background .3s;}
+        .upload-area{border:2px dashed var(--border2);border-radius:var(--radius);padding:28px;text-align:center;cursor:pointer;transition:all .2s;background:var(--surface2);}
+        .upload-area:hover{border-color:var(--blue);background:var(--blue-light);}
+        .upload-area.has-file{border-color:var(--green);background:var(--green-bg);border-style:solid;}
+        .record-area{display:flex;flex-direction:column;align-items:center;gap:20px;padding:36px;background:var(--surface2);border-radius:var(--radius);border:1.5px solid var(--border);}
+        .record-btn{width:88px;height:88px;border-radius:50%;border:3px solid var(--border2);background:var(--white);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .3s;font-size:30px;box-shadow:var(--shadow-md);}
+        .record-btn:hover{border-color:var(--blue);transform:scale(1.05);}
+        .record-btn.recording{border-color:var(--red);background:var(--red-bg);animation:pulse 1.5s infinite;}
+        @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(220,38,38,.35);}70%{box-shadow:0 0 0 16px rgba(220,38,38,0);}100%{box-shadow:0 0 0 0 rgba(220,38,38,0);}}
+        .record-timer{font-family:'DM Mono',monospace;font-size:28px;color:var(--text);letter-spacing:.06em;}
+        .record-status{font-size:14px;color:var(--text2);}
+        .waveform{display:flex;align-items:center;gap:3px;height:36px;opacity:0;transition:opacity .3s;}
+        .waveform.active{opacity:1;}
+        .wave-bar{width:4px;border-radius:2px;background:var(--blue);min-height:4px;transition:height .1s;}
+        .script-display{background:var(--blue-light);border:1.5px solid var(--blue-mid);border-radius:var(--radius-sm);padding:16px;font-size:15px;line-height:1.8;color:var(--text);max-height:180px;overflow-y:auto;text-align:left;}
+        audio{width:100%;border-radius:var(--radius-sm);margin-top:8px;}
+        .sentence-list{display:flex;flex-direction:column;gap:8px;}
+        .sentence-item{display:flex;align-items:flex-start;gap:12px;padding:14px 16px;border-radius:var(--radius-sm);border:1.5px solid var(--border);transition:all .3s;background:var(--white);}
+        .sentence-item.ok{background:var(--green-bg);border-color:var(--green-border);}
+        .sentence-item.retry{background:var(--red-bg);border-color:var(--red-border);}
+        .sentence-icon{font-size:18px;flex-shrink:0;margin-top:2px;}
+        .sentence-content{flex:1;}
+        .sentence-text{font-size:14px;line-height:1.6;color:var(--text);}
+        .sentence-item.ok .sentence-text{color:var(--green);}
+        .sentence-item.retry .sentence-text{color:var(--red);}
+        .sentence-issue{font-size:12px;color:var(--text3);margin-top:4px;}
+        .sentence-actions{display:flex;gap:6px;flex-shrink:0;align-items:center;}
+        .tts-btn{padding:4px 10px;border-radius:var(--radius-sm);font-size:11px;font-weight:600;cursor:pointer;border:1.5px solid var(--blue-mid);background:var(--blue-light);color:var(--blue);transition:all .2s;font-family:inherit;}
+        .tts-btn:hover{background:var(--blue);color:#fff;}
+        .retry-sent-btn{padding:4px 10px;border-radius:var(--radius-sm);font-size:11px;font-weight:600;cursor:pointer;border:1.5px solid var(--red-border);background:var(--red-bg);color:var(--red);transition:all .2s;font-family:inherit;}
+        .retry-sent-btn:hover{background:var(--red);color:#fff;}
+        .result-banner{padding:20px 24px;border-radius:var(--radius);margin-bottom:18px;text-align:center;border:1.5px solid;}
+        .result-banner.all-clear{background:var(--green-bg);border-color:var(--green-border);}
+        .result-banner.has-retry{background:var(--red-bg);border-color:var(--red-border);}
+        .result-banner-title{font-size:20px;font-weight:700;margin-bottom:4px;}
+        .result-banner.all-clear .result-banner-title{color:var(--green);}
+        .result-banner.has-retry .result-banner-title{color:var(--red);}
+        .result-banner-sub{font-size:13px;color:var(--text2);}
+        .feedback-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+        .feedback-item{background:var(--surface2);border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:14px;}
+        .feedback-icon{font-size:18px;margin-bottom:6px;}
+        .feedback-title{font-size:12px;font-weight:700;color:var(--text);margin-bottom:4px;}
+        .feedback-text{font-size:12px;color:var(--text2);line-height:1.6;}
+        .attempt-info{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:12px 16px;background:var(--blue-light);border-radius:var(--radius-sm);border:1.5px solid var(--blue-mid);margin-bottom:14px;}
+        .attempt-num{font-size:14px;font-weight:700;color:var(--blue);}
+        .attempt-dots{display:flex;gap:4px;}
+        .attempt-dot{width:8px;height:8px;border-radius:50%;background:var(--border2);transition:all .3s;}
+        .attempt-dot.done{background:var(--blue);}
+        .loading-overlay{display:none;position:fixed;inset:0;z-index:999;background:rgba(255,255,255,.85);backdrop-filter:blur(4px);align-items:center;justify-content:center;flex-direction:column;gap:16px;}
+        .loading-overlay.active{display:flex;}
+        .loading-spinner{width:40px;height:40px;border:3px solid var(--border);border-top-color:var(--blue);border-radius:50%;animation:spin .8s linear infinite;}
+        @keyframes spin{to{transform:rotate(360deg);}}
+        .loading-text{font-size:15px;color:var(--text);font-weight:500;}
+        .loading-step{font-size:12px;color:var(--text2);font-family:'DM Mono',monospace;}
+        .modal{display:none;position:fixed;inset:0;background:rgba(15,23,42,.5);z-index:500;align-items:center;justify-content:center;backdrop-filter:blur(2px);}
+        .modal-box{background:var(--white);border-radius:16px;padding:32px;max-width:500px;width:90%;box-shadow:var(--shadow-lg);text-align:center;}
+        .modal-sentence{font-size:16px;line-height:1.7;color:var(--text);margin:14px 0 22px;padding:14px;background:var(--blue-light);border-radius:var(--radius-sm);border:1.5px solid var(--blue-mid);}
+        .alert-info{background:var(--blue-light);border:1.5px solid var(--blue-mid);border-radius:var(--radius-sm);padding:12px 16px;font-size:13px;color:var(--blue);margin-bottom:14px;}
+        .alert-warn{background:var(--yellow-bg);border:1.5px solid #fcd34d;border-radius:var(--radius-sm);padding:12px 16px;font-size:13px;color:var(--yellow);margin-bottom:14px;}
+        h2{font-size:22px;font-weight:700;color:var(--text);margin-bottom:4px;}
+        p{color:var(--text2);font-size:14px;}
+        .text-muted{color:var(--text2);font-size:13px;}
+        .mt-2{margin-top:8px;}.mt-3{margin-top:16px;}.mb-4{margin-bottom:24px;}
+    </style>
 </head>
 <body>
 
 <div class="loading-overlay" id="loadingOverlay">
-  <div class="loading-spinner"></div>
-  <div class="loading-text" id="loadingText">처리 중입니다...</div>
-  <div class="loading-step" id="loadingStep"></div>
+    <div class="loading-spinner"></div>
+    <div class="loading-text" id="loadingText">처리 중입니다...</div>
+    <div class="loading-step" id="loadingStep"></div>
 </div>
 
 <header class="header">
-  <div class="logo">Speaking<span>Test</span> · 영어 말하기 수행평가</div>
-  <div id="userBadge" style="display:none;" class="user-badge">
-    <span id="userBadgeText"></span>
-    <button onclick="logout()" style="background:rgba(255,255,255,.2);border:none;color:#fff;font-size:11px;padding:3px 8px;border-radius:4px;cursor:pointer;font-family:inherit;">로그아웃</button>
-  </div>
+    <div class="logo">Speaking<span>Test</span> · 영어 말하기 수행평가</div>
+    <div id="userBadge" style="display:none;" class="user-badge">
+        <span id="userBadgeText"></span>
+        <button onclick="logout()" style="background:rgba(255,255,255,.2);border:none;color:#fff;font-size:11px;padding:3px 8px;border-radius:4px;cursor:pointer;font-family:inherit;">로그아웃</button>
+    </div>
 </header>
 
-<!-- 로그인 -->
 <div class="screen active" id="screen-login">
-<div class="login-wrap">
-  <div class="login-card">
-    <div class="login-icon">🎤</div>
-    <h2>영어 말하기 수행평가</h2>
-    <p>학번과 비밀번호로 로그인하세요.</p>
-    <div class="form-group">
-      <label class="form-label">학번 (아이디)</label>
-      <input class="form-input" id="loginId" placeholder="예: di26s2101" onkeydown="if(event.key==='Enter')login()"/>
+    <div class="login-wrap">
+        <div class="login-card">
+            <div class="login-icon">🎤</div>
+            <h2>영어 말하기 수행평가</h2>
+            <p>학번과 비밀번호로 로그인하세요.</p>
+            <div class="form-group">
+                <label class="form-label">학번 (아이디)</label>
+                <input class="form-input" id="loginId" placeholder="예: di26s2101" onkeydown="if(event.key==='Enter')login()"/>
+            </div>
+            <div class="form-group">
+                <label class="form-label">비밀번호</label>
+                <input class="form-input" type="password" id="loginPw" placeholder="비밀번호 입력" onkeydown="if(event.key==='Enter')login()"/>
+            </div>
+            <div id="loginError" style="color:var(--red);font-size:13px;margin-bottom:12px;display:none;"></div>
+            <button class="btn btn-primary btn-lg" style="width:100%;justify-content:center;" onclick="login()">로그인</button>
+            <div style="margin-top:20px;padding-top:16px;border-top:1px solid var(--border);">
+                <a href="/teacher.html" style="font-size:13px;color:var(--text2);text-decoration:none;">교사용 대시보드 →</a>
+            </div>
+        </div>
     </div>
-    <div class="form-group">
-      <label class="form-label">비밀번호</label>
-      <input class="form-input" type="password" id="loginPw" placeholder="비밀번호 입력" onkeydown="if(event.key==='Enter')login()"/>
-    </div>
-    <div id="loginError" style="color:var(--red);font-size:13px;margin-bottom:12px;display:none;"></div>
-    <button class="btn btn-primary btn-lg" style="width:100%;justify-content:center;" onclick="login()">로그인</button>
-    <div style="margin-top:20px;padding-top:16px;border-top:1px solid var(--border);">
-      <a href="/teacher.html" style="font-size:13px;color:var(--text2);text-decoration:none;">교사용 대시보드 →</a>
-    </div>
-  </div>
-</div>
 </div>
 
-<!-- 학생 메인 -->
 <div class="screen" id="screen-student">
-<div class="main">
-
-  <!-- 단계 표시 -->
-  <div class="step-bar" style="margin-bottom:28px;">
-    <div class="step-item">
-      <div class="step-dot active" id="dot1" onclick="navigateToStep(1)">1</div>
-      <span class="step-label active" id="lbl1" onclick="navigateToStep(1)">스크립트 제출</span>
-    </div>
-    <div class="step-line" id="line12"></div>
-    <div class="step-item">
-      <div class="step-dot" id="dot2" onclick="navigateToStep(2)">2</div>
-      <span class="step-label" id="lbl2" onclick="navigateToStep(2)">음성 녹음</span>
-    </div>
-    <div class="step-line" id="line23"></div>
-    <div class="step-item">
-      <div class="step-dot" id="dot3" onclick="navigateToStep(3)">3</div>
-      <span class="step-label" id="lbl3" onclick="navigateToStep(3)">발화 분석</span>
-    </div>
-  </div>
-
-  <!-- STEP 1 -->
-  <div id="step1">
-    <h2>스크립트 및 발표 자료 제출</h2>
-    <p class="mb-4">책 소개 스크립트와 발표 자료(PPT/활동지)를 함께 제출하세요.</p>
-    <div class="card">
-      <div class="card-title">읽은 책 정보</div>
-      <div class="form-group"><label class="form-label">책 제목</label><input class="form-input" id="bookTitle" placeholder="예: The Little Prince"/></div>
-      <div class="form-group"><label class="form-label">저자</label><input class="form-input" id="bookAuthor" placeholder="예: Antoine de Saint-Exupéry"/></div>
-    </div>
-    <div class="card">
-      <div class="card-title">말하기 스크립트 (영어)</div>
-      <div class="alert-info">💡 한 문장씩 작성하세요. 마침표(.)로 끝내야 다음 문장을 입력할 수 있어요.</div>
-      <div id="sentenceInputList" style="display:flex;flex-direction:column;gap:10px;margin-bottom:14px;"></div>
-      <button class="btn btn-ghost btn-sm" id="addSentenceBtn" onclick="addSentenceInput()" style="margin-bottom:14px;">+ 문장 직접 추가</button>
-      <textarea class="form-textarea" id="scriptText" style="display:none;"></textarea>
-      <div class="progress-wrap"><div class="progress-bar" id="scriptProgress"></div></div>
-      <div class="text-muted mt-2" id="wordCount">단어 수: 0 / 50</div>
-    </div>
-    <div class="card">
-      <div class="card-title">발표 자료 업로드</div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
-        <div>
-          <div style="font-size:13px;font-weight:600;color:var(--text2);margin-bottom:8px;">📊 PPT / 발표 자료</div>
-          <div class="upload-area" id="pptUpload" onclick="document.getElementById('pptFile').click()">
-            <div style="font-size:24px;margin-bottom:6px;">📎</div>
-            <div style="font-size:13px;color:var(--text2);" id="pptUploadText">클릭하여 선택</div>
-            <div style="font-size:11px;color:var(--text3);">모든 파일 · 최대 30MB</div>
-          </div>
-          <input type="file" id="pptFile" accept="*/*" style="display:none;" onchange="handleFile('ppt',this)"/>
-          <div id="pptPreview" style="display:none;margin-top:8px;"></div>
+    <div class="main">
+        <div class="step-bar" style="margin-bottom:28px;">
+            <div class="step-item">
+                <div class="step-dot active" id="dot1" onclick="navigateToStep(1)">1</div>
+                <span class="step-label active" id="lbl1" onclick="navigateToStep(1)">스크립트 제출</span>
+            </div>
+            <div class="step-line" id="line12"></div>
+            <div class="step-item">
+                <div class="step-dot" id="dot2" onclick="navigateToStep(2)">2</div>
+                <span class="step-label" id="lbl2" onclick="navigateToStep(2)">음성 녹음</span>
+            </div>
+            <div class="step-line" id="line23"></div>
+            <div class="step-item">
+                <div class="step-dot" id="dot3" onclick="navigateToStep(3)">3</div>
+                <span class="step-label" id="lbl3" onclick="navigateToStep(3)">발화 분석</span>
+            </div>
         </div>
-        <div>
-          <div style="font-size:13px;font-weight:600;color:var(--text2);margin-bottom:8px;">📝 활동지</div>
-          <div class="upload-area" id="wsUpload" onclick="document.getElementById('wsFile').click()">
-            <div style="font-size:24px;margin-bottom:6px;">📄</div>
-            <div style="font-size:13px;color:var(--text2);" id="wsUploadText">클릭하여 선택</div>
-            <div style="font-size:11px;color:var(--text3);">모든 파일 · 최대 30MB</div>
-          </div>
-          <input type="file" id="wsFile" accept="*/*" style="display:none;" onchange="handleFile('ws',this)"/>
-          <div id="wsPreview" style="display:none;margin-top:8px;"></div>
+
+        <div id="step1">
+            <h2>스크립트 및 발표 자료 제출</h2>
+            <p class="mb-4">책 소개 스크립트와 발표 자료(PPT/활동지)를 함께 제출하세요.</p>
+            <div class="card">
+                <div class="card-title">읽은 책 정보</div>
+                <div class="form-group"><label class="form-label">책 제목</label><input class="form-input" id="bookTitle" placeholder="예: The Little Prince"/></div>
+                <div class="form-group"><label class="form-label">저자</label><input class="form-input" id="bookAuthor" placeholder="예: Antoine de Saint-Exupéry"/></div>
+            </div>
+            <div class="card">
+                <div class="card-title">말하기 스크립트 (영어)</div>
+                <div class="alert-info">💡 문장을 마침표(.)로 끝내면 AI가 문장별로 분석해드려요.</div>
+                <div class="form-group">
+                    <textarea class="form-textarea" id="scriptText" placeholder="Today, I would like to introduce a book called ...&#10;&#10;This story is about...&#10;&#10;I recommend this book because..."></textarea>
+                </div>
+                <div class="progress-wrap"><div class="progress-bar" id="scriptProgress"></div></div>
+                <div class="text-muted mt-2" id="wordCount">단어 수: 0 / 50</div>
+            </div>
+            <div class="card">
+                <div class="card-title">발표 자료 업로드</div>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+                    <div>
+                        <div style="font-size:13px;font-weight:600;color:var(--text2);margin-bottom:8px;">📊 PPT / 발표 자료</div>
+                        <div class="upload-area" id="pptUpload" onclick="document.getElementById('pptFile').click()">
+                            <div style="font-size:24px;margin-bottom:6px;">📎</div>
+                            <div style="font-size:13px;color:var(--text2);" id="pptUploadText">클릭하여 선택</div>
+                            <div style="font-size:11px;color:var(--text3);">모든 파일 · 최대 30MB</div>
+                        </div>
+                        <input type="file" id="pptFile" accept="*/*" style="display:none;" onchange="handleFile('ppt',this)"/>
+                        <div id="pptPreview" style="display:none;margin-top:8px;"></div>
+                    </div>
+                    <div>
+                        <div style="font-size:13px;font-weight:600;color:var(--text2);margin-bottom:8px;">📝 활동지</div>
+                        <div class="upload-area" id="wsUpload" onclick="document.getElementById('wsFile').click()">
+                            <div style="font-size:24px;margin-bottom:6px;">📄</div>
+                            <div style="font-size:13px;color:var(--text2);" id="wsUploadText">클릭하여 선택</div>
+                            <div style="font-size:11px;color:var(--text3);">모든 파일 · 최대 30MB</div>
+                        </div>
+                        <input type="file" id="wsFile" accept="*/*" style="display:none;" onchange="handleFile('ws',this)"/>
+                        <div id="wsPreview" style="display:none;margin-top:8px;"></div>
+                    </div>
+                </div>
+            </div>
+            <div style="display:flex;justify-content:flex-end;">
+                <button class="btn btn-primary btn-lg" onclick="submitScript()">제출 후 녹음 시작 →</button>
+            </div>
         </div>
-      </div>
-    </div>
-    <div style="display:flex;justify-content:flex-end;">
-      <button class="btn btn-primary btn-lg" onclick="submitScript()">제출 후 녹음 시작 →</button>
-    </div>
-  </div>
 
-  <!-- STEP 2 -->
-  <div id="step2" style="display:none;">
-    <h2>음성 녹음</h2>
-    <p class="mb-4">스크립트를 보며 영어로 말해보세요. 모든 문장을 통과해야 제출할 수 있어요.</p>
-    <div class="card">
-      <div class="card-title">나의 스크립트</div>
-      <div class="script-display" id="scriptDisplay"></div>
-    </div>
-    <div class="attempt-info">
-      <span class="attempt-num">🎯 <span id="attemptCount">0</span>번째 도전</span>
-      <div class="attempt-dots" id="attemptDots"></div>
-      <span class="text-muted" style="font-size:12px;">횟수 제한 없이 도전하세요!</span>
-    </div>
-    <div id="prevSummary" style="display:none;margin-bottom:14px;" class="alert-warn"></div>
-    <div class="record-area">
-      <div class="waveform" id="waveform">
-        <div class="wave-bar" style="height:6px"></div><div class="wave-bar" style="height:14px"></div>
-        <div class="wave-bar" style="height:22px"></div><div class="wave-bar" style="height:10px"></div>
-        <div class="wave-bar" style="height:28px"></div><div class="wave-bar" style="height:18px"></div>
-        <div class="wave-bar" style="height:24px"></div><div class="wave-bar" style="height:8px"></div>
-        <div class="wave-bar" style="height:20px"></div><div class="wave-bar" style="height:6px"></div>
-        <div class="wave-bar" style="height:16px"></div><div class="wave-bar" style="height:30px"></div>
-        <div class="wave-bar" style="height:12px"></div><div class="wave-bar" style="height:22px"></div>
-        <div class="wave-bar" style="height:8px"></div>
-      </div>
-      <div class="record-timer" id="recordTimer">00:00</div>
-      <button class="record-btn" id="recordBtn" onclick="toggleRecording()"><span id="recordIcon">🎙️</span></button>
-      <div class="record-status" id="recordStatus">버튼을 눌러 녹음을 시작하세요</div>
-      <div id="audioPlayback" style="display:none;width:100%;max-width:420px;">
-        <audio id="audioPlayer" controls></audio>
-        <div class="mt-2" style="display:flex;gap:10px;justify-content:center;">
-          <button class="btn btn-ghost btn-sm" onclick="retryRecording()">🔄 다시 녹음</button>
-          <button class="btn btn-primary" onclick="submitRecording()">AI 분석 받기 →</button>
+        <div id="step2" style="display:none;">
+            <h2>음성 녹음</h2>
+            <p class="mb-4">스크립트를 보며 영어로 말해보세요. 모든 문장을 통과해야 제출할 수 있어요.</p>
+            <div class="card">
+                <div class="card-title">나의 스크립트</div>
+                <div class="script-display" id="scriptDisplay"></div>
+            </div>
+            <div class="attempt-info">
+                <span class="attempt-num">🎯 <span id="attemptCount">0</span>번째 도전</span>
+                <div class="attempt-dots" id="attemptDots"></div>
+                <span class="text-muted" style="font-size:12px;">횟수 제한 없이 도전하세요!</span>
+            </div>
+            <div id="prevSummary" style="display:none;margin-bottom:14px;" class="alert-warn"></div>
+            <div class="record-area">
+                <div class="waveform" id="waveform">
+                    <div class="wave-bar" style="height:6px"></div><div class="wave-bar" style="height:14px"></div>
+                    <div class="wave-bar" style="height:22px"></div><div class="wave-bar" style="height:10px"></div>
+                    <div class="wave-bar" style="height:28px"></div><div class="wave-bar" style="height:18px"></div>
+                    <div class="wave-bar" style="height:24px"></div><div class="wave-bar" style="height:8px"></div>
+                    <div class="wave-bar" style="height:20px"></div><div class="wave-bar" style="height:6px"></div>
+                    <div class="wave-bar" style="height:16px"></div><div class="wave-bar" style="height:30px"></div>
+                    <div class="wave-bar" style="height:12px"></div><div class="wave-bar" style="height:22px"></div>
+                    <div class="wave-bar" style="height:8px"></div>
+                </div>
+                <div class="record-timer" id="recordTimer">00:00</div>
+                <button class="record-btn" id="recordBtn" onclick="toggleRecording()"><span id="recordIcon">🎙️</span></button>
+                <div class="record-status" id="recordStatus">버튼을 눌러 녹음을 시작하세요</div>
+                <div id="audioPlayback" style="display:none;width:100%;max-width:420px;">
+                    <audio id="audioPlayer" controls></audio>
+                    <div class="mt-2" style="display:flex;gap:10px;justify-content:center;">
+                        <button class="btn btn-ghost btn-sm" onclick="retryRecording()">🔄 다시 녹음</button>
+                        <button class="btn btn-primary" onclick="submitRecording()">AI 분석 받기 →</button>
+                    </div>
+                </div>
+            </div>
         </div>
-      </div>
-    </div>
-  </div>
 
-  <!-- STEP 3 -->
-  <div id="step3" style="display:none;">
-    <h2>발화 분석 결과</h2>
-    <p class="mb-4" id="resultInfo"></p>
-    <div class="card" style="padding:18px 22px;">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
-        <span style="font-size:13px;font-weight:700;color:var(--text);">✅ 통과 문장</span>
-        <span style="font-family:'DM Mono',monospace;font-size:13px;font-weight:700;" id="goalCount"></span>
-      </div>
-      <div class="goal-wrap"><div class="goal-bar" id="goalBar"></div></div>
-      <div style="font-size:12px;color:var(--text2);margin-top:8px;" id="goalHint"></div>
+        <div id="step3" style="display:none;">
+            <h2>발화 분석 결과</h2>
+            <p class="mb-4" id="resultInfo"></p>
+            <div class="card" style="padding:18px 22px;">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+                    <span style="font-size:13px;font-weight:700;color:var(--text);">✅ 통과 문장</span>
+                    <span style="font-family:'DM Mono',monospace;font-size:13px;font-weight:700;" id="goalCount"></span>
+                </div>
+                <div class="goal-wrap"><div class="goal-bar" id="goalBar"></div></div>
+                <div style="font-size:12px;color:var(--text2);margin-top:8px;" id="goalHint"></div>
+            </div>
+            <div class="result-banner" id="resultBanner">
+                <div class="result-banner-title" id="resultBannerTitle"></div>
+                <div class="result-banner-sub" id="resultBannerSub"></div>
+            </div>
+            <div class="card">
+                <div class="card-title">문장별 발화 확인</div>
+                <div class="alert-info" style="margin-bottom:12px;">🔊 스피커 버튼으로 원어민 발음을 들을 수 있어요. ❌ 문장은 개별 재도전도 가능해요.</div>
+                <div class="sentence-list" id="sentenceList"></div>
+            </div>
+            <div class="card">
+                <div class="card-title">AI 피드백</div>
+                <div class="feedback-grid" id="feedbackGrid"></div>
+                <div class="alert-info" style="margin-top:12px;margin-bottom:0;">⏱️ 멈춤 없이 자연스러운 속도로 말하는 연습을 해보세요.</div>
+            </div>
+            <div class="card">
+                <div class="card-title">인식된 발화 내용</div>
+                <div class="script-display" id="transcriptDisplay" style="min-height:50px;background:var(--surface2);border-color:var(--border);"></div>
+            </div>
+            <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
+                <button class="btn btn-ghost" onclick="goToStep2Again()">🔄 전체 다시 녹음</button>
+                <button class="btn btn-success btn-lg" id="submitBtn" onclick="finalSubmit()" disabled>✓ 최종 제출 완료</button>
+                <button class="btn btn-ghost" id="mySubmitViewBtn" onclick="showMySubmission()" style="display:none;">📋 제출 내역 보기</button>
+                <span id="submitHint" style="font-size:12px;color:var(--text2);"></span>
+            </div>
+        </div>
     </div>
-    <div class="result-banner" id="resultBanner">
-      <div class="result-banner-title" id="resultBannerTitle"></div>
-      <div class="result-banner-sub" id="resultBannerSub"></div>
-    </div>
-    <div class="card">
-      <div class="card-title">문장별 발화 확인</div>
-      <div class="alert-info" style="margin-bottom:12px;">🔊 스피커 버튼으로 원어민 발음을 들을 수 있어요. ❌ 문장은 개별 재도전도 가능해요.</div>
-      <div class="sentence-list" id="sentenceList"></div>
-    </div>
-    <div class="card">
-      <div class="card-title">AI 피드백</div>
-      <div class="feedback-grid" id="feedbackGrid"></div>
-      <div class="alert-info" style="margin-top:12px;margin-bottom:0;">⏱️ 멈춤 없이 자연스러운 속도로 말하는 연습을 해보세요.</div>
-    </div>
-    <div class="card">
-      <div class="card-title">인식된 발화 내용</div>
-      <div class="script-display" id="transcriptDisplay" style="min-height:50px;background:var(--surface2);border-color:var(--border);"></div>
-    </div>
-    <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
-      <button class="btn btn-ghost" onclick="goToStep2Again()">🔄 전체 다시 녹음</button>
-      <button class="btn btn-success btn-lg" id="submitBtn" onclick="finalSubmit()" disabled>✓ 최종 제출 완료</button>
-      <button class="btn btn-ghost" id="mySubmitViewBtn" onclick="showMySubmission()" style="display:none;">📋 제출 내역 보기</button>
-      <span id="submitHint" style="font-size:12px;color:var(--text2);"></span>
-    </div>
-  </div>
-
-</div>
 </div>
 
-<!-- 문장별 모달 -->
 <div class="modal" id="sentenceModal">
-  <div class="modal-box">
-    <div style="font-size:12px;color:var(--text2);margin-bottom:4px;">이 문장만 다시 말해보세요</div>
-    <div class="modal-sentence" id="modalSentText"></div>
-    <div style="margin-bottom:12px;">
-      <button class="tts-btn" style="font-size:12px;padding:6px 16px;" onclick="playTTS(document.getElementById('modalSentText').textContent)">🔊 발음 듣기</button>
-    </div>
-    <div style="display:flex;flex-direction:column;align-items:center;gap:14px;">
-      <div class="record-timer" id="modalTimer">00:00</div>
-      <button class="record-btn" id="modalRecordBtn" onclick="toggleModalRecording()"><span id="modalRecordIcon">🎙️</span></button>
-      <div class="record-status" id="modalRecordStatus">버튼을 눌러 이 문장 녹음 시작</div>
-      <div id="modalAudioPlayback" style="display:none;width:100%;">
-        <audio id="modalAudioPlayer" controls style="width:100%;"></audio>
-        <div style="display:flex;gap:8px;justify-content:center;margin-top:10px;">
-          <button class="btn btn-ghost btn-sm" onclick="retryModalRecording()">🔄 다시</button>
-          <button class="btn btn-primary btn-sm" onclick="submitModalRecording()">이 문장 분석 →</button>
+    <div class="modal-box">
+        <div style="font-size:12px;color:var(--text2);margin-bottom:4px;">이 문장만 다시 말해보세요</div>
+        <div class="modal-sentence" id="modalSentText"></div>
+        <div style="margin-bottom:12px;">
+            <button class="tts-btn" style="font-size:12px;padding:6px 16px;" onclick="playTTS(document.getElementById('modalSentText').textContent)">🔊 발음 듣기</button>
         </div>
-      </div>
-      <button class="btn btn-ghost btn-sm" onclick="closeModal()">취소</button>
+        <div style="display:flex;flex-direction:column;align-items:center;gap:14px;">
+            <div class="record-timer" id="modalTimer">00:00</div>
+            <button class="record-btn" id="modalRecordBtn" onclick="toggleModalRecording()"><span id="modalRecordIcon">🎙️</span></button>
+            <div class="record-status" id="modalRecordStatus">버튼을 눌러 이 문장 녹음 시작</div>
+            <div id="modalAudioPlayback" style="display:none;width:100%;">
+                <audio id="modalAudioPlayer" controls style="width:100%;"></audio>
+                <div style="display:flex;gap:8px;justify-content:center;margin-top:10px;">
+                    <button class="btn btn-ghost btn-sm" onclick="retryModalRecording()">🔄 다시</button>
+                    <button class="btn btn-primary btn-sm" onclick="submitModalRecording()">이 문장 분석 →</button>
+                </div>
+            </div>
+            <button class="btn btn-ghost btn-sm" onclick="closeModal()">취소</button>
+        </div>
     </div>
-  </div>
 </div>
-
 <script>
 const state = {
-  user: null,
-  submissionId: null,
-  currentBook: {},
-  script: '',
-  sentences: [],
-  sentenceStatuses: [],
-  teacherApprovedSentences: [],
-  attemptCount: 0,
-  lastResult: null,
-  currentSubmissionData: null,
-  mediaRecorder: null, audioChunks: [], recordingInterval: null, waveInterval: null,
-  recordSeconds: 0, isRecording: false, audioBlob: null,
-  modalMediaRecorder: null, modalAudioChunks: [], modalRecordingInterval: null,
-  modalRecordSeconds: 0, modalIsRecording: false, modalAudioBlob: null,
-  modalSentIdx: null,
-  pptDataUrl: null, pptFilename: null,
-  wsDataUrl: null, wsFilename: null,
-  ttsCache: {},
+    user: null, submissionId: null, currentBook: {}, script: '', sentences: [],
+    sentenceStatuses: [], teacherApprovedSentences: [], attemptCount: 0,
+    lastResult: null, currentSubmissionData: null,
+    mediaRecorder: null, audioChunks: [], recordingInterval: null, waveInterval: null,
+    recordSeconds: 0, isRecording: false, audioBlob: null,
+    modalMediaRecorder: null, modalAudioChunks: [], modalRecordingInterval: null,
+    modalRecordSeconds: 0, modalIsRecording: false, modalAudioBlob: null,
+    modalSentIdx: null, pptDataUrl: null, pptFilename: null,
+    wsDataUrl: null, wsFilename: null, ttsCache: {},
 };
 
-// ── 로그인 ──
+function showLoading(text, step) {
+    document.getElementById('loadingOverlay').classList.add('active');
+    document.getElementById('loadingText').textContent = text || '처리 중입니다...';
+    document.getElementById('loadingStep').textContent = step || '';
+}
+function hideLoading() { document.getElementById('loadingOverlay').classList.remove('active'); }
+function setLoadingStep(step) { document.getElementById('loadingStep').textContent = step; }
+
 async function login() {
-  const username = document.getElementById('loginId').value.trim();
-  const password = document.getElementById('loginPw').value;
-  if (!username || !password) { showLoginError('학번과 비밀번호를 입력해주세요.'); return; }
-  showLoading('로그인 중...');
-  try {
-    const res = await fetch('/api/auth', {
-      method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ type: 'student', username, password })
-    });
-    const data = await res.json();
-    hideLoading();
-    if (!data.success) { showLoginError(data.error || '로그인 실패'); return; }
-    state.user = data.user;
-    document.getElementById('userBadge').style.display = 'flex';
-    document.getElementById('userBadgeText').textContent = `${data.user.name} · ${data.user.className}`;
-    showScreen('student');
-    await loadPreviousSubmission();
-    if (!state.lastResult) goToStep(1);
-  } catch(err) { hideLoading(); showLoginError('서버 오류: ' + err.message); }
+    const username = document.getElementById('loginId').value.trim();
+    const password = document.getElementById('loginPw').value;
+    if (!username || !password) { showLoginError('학번과 비밀번호를 입력해주세요.'); return; }
+    showLoading('로그인 중...');
+    try {
+        const res = await fetch('/api/auth', {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ type: 'student', username: username, password: password })
+        });
+        const data = await res.json();
+        hideLoading();
+        if (!data.success) { showLoginError(data.error || '로그인 실패'); return; }
+        state.user = data.user;
+        document.getElementById('userBadge').style.display = 'flex';
+        document.getElementById('userBadgeText').textContent = data.user.name + ' · ' + data.user.className;
+        showScreen('student');
+        await loadPreviousSubmission();
+        if (!state.lastResult) goToStep(1);
+    } catch (err) { hideLoading(); showLoginError('서버 오류: ' + err.message); }
 }
 
 function showLoginError(msg) {
-  const el = document.getElementById('loginError');
-  el.textContent = msg; el.style.display = 'block';
+    const el = document.getElementById('loginError');
+    el.textContent = msg; el.style.display = 'block';
 }
-
 function logout() {
-  state.user = null;
-  document.getElementById('userBadge').style.display = 'none';
-  showScreen('login');
+    state.user = null;
+    document.getElementById('userBadge').style.display = 'none';
+    showScreen('login');
 }
-
 function showScreen(name) {
-  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-  document.getElementById('screen-' + name).classList.add('active');
+    document.querySelectorAll('.screen').forEach(function(s) { s.classList.remove('active'); });
+    document.getElementById('screen-' + name).classList.add('active');
 }
 
-function lockUploadIfFinalSubmitted() {
-  if (!state.currentSubmissionData?.is_final_submitted) return;
-  ['pptUpload','wsUpload'].forEach(id => {
-    const el = document.getElementById(id);
-    if (!el) return;
-    el.style.pointerEvents = 'none';
-    el.style.opacity = '.6';
-  });
-  const card = document.getElementById('pptUpload')?.closest('.card');
-  if (card && !card.querySelector('.lock-notice')) {
-    const notice = document.createElement('div');
-    notice.className = 'lock-notice';
-    notice.style.cssText = 'margin-top:10px;padding:8px 12px;background:var(--yellow-bg);border:1.5px solid #fcd34d;border-radius:var(--radius-sm);font-size:12px;color:var(--yellow);';
-    notice.textContent = '🔒 최종 제출 완료 — 자료 수정은 제출 내역 보기에서 가능해요.';
-    card.appendChild(notice);
-  }
-}
-
-function lockUploadIfFinalSubmitted() {
-  if (!state.currentSubmissionData?.is_final_submitted) return;
-  // 업로드 영역 잠금
-  ['pptUpload','wsUpload'].forEach(id => {
-    const el = document.getElementById(id);
-    if (!el) return;
-    el.style.pointerEvents = 'none';
-    el.style.opacity = '.6';
-    el.title = '최종 제출 후에는 제출 내역에서만 수정 가능합니다.';
-  });
-  // 안내 문구 추가
-  const card = document.getElementById('pptUpload')?.closest('.card');
-  if (card && !card.querySelector('.lock-notice')) {
-    const notice = document.createElement('div');
-    notice.className = 'lock-notice';
-    notice.style.cssText = 'margin-top:10px;padding:8px 12px;background:var(--yellow-bg);border:1.5px solid #fcd34d;border-radius:var(--radius-sm);font-size:12px;color:var(--yellow);';
-    notice.textContent = '🔒 최종 제출 완료 — 자료 수정은 제출 내역 보기에서 가능해요.';
-    card.appendChild(notice);
-  }
-}
-
-// ── 이전 데이터 불러오기 ──
 async function loadPreviousSubmission() {
-  try {
-    const res = await fetch('/api/submit?studentId=' + state.user.id);
-    const data = await res.json();
-    if (!Array.isArray(data) || !data.length) return;
-    const prev = data[0];
-    if (!prev) return;
-
-    state.submissionId = prev.id;
-    state.currentSubmissionData = prev;
-    state.currentBook = { book: prev.book_title || '', author: prev.book_author || '' };
-    state.script = prev.script || '';
-    state.sentences = prev.sentences || [];
-    state.attemptCount = prev.attempt_count || 0;
-
-    // PPT/활동지 URL 복원
-    if (prev.ppt_url) {
-      state.pptDataUrl = prev.ppt_url;
-      state.pptFilename = prev.ppt_filename;
-      const pptUpload = document.getElementById('pptUpload');
-      const pptUploadText = document.getElementById('pptUploadText');
-      if (pptUpload) pptUpload.classList.add('has-file');
-      if (pptUploadText) pptUploadText.textContent = '✓ ' + prev.ppt_filename;
-    }
-    if (prev.worksheet_url) {
-      state.wsDataUrl = prev.worksheet_url;
-      state.wsFilename = prev.worksheet_filename;
-      const wsUpload = document.getElementById('wsUpload');
-      const wsUploadText = document.getElementById('wsUploadText');
-      if (wsUpload) wsUpload.classList.add('has-file');
-      if (wsUploadText) wsUploadText.textContent = '✓ ' + prev.worksheet_filename;
-    }
-
-    // 입력 폼 복원
-    const bookTitleEl = document.getElementById('bookTitle');
-    const bookAuthorEl = document.getElementById('bookAuthor');
-    const scriptTextEl = document.getElementById('scriptText');
-    if (bookTitleEl) bookTitleEl.value = prev.book_title || '';
-    if (bookAuthorEl) bookAuthorEl.value = prev.book_author || '';
-    if (scriptTextEl) {
-      scriptTextEl.value = prev.script || '';
-      if (scriptTextEl) scriptTextEl.value = prev.script || '';
-    // 문장별 입력칸 복원
-    if (prev.sentences && prev.sentences.length) {
-      setTimeout(() => initSentenceInputs(prev.sentences), 400);
-    }
-    const w = (prev.script || '').trim().split(/\s+/).filter(x => x).length;
-      const wc = document.getElementById('wordCount');
-      const sp = document.getElementById('scriptProgress');
-      if (wc) wc.textContent = `단어 수: ${w} / 50`;
-      if (sp) sp.style.width = Math.min(w / 50 * 100, 100) + '%';
-    }
-
-    // 문장 상태 복원 (AI + 교사 승인)
-    if (prev.sentence_results && prev.sentence_results.length) {
-      const approvedList = prev.teacher_approved_sentences || [];
-      state.teacherApprovedSentences = approvedList;
-      state.sentenceStatuses = prev.sentence_results.map((sr, i) =>
-        sr.status === 'ok' || approvedList.includes(i) ? 'ok' : 'retry'
-      );
-    }
-// 최종 제출 후 업로드 잠금
-    if (prev.is_final_submitted) {
-      setTimeout(() => lockUploadIfFinalSubmitted(), 500);
-    }
-
-    // 결과가 있으면 3단계로 이동
-    if (prev.attempt_count > 0 && prev.sentence_results && prev.sentence_results.length) {
-    // 결과가 있으면 3단계로 이동
-    if (prev.attempt_count > 0 && prev.sentence_results && prev.sentence_results.length) {
-      state.lastResult = {
-        total: prev.ai_score,
-        grade: prev.grade,
-        pronunciation: prev.pronunciation,
-        content: prev.content,
-        fluency: prev.fluency,
-        completeness: prev.completeness,
-        sentenceResults: prev.sentence_results,
-        sentences: prev.sentences,
-        transcript: prev.transcript || '',
-        pronunciationFeedback: prev.pronunciation_feedback || '',
-        contentFeedback: prev.content_feedback || '',
-        fluencyFeedback: prev.fluency_feedback || '',
-        overallFeedback: prev.overall_feedback || '',
-      };
-      document.getElementById('scriptDisplay').textContent = prev.script || '';
-      updateAttemptUI();
-      setTimeout(() => {
-        renderResults();
-        goToStep(3);
-        if (prev.is_final_submitted) {
-          const btn = document.getElementById('mySubmitViewBtn');
-          if (btn) btn.style.display = 'inline-flex';
+    try {
+        const res = await fetch('/api/submit?studentId=' + state.user.id);
+        const data = await res.json();
+        if (!Array.isArray(data) || !data.length) return;
+        const prev = data[0];
+        if (!prev) return;
+        state.submissionId = prev.id;
+        state.currentSubmissionData = prev;
+        state.currentBook = { book: prev.book_title || '', author: prev.book_author || '' };
+        state.script = prev.script || '';
+        state.sentences = prev.sentences || [];
+        state.attemptCount = prev.attempt_count || 0;
+        if (prev.ppt_url) {
+            state.pptDataUrl = prev.ppt_url; state.pptFilename = prev.ppt_filename;
+            var pptUpload = document.getElementById('pptUpload');
+            var pptUploadText = document.getElementById('pptUploadText');
+            if (pptUpload) pptUpload.classList.add('has-file');
+            if (pptUploadText) pptUploadText.textContent = '✓ ' + prev.ppt_filename;
         }
-      }, 300);
-    }
-  } catch(err) { console.error('이전 데이터 로딩 오류:', err); }
+        if (prev.worksheet_url) {
+            state.wsDataUrl = prev.worksheet_url; state.wsFilename = prev.worksheet_filename;
+            var wsUpload = document.getElementById('wsUpload');
+            var wsUploadText = document.getElementById('wsUploadText');
+            if (wsUpload) wsUpload.classList.add('has-file');
+            if (wsUploadText) wsUploadText.textContent = '✓ ' + prev.worksheet_filename;
+        }
+        var bookTitleEl = document.getElementById('bookTitle');
+        var bookAuthorEl = document.getElementById('bookAuthor');
+        var scriptTextEl = document.getElementById('scriptText');
+        if (bookTitleEl) bookTitleEl.value = prev.book_title || '';
+        if (bookAuthorEl) bookAuthorEl.value = prev.book_author || '';
+        if (scriptTextEl) {
+            scriptTextEl.value = prev.script || '';
+            var w = (prev.script || '').trim().split(/\s+/).filter(function(x) { return x; }).length;
+            var wc = document.getElementById('wordCount');
+            var sp = document.getElementById('scriptProgress');
+            if (wc) wc.textContent = '단어 수: ' + w + ' / 50';
+            if (sp) sp.style.width = Math.min(w / 50 * 100, 100) + '%';
+        }
+        if (prev.sentence_results && prev.sentence_results.length) {
+            var approvedList = prev.teacher_approved_sentences || [];
+            state.teacherApprovedSentences = approvedList;
+            state.sentenceStatuses = prev.sentence_results.map(function(sr, i) {
+                return sr.status === 'ok' || approvedList.includes(i) ? 'ok' : 'retry';
+            });
+        }
+        if (prev.attempt_count > 0 && prev.sentence_results && prev.sentence_results.length) {
+            state.lastResult = {
+                total: prev.ai_score, grade: prev.grade,
+                pronunciation: prev.pronunciation, content: prev.content,
+                fluency: prev.fluency, completeness: prev.completeness,
+                sentenceResults: prev.sentence_results, sentences: prev.sentences,
+                transcript: prev.transcript || '',
+                pronunciationFeedback: prev.pronunciation_feedback || '',
+                contentFeedback: prev.content_feedback || '',
+                fluencyFeedback: prev.fluency_feedback || '',
+                overallFeedback: prev.overall_feedback || '',
+            };
+            document.getElementById('scriptDisplay').textContent = prev.script || '';
+            updateAttemptUI();
+            setTimeout(function() {
+                renderResults();
+                goToStep(3);
+                if (prev.is_final_submitted) {
+                    var btn = document.getElementById('mySubmitViewBtn');
+                    if (btn) btn.style.display = 'inline-flex';
+                }
+            }, 300);
+        }
+    } catch (err) { console.error('이전 데이터 로딩 오류:', err); }
 }
 
-// ── 단계 이동 ──
 function goToStep(n) {
-  [1, 2, 3].forEach(i => {
-    const step = document.getElementById('step' + i);
-    if (step) step.style.display = i === n ? 'block' : 'none';
-    const dot = document.getElementById('dot' + i);
-    const lbl = document.getElementById('lbl' + i);
-    if (dot) {
-      if (i < n) { dot.className = 'step-dot done'; }
-      else if (i === n) { dot.className = 'step-dot active'; }
-      else { dot.className = 'step-dot'; }
-    }
-    if (lbl) { lbl.className = i === n ? 'step-label active' : 'step-label'; }
-    if (i < 3) {
-      const line = document.getElementById('line' + i + (i + 1));
-      if (line) line.className = i < n ? 'step-line done' : 'step-line';
-    }
-  });
-  window.scrollTo(0, 0);
+    [1, 2, 3].forEach(function(i) {
+        var step = document.getElementById('step' + i);
+        if (step) step.style.display = i === n ? 'block' : 'none';
+        var dot = document.getElementById('dot' + i);
+        var lbl = document.getElementById('lbl' + i);
+        if (dot) {
+            if (i < n) { dot.className = 'step-dot done'; }
+            else if (i === n) { dot.className = 'step-dot active'; }
+            else { dot.className = 'step-dot'; }
+        }
+        if (lbl) { lbl.className = i === n ? 'step-label active' : 'step-label'; }
+        if (i < 3) {
+            var line = document.getElementById('line' + i + (i + 1));
+            if (line) line.className = i < n ? 'step-line done' : 'step-line';
+        }
+    });
+    window.scrollTo(0, 0);
 }
 
 function navigateToStep(n) {
-  if (n === 2 && !state.script) { alert('먼저 스크립트를 제출해주세요.'); return; }
-  if (n === 3 && !state.lastResult) { alert('먼저 녹음을 완료해주세요.'); return; }
-  if (n === 2) {
+    if (n === 2 && !state.script) { alert('먼저 스크립트를 제출해주세요.'); return; }
+    if (n === 3 && !state.lastResult) { alert('먼저 녹음을 완료해주세요.'); return; }
+    if (n === 2) {
+        document.getElementById('audioPlayback').style.display = 'none';
+        document.getElementById('recordStatus').textContent = '버튼을 눌러 녹음을 시작하세요';
+        document.getElementById('recordTimer').textContent = '00:00';
+        document.getElementById('waveform').classList.remove('active');
+        state.audioBlob = null;
+        document.getElementById('scriptDisplay').textContent = state.script || '';
+        updateAttemptUI();
+        if (state.lastResult) {
+            var retry = state.sentenceStatuses.filter(function(s) { return s === 'retry'; }).length;
+            var ok = state.sentenceStatuses.length - retry;
+            if (retry > 0) {
+                document.getElementById('prevSummary').style.display = 'block';
+                document.getElementById('prevSummary').textContent = '이전 결과: ' + ok + '개 통과 · ' + retry + '개 재도전 필요 — 빨간 문장에 집중해서 다시 말해보세요!';
+            }
+        }
+    }
+    if (n === 3 && state.lastResult) renderResults();
+    goToStep(n);
+}
+
+function handleFile(type, input) {
+    var file = input.files[0];
+    if (!file) return;
+    if (file.size > 30 * 1024 * 1024) { alert('30MB 이하 파일만 가능합니다.'); return; }
+    var reader = new FileReader();
+    reader.onloadend = function() {
+        if (type === 'ppt') {
+            state.pptDataUrl = reader.result; state.pptFilename = file.name;
+            document.getElementById('pptUpload').classList.add('has-file');
+            document.getElementById('pptUploadText').textContent = '✓ ' + file.name;
+        } else {
+            state.wsDataUrl = reader.result; state.wsFilename = file.name;
+            document.getElementById('wsUpload').classList.add('has-file');
+            document.getElementById('wsUploadText').textContent = '✓ ' + file.name;
+        }
+    };
+    reader.readAsDataURL(file);
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    var el = document.getElementById('scriptText');
+    if (el) el.addEventListener('input', function() {
+        var w = this.value.trim().split(/\s+/).filter(function(x) { return x; }).length;
+        document.getElementById('wordCount').textContent = '단어 수: ' + w + ' / 50';
+        document.getElementById('scriptProgress').style.width = Math.min(w / 50 * 100, 100) + '%';
+    });
+});
+
+async function submitScript() {
+    var book = document.getElementById('bookTitle').value.trim();
+    var author = document.getElementById('bookAuthor').value.trim();
+    var script = document.getElementById('scriptText').value.trim();
+    if (!book || !script) { alert('책 제목과 스크립트를 입력해주세요.'); return; }
+    if (script.split(/\s+/).filter(function(x) { return x; }).length < 10) { alert('스크립트가 너무 짧습니다.'); return; }
+    state.currentBook = { book: book, author: author };
+    state.script = script;
+    state.sentences = script.split(/[.!?]+\s+/).filter(function(s) { return s.trim().length > 3; });
+    if (!state.submissionId) {
+        state.sentenceStatuses = state.sentences.map(function() { return 'retry'; });
+        state.attemptCount = 0;
+    }
+    document.getElementById('scriptDisplay').textContent = script;
+    updateAttemptUI();
+    document.getElementById('prevSummary').style.display = 'none';
+    showLoading('저장 중...');
+    await saveScriptAndFiles();
+    hideLoading();
+    goToStep(2);
+}
+
+async function uploadFile(fileDataUrl, filename, fileType) {
+    if (!fileDataUrl || !filename) return null;
+    try {
+        var res = await fetch('/api/upload', {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ fileBase64: fileDataUrl, filename: filename, studentId: state.user.id, fileType: fileType })
+        });
+        var data = await res.json();
+        return data.success ? data.url : null;
+    } catch (err) { console.error('업로드 오류:', err); return null; }
+}
+
+async function saveScriptAndFiles() {
+    if (!state.user) return;
+    try {
+        var r = state.lastResult;
+        var body = {
+            studentId: state.user.id, studentName: state.user.name,
+            studentNumber: state.user.studentNumber, classId: state.user.classId,
+            bookTitle: state.currentBook.book, bookAuthor: state.currentBook.author || '',
+            script: state.script,
+            aiScore: r ? r.total : 0, finalScore: r ? r.total : 0,
+            grade: r ? r.grade : '', pronunciation: r ? r.pronunciation : 0,
+            content: r ? r.content : 0, fluency: r ? r.fluency : 0, completeness: r ? r.completeness : 0,
+            sentences: state.sentences, sentenceResults: r ? r.sentenceResults : [],
+            attemptCount: state.attemptCount,
+            isPassed: state.sentenceStatuses.every(function(s) { return s === 'ok'; }),
+            isFinalSubmitted: false,
+            pronunciationFeedback: r ? r.pronunciationFeedback : '',
+            contentFeedback: r ? r.contentFeedback : '',
+            fluencyFeedback: r ? r.fluencyFeedback : '',
+            overallFeedback: r ? r.overallFeedback : '',
+            transcript: r ? r.transcript : '',
+        };
+        if (state.pptDataUrl && state.pptFilename) {
+            if (!state.pptDataUrl.startsWith('http')) {
+                setLoadingStep('PPT 업로드 중...');
+                var url = await uploadFile(state.pptDataUrl, state.pptFilename, 'ppt');
+                if (url) { state.pptDataUrl = url; body.pptUpdatedAt = new Date().toISOString(); }
+            }
+            body.pptDataUrl = state.pptDataUrl; body.pptFilename = state.pptFilename;
+        }
+        if (state.wsDataUrl && state.wsFilename) {
+            if (!state.wsDataUrl.startsWith('http')) {
+                setLoadingStep('활동지 업로드 중...');
+                var url2 = await uploadFile(state.wsDataUrl, state.wsFilename, 'worksheet');
+                if (url2) { state.wsDataUrl = url2; body.worksheetUpdatedAt = new Date().toISOString(); }
+            }
+            body.worksheetDataUrl = state.wsDataUrl; body.worksheetFilename = state.wsFilename;
+        }
+        var res2 = await fetch('/api/submit', {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(body)
+        });
+        var data2 = await res2.json();
+        if (data2.id) state.submissionId = data2.id;
+    } catch (err) { console.error('저장 오류:', err); }
+}
+
+async function saveSubmissionLight() {
+    if (!state.user || !state.lastResult) return;
+    var r = state.lastResult;
+    try {
+        var body = {
+            studentId: state.user.id, studentName: state.user.name,
+            studentNumber: state.user.studentNumber, classId: state.user.classId,
+            bookTitle: state.currentBook.book, bookAuthor: state.currentBook.author || '',
+            script: state.script,
+            aiScore: r.total, finalScore: r.total, grade: r.grade,
+            pronunciation: r.pronunciation, content: r.content,
+            fluency: r.fluency, completeness: r.completeness,
+            sentences: state.sentences, sentenceResults: r.sentenceResults,
+            attemptCount: state.attemptCount,
+            isPassed: state.sentenceStatuses.every(function(s) { return s === 'ok'; }),
+            isFinalSubmitted: false,
+            pronunciationFeedback: r.pronunciationFeedback || '',
+            contentFeedback: r.contentFeedback || '',
+            fluencyFeedback: r.fluencyFeedback || '',
+            overallFeedback: r.overallFeedback || '',
+            transcript: r.transcript || '',
+        };
+        if (state.pptDataUrl && state.pptDataUrl.startsWith('http')) { body.pptDataUrl = state.pptDataUrl; body.pptFilename = state.pptFilename; }
+        if (state.wsDataUrl && state.wsDataUrl.startsWith('http')) { body.worksheetDataUrl = state.wsDataUrl; body.worksheetFilename = state.wsFilename; }
+        var res = await fetch('/api/submit', {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(body)
+        });
+        var data = await res.json();
+        if (data.id) state.submissionId = data.id;
+    } catch (err) { console.error('저장 오류:', err); }
+}
+
+async function saveSubmission(isFinalSubmitted) {
+    if (!state.user || !state.lastResult) return;
+    var r = state.lastResult;
+    try {
+        var body = {
+            studentId: state.user.id, studentName: state.user.name,
+            studentNumber: state.user.studentNumber, classId: state.user.classId,
+            bookTitle: state.currentBook.book, bookAuthor: state.currentBook.author || '',
+            script: state.script,
+            aiScore: r.total, finalScore: r.total, grade: r.grade,
+            pronunciation: r.pronunciation, content: r.content,
+            fluency: r.fluency, completeness: r.completeness,
+            sentences: state.sentences, sentenceResults: r.sentenceResults,
+            attemptCount: state.attemptCount,
+            isPassed: state.sentenceStatuses.every(function(s) { return s === 'ok'; }),
+            isFinalSubmitted: isFinalSubmitted || false,
+            pronunciationFeedback: r.pronunciationFeedback || '',
+            contentFeedback: r.contentFeedback || '',
+            fluencyFeedback: r.fluencyFeedback || '',
+            overallFeedback: r.overallFeedback || '',
+            transcript: r.transcript || '',
+        };
+        if (state.pptDataUrl && state.pptFilename) {
+            if (!state.pptDataUrl.startsWith('http')) {
+                setLoadingStep('PPT 업로드 중...');
+                var url = await uploadFile(state.pptDataUrl, state.pptFilename, 'ppt');
+                if (url) { state.pptDataUrl = url; body.pptUpdatedAt = new Date().toISOString(); }
+            }
+            body.pptDataUrl = state.pptDataUrl; body.pptFilename = state.pptFilename;
+        }
+        if (state.wsDataUrl && state.wsFilename) {
+            if (!state.wsDataUrl.startsWith('http')) {
+                setLoadingStep('활동지 업로드 중...');
+                var url2 = await uploadFile(state.wsDataUrl, state.wsFilename, 'worksheet');
+                if (url2) { state.wsDataUrl = url2; body.worksheetUpdatedAt = new Date().toISOString(); }
+            }
+            body.worksheetDataUrl = state.wsDataUrl; body.worksheetFilename = state.wsFilename;
+        }
+        var res = await fetch('/api/submit', {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(body)
+        });
+        var data = await res.json();
+        if (data.id) state.submissionId = data.id;
+    } catch (err) { console.error('저장 오류:', err); }
+}
+
+async function refreshCurrentSubmission() {
+    try {
+        var res = await fetch('/api/submit?studentId=' + state.user.id);
+        var data = await res.json();
+        if (Array.isArray(data) && data.length) {
+            var prev = data[0];
+            state.currentSubmissionData = prev;
+            if (prev.ppt_url) { state.pptDataUrl = prev.ppt_url; state.pptFilename = prev.ppt_filename; }
+            if (prev.worksheet_url) { state.wsDataUrl = prev.worksheet_url; state.wsFilename = prev.worksheet_filename; }
+        }
+    } catch (err) { console.error(err); }
+}
+
+function getMime() {
+    var types = ['audio/webm;codecs=opus', 'audio/webm', 'audio/ogg;codecs=opus', 'audio/mp4'];
+    for (var i = 0; i < types.length; i++) { if (MediaRecorder.isTypeSupported(types[i])) return types[i]; }
+    return 'audio/webm';
+}
+
+async function toggleRecording() { state.isRecording ? stopRecording() : await startRecording(); }
+
+async function startRecording() {
+    try {
+        var stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        state.mediaRecorder = new MediaRecorder(stream, { mimeType: getMime() });
+        state.audioChunks = [];
+        state.mediaRecorder.ondataavailable = function(e) { if (e.data.size > 0) state.audioChunks.push(e.data); };
+        state.mediaRecorder.onstop = function() {
+            state.audioBlob = new Blob(state.audioChunks, { type: getMime() });
+            document.getElementById('audioPlayer').src = URL.createObjectURL(state.audioBlob);
+            document.getElementById('audioPlayback').style.display = 'block';
+        };
+        state.mediaRecorder.start(100);
+        state.isRecording = true; state.recordSeconds = 0;
+        document.getElementById('recordBtn').classList.add('recording');
+        document.getElementById('recordIcon').textContent = '⏹️';
+        document.getElementById('recordStatus').textContent = '녹음 중... 다시 누르면 중지';
+        document.getElementById('waveform').classList.add('active');
+        document.getElementById('audioPlayback').style.display = 'none';
+        state.recordingInterval = setInterval(function() {
+            state.recordSeconds++;
+            var m = String(Math.floor(state.recordSeconds / 60)).padStart(2, '0');
+            var s = String(state.recordSeconds % 60).padStart(2, '0');
+            document.getElementById('recordTimer').textContent = m + ':' + s;
+            if (state.recordSeconds >= 180) stopRecording();
+        }, 1000);
+        state.waveInterval = setInterval(function() {
+            document.querySelectorAll('#waveform .wave-bar').forEach(function(b) { b.style.height = (Math.random() * 26 + 4) + 'px'; });
+        }, 100);
+    } catch (err) { alert('마이크 접근 권한이 필요합니다.'); }
+}
+
+function stopRecording() {
+    if (!state.mediaRecorder) return;
+    state.mediaRecorder.stop();
+    state.mediaRecorder.stream.getTracks().forEach(function(t) { t.stop(); });
+    clearInterval(state.recordingInterval); clearInterval(state.waveInterval);
+    state.isRecording = false;
+    document.getElementById('recordBtn').classList.remove('recording');
+    document.getElementById('recordIcon').textContent = '🎙️';
+    document.getElementById('waveform').classList.remove('active');
+    document.getElementById('recordStatus').textContent = '녹음 완료! 재생 후 제출하세요.';
+}
+
+function retryRecording() {
+    document.getElementById('audioPlayback').style.display = 'none';
+    document.getElementById('recordStatus').textContent = '버튼을 눌러 녹음을 시작하세요';
+    document.getElementById('recordTimer').textContent = '00:00';
+    state.audioBlob = null;
+}
+
+async function submitRecording() {
+    if (!state.audioBlob) { alert('먼저 녹음해주세요.'); return; }
+    state.attemptCount++;
+    updateAttemptUI();
+    showLoading('AI 분석 중...', '음성을 텍스트로 변환 중');
+    try {
+        var base64 = await toBase64(state.audioBlob);
+        setLoadingStep('문장별 발화 분석 중');
+        var res = await fetch('/api/score', {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                studentId: state.user ? state.user.id : null,
+                submissionId: state.submissionId,
+                script: state.script, audioBase64: base64, mimeType: state.audioBlob.type
+            })
+        });
+        if (!res.ok) { var e = await res.json(); throw new Error(e.error || '서버 오류'); }
+        var result = await res.json();
+        state.lastResult = result;
+        state.sentences = result.sentences || state.sentences;
+        var approvedList = state.teacherApprovedSentences || [];
+        state.sentenceStatuses = (result.sentenceResults || []).map(function(sr, i) {
+            return sr.status === 'ok' || approvedList.includes(i) ? 'ok' : 'retry';
+        });
+        hideLoading();
+        renderResults();
+        goToStep(3);
+        await saveSubmissionLight();
+    } catch (err) {
+        hideLoading();
+        alert('채점 오류: ' + err.message);
+        state.attemptCount--;
+        updateAttemptUI();
+    }
+}
+
+function updateAttemptUI() {
+    document.getElementById('attemptCount').textContent = state.attemptCount;
+    var dots = document.getElementById('attemptDots');
+    var show = Math.min(state.attemptCount, 12);
+    var html = '';
+    for (var i = 0; i < show; i++) { html += '<div class="attempt-dot done"></div>'; }
+    html += '<div class="attempt-dot"></div>';
+    dots.innerHTML = html;
+}
+
+function goToStep2Again() {
     document.getElementById('audioPlayback').style.display = 'none';
     document.getElementById('recordStatus').textContent = '버튼을 눌러 녹음을 시작하세요';
     document.getElementById('recordTimer').textContent = '00:00';
     document.getElementById('waveform').classList.remove('active');
     state.audioBlob = null;
-    document.getElementById('scriptDisplay').textContent = state.script || '';
     updateAttemptUI();
     if (state.lastResult) {
-      const retry = state.sentenceStatuses.filter(s => s === 'retry').length;
-      const ok = state.sentenceStatuses.length - retry;
-      if (retry > 0) {
+        var retry = state.sentenceStatuses.filter(function(s) { return s === 'retry'; }).length;
+        var ok = state.sentenceStatuses.length - retry;
         document.getElementById('prevSummary').style.display = 'block';
-        document.getElementById('prevSummary').textContent = `이전 결과: ${ok}개 통과 · ${retry}개 재도전 필요 — 빨간 문장에 집중해서 다시 말해보세요!`;
-      }
+        document.getElementById('prevSummary').textContent = '이전 결과: ' + ok + '개 통과 · ' + retry + '개 재도전 필요 — 빨간 문장에 집중해서 다시 말해보세요!';
     }
-  }
-  if (n === 3 && state.lastResult) renderResults();
-  goToStep(n);
+    goToStep(2);
 }
-
-// ── 파일 처리 ──
-function handleFile(type, input) {
-  const file = input.files[0];
-  if (!file) return;
-  if (file.size > 30 * 1024 * 1024) { alert('30MB 이하 파일만 가능합니다.'); return; }
-  const reader = new FileReader();
-  reader.onloadend = () => {
-    if (type === 'ppt') {
-      state.pptDataUrl = reader.result; state.pptFilename = file.name;
-      document.getElementById('pptUpload').classList.add('has-file');
-      document.getElementById('pptUploadText').textContent = '✓ ' + file.name;
-      if (file.type.startsWith('image/')) {
-        document.getElementById('pptPreview').style.display = 'block';
-        document.getElementById('pptPreview').innerHTML = `<img src="${reader.result}" style="max-width:100%;max-height:120px;border-radius:6px;border:1px solid var(--border);">`;
-      } else if (file.type === 'application/pdf') {
-        document.getElementById('pptPreview').style.display = 'block';
-        document.getElementById('pptPreview').innerHTML = `<embed src="${reader.result}" type="application/pdf" width="100%" height="160px" style="border-radius:6px;border:1px solid var(--border);">`;
-      }
-    } else {
-      state.wsDataUrl = reader.result; state.wsFilename = file.name;
-      document.getElementById('wsUpload').classList.add('has-file');
-      document.getElementById('wsUploadText').textContent = '✓ ' + file.name;
-      if (file.type.startsWith('image/')) {
-        document.getElementById('wsPreview').style.display = 'block';
-        document.getElementById('wsPreview').innerHTML = `<img src="${reader.result}" style="max-width:100%;max-height:120px;border-radius:6px;border:1px solid var(--border);">`;
-      } else if (file.type === 'application/pdf') {
-        document.getElementById('wsPreview').style.display = 'block';
-        document.getElementById('wsPreview').innerHTML = `<embed src="${reader.result}" type="application/pdf" width="100%" height="160px" style="border-radius:6px;border:1px solid var(--border);">`;
-      }
-    }
-  };
-  reader.readAsDataURL(file);
-}
-
-// ── 스크립트 제출 ──
-document.addEventListener('DOMContentLoaded', () => {
-  initSentenceInputs();
-});
-
-let sentenceInputCount = 0;
-
-function initSentenceInputs(existingSentences) {
-  const list = document.getElementById('sentenceInputList');
-  if (!list) return;
-  list.innerHTML = '';
-  sentenceInputCount = 0;
-  if (existingSentences && existingSentences.length) {
-    existingSentences.forEach(s => addSentenceInput(s, true));
-    // 마지막에 새 입력칸 하나 추가
-    addSentenceInput('', false);
-  } else {
-    addSentenceInput('', false);
-  }
-}
-
-function addSentenceInput(value, completed) {
-  const list = document.getElementById('sentenceInputList');
-  if (!list) return;
-  const idx = sentenceInputCount++;
-  const div = document.createElement('div');
-  div.id = `sentInput_${idx}`;
-  div.style.cssText = 'display:flex;gap:8px;align-items:flex-start;';
-  div.innerHTML = `
-    <div style="flex-shrink:0;width:26px;height:26px;border-radius:50%;background:var(--blue);color:#fff;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;margin-top:9px;">${idx+1}</div>
-    <div style="flex:1;">
-      <input type="text" class="form-input sent-input" id="sentInput_text_${idx}"
-        placeholder="영어로 문장을 입력하고 마침표(.)로 끝내세요."
-        value="${value ? value.replace(/"/g,"&quot;") : ''}"
-        ${completed ? 'disabled style="opacity:.8;background:var(--green-bg);border-color:var(--green-border);"' : ''}
-        oninput="onSentenceInput(${idx})"
-        onkeydown="onSentenceKeydown(event,${idx})"/>
-      <div id="sentInput_hint_${idx}" style="font-size:11px;color:var(--red);margin-top:3px;"></div>
-    </div>
-    ${completed
-      ? `<div style="color:var(--green);font-size:20px;margin-top:6px;">✅</div>`
-      : `<button class="btn btn-primary btn-sm" id="sentInput_btn_${idx}" onclick="completeSentence(${idx})" disabled style="margin-top:6px;white-space:nowrap;">완료 ↵</button>`
-    }
-    ${idx > 0
-      ? `<button onclick="removeSentenceInput(${idx})" style="background:none;border:none;color:var(--text3);font-size:18px;cursor:pointer;margin-top:6px;padding:0 4px;">✕</button>`
-      : ''
-    }`;
-  list.appendChild(div);
-  if (!completed) {
-    setTimeout(() => {
-      const input = document.getElementById(`sentInput_text_${idx}`);
-      if (input) input.focus();
-    }, 50);
-  }
-  updateScriptFromInputs();
-}
-
-function onSentenceInput(idx) {
-  const input = document.getElementById(`sentInput_text_${idx}`);
-  const btn = document.getElementById(`sentInput_btn_${idx}`);
-  const hint = document.getElementById(`sentInput_hint_${idx}`);
-  if (!input) return;
-  const val = input.value.trim();
-  const endsOk = val.endsWith('.') || val.endsWith('!') || val.endsWith('?');
-  if (btn) btn.disabled = !endsOk || val.length < 5;
-  if (hint) {
-    if (val.length > 3 && !endsOk) {
-      hint.textContent = '⚠️ 마침표(.)로 끝내야 완료할 수 있어요.';
-    } else {
-      hint.textContent = '';
-    }
-  }
-  updateScriptFromInputs();
-}
-
-function onSentenceKeydown(e, idx) {
-  if (e.key === 'Enter') { e.preventDefault(); completeSentence(idx); }
-}
-
-function completeSentence(idx) {
-  const input = document.getElementById(`sentInput_text_${idx}`);
-  if (!input) return;
-  const val = input.value.trim();
-  if (!val.endsWith('.') && !val.endsWith('!') && !val.endsWith('?')) {
-    alert('문장 끝에 마침표(.)를 입력해주세요!'); return;
-  }
-  if (val.length < 5) { alert('문장이 너무 짧습니다.'); return; }
-  // 완료 처리
-  input.disabled = true;
-  input.style.opacity = '.8';
-  input.style.background = 'var(--green-bg)';
-  input.style.borderColor = 'var(--green-border)';
-  const btn = document.getElementById(`sentInput_btn_${idx}`);
-  if (btn) {
-    btn.outerHTML = `<div style="color:var(--green);font-size:20px;margin-top:6px;">✅</div>`;
-  }
-  const hint = document.getElementById(`sentInput_hint_${idx}`);
-  if (hint) hint.textContent = '';
-  updateScriptFromInputs();
-  // 다음 문장 입력칸 자동 추가
-  addSentenceInput('', false);
-}
-
-function removeSentenceInput(idx) {
-  const div = document.getElementById(`sentInput_${idx}`);
-  if (div) div.remove();
-  updateScriptFromInputs();
-}
-
-function updateScriptFromInputs() {
-  const inputs = document.querySelectorAll('.sent-input');
-  const sentences = [];
-  inputs.forEach(inp => {
-    const val = inp.value.trim();
-    if (val) sentences.push(val);
-  });
-  const script = sentences.join(' ');
-  const scriptEl = document.getElementById('scriptText');
-  if (scriptEl) scriptEl.value = script;
-  const w = script.trim().split(/\s+/).filter(x => x).length;
-  const wc = document.getElementById('wordCount');
-  const sp = document.getElementById('scriptProgress');
-  if (wc) wc.textContent = `단어 수: ${w} / 50`;
-  if (sp) sp.style.width = Math.min(w / 50 * 100, 100) + '%';
-}
-
-async function submitScript() {
-  const book = document.getElementById('bookTitle').value.trim();
-  const author = document.getElementById('bookAuthor').value.trim();
-  const script = document.getElementById('scriptText').value.trim();
-  if (!book || !script) { alert('책 제목과 스크립트를 입력해주세요.'); return; }
-  if (script.split(/\s+/).filter(x => x).length < 10) { alert('스크립트가 너무 짧습니다.'); return; }
-  state.currentBook = { book, author };
-  state.script = script;
-  state.sentences = script.split(/(?<=[.!?])\s+/).filter(s => s.trim().length > 3);
-  if (!state.submissionId) {
-    state.sentenceStatuses = state.sentences.map(() => 'retry');
-    state.attemptCount = 0;
-  }
-  document.getElementById('scriptDisplay').textContent = script;
-  updateAttemptUI();
-  document.getElementById('prevSummary').style.display = 'none';
-  showLoading('저장 중...');
-  await saveScriptAndFiles();
-  hideLoading();
-  goToStep(2);
-}
-
-async function uploadFile(fileDataUrl, filename, fileType) {
-  if (!fileDataUrl || !filename) return null;
-  try {
-    const res = await fetch('/api/upload', {
-      method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ fileBase64: fileDataUrl, filename, studentId: state.user.id, fileType })
-    });
-    const data = await res.json();
-    return data.success ? data.url : null;
-  } catch(err) { console.error('업로드 오류:', err); return null; }
-}
-
-async function saveScriptAndFiles() {
-  if (!state.user) return;
-  try {
-    const body = {
-      studentId: state.user.id, studentName: state.user.name,
-      studentNumber: state.user.studentNumber, classId: state.user.classId,
-      bookTitle: state.currentBook.book, bookAuthor: state.currentBook.author || '',
-      script: state.script,
-      aiScore: state.lastResult?.total || 0, finalScore: state.lastResult?.total || 0,
-      grade: state.lastResult?.grade || '',
-      pronunciation: state.lastResult?.pronunciation || 0,
-      content: state.lastResult?.content || 0,
-      fluency: state.lastResult?.fluency || 0,
-      completeness: state.lastResult?.completeness || 0,
-      sentences: state.sentences,
-      sentenceResults: state.lastResult?.sentenceResults || [],
-      attemptCount: state.attemptCount,
-      isPassed: state.sentenceStatuses.every(s => s === 'ok'),
-      isFinalSubmitted: false,
-      pronunciationFeedback: state.lastResult?.pronunciationFeedback || '',
-      contentFeedback: state.lastResult?.contentFeedback || '',
-      fluencyFeedback: state.lastResult?.fluencyFeedback || '',
-      overallFeedback: state.lastResult?.overallFeedback || '',
-      transcript: state.lastResult?.transcript || '',
-    };
-    // PPT 업로드 (base64면 Storage 업로드, URL이면 그대로)
-    if (state.pptDataUrl && state.pptFilename) {
-      if (!state.pptDataUrl.startsWith('http')) {
-        setLoadingStep('PPT 업로드 중...');
-        const url = await uploadFile(state.pptDataUrl, state.pptFilename, 'ppt');
-        if (url) { state.pptDataUrl = url; body.pptUpdatedAt = new Date().toISOString(); }
-      }
-      body.pptDataUrl = state.pptDataUrl;
-      body.pptFilename = state.pptFilename;
-    }
-    if (state.wsDataUrl && state.wsFilename) {
-      if (!state.wsDataUrl.startsWith('http')) {
-        setLoadingStep('활동지 업로드 중...');
-        const url = await uploadFile(state.wsDataUrl, state.wsFilename, 'worksheet');
-        if (url) { state.wsDataUrl = url; body.worksheetUpdatedAt = new Date().toISOString(); }
-      }
-      body.worksheetDataUrl = state.wsDataUrl;
-      body.worksheetFilename = state.wsFilename;
-    }
-    const res = await fetch('/api/submit', {
-      method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(body)
-    });
-    const data = await res.json();
-    if (data.id) state.submissionId = data.id;
-  } catch(err) { console.error('저장 오류:', err); }
-}
-
-// ── 가벼운 저장 (채점 후 즉시) ──
-async function saveSubmissionLight() {
-  if (!state.user || !state.lastResult) return;
-  const r = state.lastResult;
-  try {
-    const body = {
-      studentId: state.user.id, studentName: state.user.name,
-      studentNumber: state.user.studentNumber, classId: state.user.classId,
-      bookTitle: state.currentBook.book, bookAuthor: state.currentBook.author || '',
-      script: state.script,
-      aiScore: r.total, finalScore: r.total, grade: r.grade,
-      pronunciation: r.pronunciation, content: r.content,
-      fluency: r.fluency, completeness: r.completeness,
-      sentences: state.sentences, sentenceResults: r.sentenceResults,
-      attemptCount: state.attemptCount,
-      isPassed: state.sentenceStatuses.every(s => s === 'ok'),
-      isFinalSubmitted: false,
-      pronunciationFeedback: r.pronunciationFeedback || '',
-      contentFeedback: r.contentFeedback || '',
-      fluencyFeedback: r.fluencyFeedback || '',
-      overallFeedback: r.overallFeedback || '',
-      transcript: r.transcript || '',
-    };
-    // PPT는 URL인 경우만 포함 (base64 제외 → 413 방지)
-    if (state.pptDataUrl?.startsWith('http')) { body.pptDataUrl = state.pptDataUrl; body.pptFilename = state.pptFilename; }
-    if (state.wsDataUrl?.startsWith('http')) { body.worksheetDataUrl = state.wsDataUrl; body.worksheetFilename = state.wsFilename; }
-    const res = await fetch('/api/submit', {
-      method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(body)
-    });
-    const data = await res.json();
-    if (data.id) state.submissionId = data.id;
-  } catch(err) { console.error('저장 오류:', err); }
-}
-
-// ── 최종 저장 ──
-async function saveSubmission(isFinalSubmitted) {
-  if (!state.user || !state.lastResult) return;
-  const r = state.lastResult;
-  try {
-    const body = {
-      studentId: state.user.id, studentName: state.user.name,
-      studentNumber: state.user.studentNumber, classId: state.user.classId,
-      bookTitle: state.currentBook.book, bookAuthor: state.currentBook.author || '',
-      script: state.script,
-      aiScore: r.total, finalScore: r.total, grade: r.grade,
-      pronunciation: r.pronunciation, content: r.content,
-      fluency: r.fluency, completeness: r.completeness,
-      sentences: state.sentences, sentenceResults: r.sentenceResults,
-      attemptCount: state.attemptCount,
-      isPassed: state.sentenceStatuses.every(s => s === 'ok'),
-      isFinalSubmitted: isFinalSubmitted || false,
-      pronunciationFeedback: r.pronunciationFeedback || '',
-      contentFeedback: r.contentFeedback || '',
-      fluencyFeedback: r.fluencyFeedback || '',
-      overallFeedback: r.overallFeedback || '',
-      transcript: r.transcript || '',
-    };
-    // PPT 처리 (항상 포함)
-    if (state.pptDataUrl && state.pptFilename) {
-      if (!state.pptDataUrl.startsWith('http')) {
-        setLoadingStep('PPT 업로드 중...');
-        const url = await uploadFile(state.pptDataUrl, state.pptFilename, 'ppt');
-        if (url) { state.pptDataUrl = url; body.pptUpdatedAt = new Date().toISOString(); }
-      }
-      body.pptDataUrl = state.pptDataUrl; body.pptFilename = state.pptFilename;
-    }
-    if (state.wsDataUrl && state.wsFilename) {
-      if (!state.wsDataUrl.startsWith('http')) {
-        setLoadingStep('활동지 업로드 중...');
-        const url = await uploadFile(state.wsDataUrl, state.wsFilename, 'worksheet');
-        if (url) { state.wsDataUrl = url; body.worksheetUpdatedAt = new Date().toISOString(); }
-      }
-      body.worksheetDataUrl = state.wsDataUrl; body.worksheetFilename = state.wsFilename;
-    }
-    const res = await fetch('/api/submit', {
-      method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(body)
-    });
-    const data = await res.json();
-    if (data.id) state.submissionId = data.id;
-  } catch(err) { console.error('저장 오류:', err); }
-}
-
-async function refreshCurrentSubmission() {
-  try {
-    const res = await fetch('/api/submit?studentId=' + state.user.id);
-    const data = await res.json();
-    if (Array.isArray(data) && data.length) {
-      const prev = data[0];
-      state.currentSubmissionData = prev;
-      if (prev.ppt_url) { state.pptDataUrl = prev.ppt_url; state.pptFilename = prev.ppt_filename; }
-      if (prev.worksheet_url) { state.wsDataUrl = prev.worksheet_url; state.wsFilename = prev.worksheet_filename; }
-    }
-  } catch(err) { console.error(err); }
-}
-
-// ── 녹음 ──
-function getMime() {
-  const types = ['audio/webm;codecs=opus', 'audio/webm', 'audio/ogg;codecs=opus', 'audio/mp4'];
-  for (const t of types) if (MediaRecorder.isTypeSupported(t)) return t;
-  return 'audio/webm';
-}
-async function toggleRecording() { state.isRecording ? stopRecording() : await startRecording(); }
-async function startRecording() {
-  try {
-    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-    state.mediaRecorder = new MediaRecorder(stream, { mimeType: getMime() });
-    state.audioChunks = [];
-    state.mediaRecorder.ondataavailable = e => { if (e.data.size > 0) state.audioChunks.push(e.data); };
-    state.mediaRecorder.onstop = () => {
-      state.audioBlob = new Blob(state.audioChunks, { type: getMime() });
-      document.getElementById('audioPlayer').src = URL.createObjectURL(state.audioBlob);
-      document.getElementById('audioPlayback').style.display = 'block';
-    };
-    state.mediaRecorder.start(100);
-    state.isRecording = true; state.recordSeconds = 0;
-    document.getElementById('recordBtn').classList.add('recording');
-    document.getElementById('recordIcon').textContent = '⏹️';
-    document.getElementById('recordStatus').textContent = '녹음 중... 다시 누르면 중지';
-    document.getElementById('waveform').classList.add('active');
-    document.getElementById('audioPlayback').style.display = 'none';
-    state.recordingInterval = setInterval(() => {
-      state.recordSeconds++;
-      const m = String(Math.floor(state.recordSeconds / 60)).padStart(2, '0');
-      const s = String(state.recordSeconds % 60).padStart(2, '0');
-      document.getElementById('recordTimer').textContent = `${m}:${s}`;
-      if (state.recordSeconds >= 180) stopRecording();
-    }, 1000);
-    state.waveInterval = setInterval(() => {
-      document.querySelectorAll('#waveform .wave-bar').forEach(b => { b.style.height = (Math.random() * 26 + 4) + 'px'; });
-    }, 100);
-  } catch(err) { alert('마이크 접근 권한이 필요합니다.'); }
-}
-function stopRecording() {
-  if (!state.mediaRecorder) return;
-  state.mediaRecorder.stop();
-  state.mediaRecorder.stream.getTracks().forEach(t => t.stop());
-  clearInterval(state.recordingInterval); clearInterval(state.waveInterval);
-  state.isRecording = false;
-  document.getElementById('recordBtn').classList.remove('recording');
-  document.getElementById('recordIcon').textContent = '🎙️';
-  document.getElementById('waveform').classList.remove('active');
-  document.getElementById('recordStatus').textContent = '녹음 완료! 재생 후 제출하세요.';
-}
-function retryRecording() {
-  document.getElementById('audioPlayback').style.display = 'none';
-  document.getElementById('recordStatus').textContent = '버튼을 눌러 녹음을 시작하세요';
-  document.getElementById('recordTimer').textContent = '00:00';
-  state.audioBlob = null;
-}
-
-// ── AI 채점 ──
-async function submitRecording() {
-  if (!state.audioBlob) { alert('먼저 녹음해주세요.'); return; }
-  state.attemptCount++;
-  updateAttemptUI();
-  showLoading('AI 분석 중...', '음성을 텍스트로 변환 중');
-  try {
-    const base64 = await toBase64(state.audioBlob);
-    setLoadingStep('문장별 발화 분석 중');
-    const res = await fetch('/api/score', {
-      method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        studentId: state.user?.id, submissionId: state.submissionId,
-        script: state.script, audioBase64: base64, mimeType: state.audioBlob.type
-      })
-    });
-    if (!res.ok) { const e = await res.json().catch(() => ({})); throw new Error(e.error || '서버 오류'); }
-    const result = await res.json();
-    state.lastResult = result;
-    state.sentences = result.sentences || state.sentences;
-    const approvedList = state.teacherApprovedSentences || [];
-    state.sentenceStatuses = (result.sentenceResults || []).map((sr, i) =>
-      sr.status === 'ok' || approvedList.includes(i) ? 'ok' : 'retry'
-    );
-    hideLoading();
-    renderResults();
-    goToStep(3);
-    // 가벼운 저장으로 즉시 반영
-    await saveSubmissionLight();
-  } catch(err) {
-    hideLoading();
-    alert('채점 오류: ' + err.message);
-    state.attemptCount--;
-    updateAttemptUI();
-  }
-}
-
-function updateAttemptUI() {
-  document.getElementById('attemptCount').textContent = state.attemptCount;
-  const dots = document.getElementById('attemptDots');
-  const show = Math.min(state.attemptCount, 12);
-  dots.innerHTML = Array.from({ length: show }, () => `<div class="attempt-dot done"></div>`).join('') + `<div class="attempt-dot"></div>`;
-}
-
-function goToStep2Again() {
-  document.getElementById('audioPlayback').style.display = 'none';
-  document.getElementById('recordStatus').textContent = '버튼을 눌러 녹음을 시작하세요';
-  document.getElementById('recordTimer').textContent = '00:00';
-  document.getElementById('waveform').classList.remove('active');
-  state.audioBlob = null;
-  // 교사 승인 문장 제외하고 전체 초기화
-  const approvedList = state.teacherApprovedSentences || [];
-  state.sentenceStatuses = state.sentences.map((_, i) =>
-    approvedList.includes(i) ? 'ok' : 'retry'
-  );
-  updateAttemptUI();
-  const prevSummary = document.getElementById('prevSummary');
-  prevSummary.style.display = 'block';
-  prevSummary.textContent = '전체 다시 녹음 — 이전 통과 기록이 초기화되었어요. 처음부터 다시 말해보세요!';
-  goToStep(2);
-}
-
-// ── 결과 렌더링 ──
 function renderResults() {
-  const r = state.lastResult;
-  const { name, id } = state.user || {};
-  const { book } = state.currentBook;
-  document.getElementById('resultInfo').textContent = `${name || ''} · 《${book || ''}》 · ${state.attemptCount}번째 시도`;
-  const okCount = state.sentenceStatuses.filter(s => s === 'ok').length;
-  const total = state.sentences.length;
-  const allClear = okCount === total;
-  const pct = total > 0 ? Math.round(okCount / total * 100) : 0;
-  document.getElementById('goalCount').textContent = `${okCount} / ${total}`;
-  document.getElementById('goalBar').style.width = pct + '%';
-  document.getElementById('goalBar').style.background = allClear ? 'var(--green)' : pct >= 70 ? 'var(--yellow)' : 'var(--red)';
-  document.getElementById('goalHint').textContent = allClear ? '🎉 모든 문장 통과! 최종 제출이 가능합니다.' : `아직 ${total - okCount}개 문장이 남았어요.`;
-  const banner = document.getElementById('resultBanner');
-  if (allClear) {
-    banner.className = 'result-banner all-clear';
-    document.getElementById('resultBannerTitle').textContent = '🎉 모든 문장 통과!';
-    document.getElementById('resultBannerSub').textContent = `${state.attemptCount}번 만에 완성했어요. 최종 제출 버튼을 눌러주세요.`;
-  } else {
-    banner.className = 'result-banner has-retry';
-    document.getElementById('resultBannerTitle').textContent = '💪 계속 도전해보세요!';
-    document.getElementById('resultBannerSub').textContent = '빨간 문장을 연습하고 다시 도전하거나, 문장별 재도전 버튼을 눌러보세요.';
-  }
-  const srs = r.sentenceResults || [];
-  const approvedList = state.teacherApprovedSentences || [];
-  document.getElementById('sentenceList').innerHTML = state.sentences.map((sent, i) => {
-    const status = state.sentenceStatuses[i] || 'retry';
-    const sr = srs[i] || {};
-    const isOk = status === 'ok';
-    const teacherOk = approvedList.includes(i);
-    const label = isOk ? (teacherOk ? '✅ 교사 승인' : '✅ 통과') : '❌';
-    const issue = sr.issue ? `<div class="sentence-issue">${sr.issue}</div>` : '';
-    return `<div class="sentence-item ${isOk ? 'ok' : 'retry'}" id="sentItem${i}">
-      <div class="sentence-icon">${label}</div>
-      <div class="sentence-content"><div class="sentence-text">${sent}</div>${issue}</div>
-      <div class="sentence-actions">
-        <button class="tts-btn" onclick="playTTS('${sent.replace(/'/g, "\\'")}')">🔊</button>
-        ${isOk ? '' : `<button class="retry-sent-btn" onclick="openSentModal(${i})">🎙️ 재도전</button>`}
-      </div>
-    </div>`;
-  }).join('');
-  const pfb = r.pronunciationFeedback || r.pronunciation_feedback || '';
-  const cfb = r.contentFeedback || r.content_feedback || '';
-  const ffb = r.fluencyFeedback || r.fluency_feedback || '';
-  const ofb = r.overallFeedback || r.overall_feedback || '';
-  document.getElementById('feedbackGrid').innerHTML = `
-    <div class="feedback-item"><div class="feedback-icon">🔊</div><div class="feedback-title">발음</div><div class="feedback-text">${pfb || '피드백 없음'}</div></div>
-    <div class="feedback-item"><div class="feedback-icon">📖</div><div class="feedback-title">내용</div><div class="feedback-text">${cfb || '피드백 없음'}</div></div>
-    <div class="feedback-item"><div class="feedback-icon">💬</div><div class="feedback-title">유창성</div><div class="feedback-text">${ffb || '피드백 없음'}</div></div>
-    <div class="feedback-item"><div class="feedback-icon">⭐</div><div class="feedback-title">종합</div><div class="feedback-text">${ofb || '피드백 없음'}</div></div>`;
-  document.getElementById('transcriptDisplay').textContent = r.transcript || r.simulatedTranscript || '';
-  document.getElementById('submitBtn').disabled = !allClear;
-  document.getElementById('submitHint').textContent = allClear ? '' : `모든 문장(${total}개)을 통과해야 제출할 수 있어요.`;
+    var r = state.lastResult;
+    var name = state.user ? state.user.name : '';
+    var book = state.currentBook ? (state.currentBook.book || '') : '';
+    document.getElementById('resultInfo').textContent = name + ' · 《' + book + '》 · ' + state.attemptCount + '번째 시도';
+    var okCount = state.sentenceStatuses.filter(function(s) { return s === 'ok'; }).length;
+    var total = state.sentences.length;
+    var allClear = okCount === total;
+    var pct = total > 0 ? Math.round(okCount / total * 100) : 0;
+    document.getElementById('goalCount').textContent = okCount + ' / ' + total;
+    document.getElementById('goalBar').style.width = pct + '%';
+    document.getElementById('goalBar').style.background = allClear ? 'var(--green)' : pct >= 70 ? 'var(--yellow)' : 'var(--red)';
+    document.getElementById('goalHint').textContent = allClear ? '🎉 모든 문장 통과! 최종 제출이 가능합니다.' : '아직 ' + (total - okCount) + '개 문장이 남았어요.';
+    var banner = document.getElementById('resultBanner');
+    if (allClear) {
+        banner.className = 'result-banner all-clear';
+        document.getElementById('resultBannerTitle').textContent = '🎉 모든 문장 통과!';
+        document.getElementById('resultBannerSub').textContent = state.attemptCount + '번 만에 완성했어요. 최종 제출 버튼을 눌러주세요.';
+    } else {
+        banner.className = 'result-banner has-retry';
+        document.getElementById('resultBannerTitle').textContent = '💪 계속 도전해보세요!';
+        document.getElementById('resultBannerSub').textContent = '빨간 문장을 연습하고 다시 도전하거나, 문장별 재도전 버튼을 눌러보세요.';
+    }
+    var srs = r.sentenceResults || [];
+    var approvedList = state.teacherApprovedSentences || [];
+    document.getElementById('sentenceList').innerHTML = state.sentences.map(function(sent, i) {
+        var status = state.sentenceStatuses[i] || 'retry';
+        var sr = srs[i] || {};
+        var isOk = status === 'ok';
+        var teacherOk = approvedList.includes(i);
+        var label = isOk ? (teacherOk ? '✅ 교사 승인' : '✅ 통과') : '❌';
+        var issue = sr.issue ? '<div class="sentence-issue">' + sr.issue + '</div>' : '';
+        return '<div class="sentence-item ' + (isOk ? 'ok' : 'retry') + '" id="sentItem' + i + '">' +
+            '<div class="sentence-icon">' + label + '</div>' +
+            '<div class="sentence-content"><div class="sentence-text">' + sent + '</div>' + issue + '</div>' +
+            '<div class="sentence-actions">' +
+            '<button class="tts-btn" onclick="playTTS(\'' + sent.replace(/'/g, "\\'") + '\')">🔊</button>' +
+            (isOk ? '' : '<button class="retry-sent-btn" onclick="openSentModal(' + i + ')">🎙️ 재도전</button>') +
+            '</div></div>';
+    }).join('');
+    var pfb = r.pronunciationFeedback || r.pronunciation_feedback || '';
+    var cfb = r.contentFeedback || r.content_feedback || '';
+    var ffb = r.fluencyFeedback || r.fluency_feedback || '';
+    var ofb = r.overallFeedback || r.overall_feedback || '';
+    document.getElementById('feedbackGrid').innerHTML =
+        '<div class="feedback-item"><div class="feedback-icon">🔊</div><div class="feedback-title">발음</div><div class="feedback-text">' + (pfb || '피드백 없음') + '</div></div>' +
+        '<div class="feedback-item"><div class="feedback-icon">📖</div><div class="feedback-title">내용</div><div class="feedback-text">' + (cfb || '피드백 없음') + '</div></div>' +
+        '<div class="feedback-item"><div class="feedback-icon">💬</div><div class="feedback-title">유창성</div><div class="feedback-text">' + (ffb || '피드백 없음') + '</div></div>' +
+        '<div class="feedback-item"><div class="feedback-icon">⭐</div><div class="feedback-title">종합</div><div class="feedback-text">' + (ofb || '피드백 없음') + '</div></div>';
+    document.getElementById('transcriptDisplay').textContent = r.transcript || r.simulatedTranscript || '';
+    document.getElementById('submitBtn').disabled = !allClear;
+    document.getElementById('submitHint').textContent = allClear ? '' : '모든 문장(' + total + '개)을 통과해야 제출할 수 있어요.';
 }
-
-// ── TTS ──
-let currentAudio = null;
 
 async function playTTS(text) {
-  if (!text) return;
-  if (currentAudio) { currentAudio.pause(); currentAudio = null; }
-  if (state.ttsCache[text]) { playAudioBase64(state.ttsCache[text]); return; }
-  try {
-    const res = await fetch('/api/tts', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ text }) });
-    const data = await res.json();
-    if (data.audio) { state.ttsCache[text] = data.audio; playAudioBase64(data.audio); }
-  } catch(err) { console.error('TTS 오류:', err); }
-}
-
-function stopTTS() {
-  if (currentAudio) { currentAudio.pause(); currentAudio.currentTime = 0; currentAudio = null; }
-}
-
-function playAudioBase64(base64) {
-  currentAudio = new Audio('data:audio/mp3;base64,' + base64);
-  currentAudio.play();
-  currentAudio.onended = () => { currentAudio = null; };
-}
+    if (!text) return;
+    if (state.ttsCache[text]) { playAudioBase64(state.ttsCache[text]); return; }
+    try {
+        var res = await fetch('/api/tts', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ text: text }) });
+        var data = await res.json();
+        if (data.audio) { state.ttsCache[text] = data.audio; playAudioBase64(data.audio); }
+    } catch (err) { console.error('TTS 오류:', err); }
 }
 function playAudioBase64(base64) { new Audio('data:audio/mp3;base64,' + base64).play(); }
 
-// ── 문장별 모달 ──
 function openSentModal(idx) {
-  state.modalSentIdx = idx;
-  state.modalAudioBlob = null; state.modalIsRecording = false;
-  document.getElementById('modalSentText').textContent = state.sentences[idx] || '';
-  document.getElementById('modalRecordStatus').textContent = '버튼을 눌러 이 문장 녹음 시작';
-  document.getElementById('modalTimer').textContent = '00:00';
-  document.getElementById('modalAudioPlayback').style.display = 'none';
-  document.getElementById('modalRecordBtn').classList.remove('recording');
-  document.getElementById('modalRecordIcon').textContent = '🎙️';
-  document.getElementById('sentenceModal').style.display = 'flex';
+    state.modalSentIdx = idx;
+    state.modalAudioBlob = null; state.modalIsRecording = false;
+    document.getElementById('modalSentText').textContent = state.sentences[idx] || '';
+    document.getElementById('modalRecordStatus').textContent = '버튼을 눌러 이 문장 녹음 시작';
+    document.getElementById('modalTimer').textContent = '00:00';
+    document.getElementById('modalAudioPlayback').style.display = 'none';
+    document.getElementById('modalRecordBtn').classList.remove('recording');
+    document.getElementById('modalRecordIcon').textContent = '🎙️';
+    document.getElementById('sentenceModal').style.display = 'flex';
 }
 function closeModal() {
-  if (state.modalIsRecording) stopModalRecording();
-  document.getElementById('sentenceModal').style.display = 'none';
-  state.modalSentIdx = null;
+    if (state.modalIsRecording) stopModalRecording();
+    document.getElementById('sentenceModal').style.display = 'none';
+    state.modalSentIdx = null;
 }
 async function toggleModalRecording() { state.modalIsRecording ? stopModalRecording() : await startModalRecording(); }
 async function startModalRecording() {
-  try {
-    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-    state.modalMediaRecorder = new MediaRecorder(stream, { mimeType: getMime() });
-    state.modalAudioChunks = [];
-    state.modalMediaRecorder.ondataavailable = e => { if (e.data.size > 0) state.modalAudioChunks.push(e.data); };
-    state.modalMediaRecorder.onstop = () => {
-      state.modalAudioBlob = new Blob(state.modalAudioChunks, { type: getMime() });
-      document.getElementById('modalAudioPlayer').src = URL.createObjectURL(state.modalAudioBlob);
-      document.getElementById('modalAudioPlayback').style.display = 'block';
-    };
-    state.modalMediaRecorder.start(100);
-    state.modalIsRecording = true; state.modalRecordSeconds = 0;
-    document.getElementById('modalRecordBtn').classList.add('recording');
-    document.getElementById('modalRecordIcon').textContent = '⏹️';
-    document.getElementById('modalRecordStatus').textContent = '녹음 중...';
-    document.getElementById('modalAudioPlayback').style.display = 'none';
-    state.modalRecordingInterval = setInterval(() => {
-      state.modalRecordSeconds++;
-      const m = String(Math.floor(state.modalRecordSeconds / 60)).padStart(2, '0');
-      const s = String(state.modalRecordSeconds % 60).padStart(2, '0');
-      document.getElementById('modalTimer').textContent = `${m}:${s}`;
-      if (state.modalRecordSeconds >= 30) stopModalRecording();
-    }, 1000);
-  } catch(err) { alert('마이크 접근 권한이 필요합니다.'); }
+    try {
+        var stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        state.modalMediaRecorder = new MediaRecorder(stream, { mimeType: getMime() });
+        state.modalAudioChunks = [];
+        state.modalMediaRecorder.ondataavailable = function(e) { if (e.data.size > 0) state.modalAudioChunks.push(e.data); };
+        state.modalMediaRecorder.onstop = function() {
+            state.modalAudioBlob = new Blob(state.modalAudioChunks, { type: getMime() });
+            document.getElementById('modalAudioPlayer').src = URL.createObjectURL(state.modalAudioBlob);
+            document.getElementById('modalAudioPlayback').style.display = 'block';
+        };
+        state.modalMediaRecorder.start(100);
+        state.modalIsRecording = true; state.modalRecordSeconds = 0;
+        document.getElementById('modalRecordBtn').classList.add('recording');
+        document.getElementById('modalRecordIcon').textContent = '⏹️';
+        document.getElementById('modalRecordStatus').textContent = '녹음 중...';
+        document.getElementById('modalAudioPlayback').style.display = 'none';
+        state.modalRecordingInterval = setInterval(function() {
+            state.modalRecordSeconds++;
+            var m = String(Math.floor(state.modalRecordSeconds / 60)).padStart(2, '0');
+            var s = String(state.modalRecordSeconds % 60).padStart(2, '0');
+            document.getElementById('modalTimer').textContent = m + ':' + s;
+            if (state.modalRecordSeconds >= 30) stopModalRecording();
+        }, 1000);
+    } catch (err) { alert('마이크 접근 권한이 필요합니다.'); }
 }
 function stopModalRecording() {
-  if (!state.modalMediaRecorder) return;
-  state.modalMediaRecorder.stop();
-  state.modalMediaRecorder.stream.getTracks().forEach(t => t.stop());
-  clearInterval(state.modalRecordingInterval);
-  state.modalIsRecording = false;
-  document.getElementById('modalRecordBtn').classList.remove('recording');
-  document.getElementById('modalRecordIcon').textContent = '🎙️';
-  document.getElementById('modalRecordStatus').textContent = '녹음 완료! 재생 후 제출하세요.';
+    if (!state.modalMediaRecorder) return;
+    state.modalMediaRecorder.stop();
+    state.modalMediaRecorder.stream.getTracks().forEach(function(t) { t.stop(); });
+    clearInterval(state.modalRecordingInterval);
+    state.modalIsRecording = false;
+    document.getElementById('modalRecordBtn').classList.remove('recording');
+    document.getElementById('modalRecordIcon').textContent = '🎙️';
+    document.getElementById('modalRecordStatus').textContent = '녹음 완료! 재생 후 제출하세요.';
 }
 function retryModalRecording() {
-  document.getElementById('modalAudioPlayback').style.display = 'none';
-  document.getElementById('modalRecordStatus').textContent = '버튼을 눌러 이 문장 녹음 시작';
-  document.getElementById('modalTimer').textContent = '00:00';
-  state.modalAudioBlob = null;
+    document.getElementById('modalAudioPlayback').style.display = 'none';
+    document.getElementById('modalRecordStatus').textContent = '버튼을 눌러 이 문장 녹음 시작';
+    document.getElementById('modalTimer').textContent = '00:00';
+    state.modalAudioBlob = null;
 }
 async function submitModalRecording() {
-  if (!state.modalAudioBlob) { alert('먼저 녹음해주세요.'); return; }
-  const idx = state.modalSentIdx;
-  const sentence = state.sentences[idx];
-  showLoading('이 문장 분석 중...', '음성 인식 중');
-  try {
-    const base64 = await toBase64(state.modalAudioBlob);
-    const res = await fetch('/api/score', {
-      method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        studentId: state.user?.id, submissionId: state.submissionId,
-        script: sentence, audioBase64: base64, mimeType: state.modalAudioBlob.type,
-        singleSentence: true, sentenceIdx: idx
-      })
-    });
-    if (!res.ok) { const e = await res.json().catch(() => ({})); throw new Error(e.error || '서버 오류'); }
-    const result = await res.json();
-    hideLoading(); closeModal();
-    const sr = (result.sentenceResults || [])[0];
-    const newStatus = sr && sr.status === 'ok' ? 'ok' : 'retry';
-    state.sentenceStatuses[idx] = newStatus;
-    updateSentItem(idx, newStatus, sr);
-    updateGoalUI();
-    await saveSubmissionLight();
-  } catch(err) { hideLoading(); alert('분석 오류: ' + err.message); }
+    if (!state.modalAudioBlob) { alert('먼저 녹음해주세요.'); return; }
+    var idx = state.modalSentIdx;
+    var sentence = state.sentences[idx];
+    showLoading('이 문장 분석 중...', '음성 인식 중');
+    try {
+        var base64 = await toBase64(state.modalAudioBlob);
+        var res = await fetch('/api/score', {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                studentId: state.user ? state.user.id : null,
+                submissionId: state.submissionId,
+                script: sentence, audioBase64: base64, mimeType: state.modalAudioBlob.type,
+                singleSentence: true, sentenceIdx: idx
+            })
+        });
+        if (!res.ok) { var e = await res.json(); throw new Error(e.error || '서버 오류'); }
+        var result = await res.json();
+        hideLoading(); closeModal();
+        var sr = (result.sentenceResults || [])[0];
+        var newStatus = sr && sr.status === 'ok' ? 'ok' : 'retry';
+        state.sentenceStatuses[idx] = newStatus;
+        updateSentItem(idx, newStatus, sr);
+        updateGoalUI();
+        await saveSubmissionLight();
+    } catch (err) { hideLoading(); alert('분석 오류: ' + err.message); }
 }
 
 function updateSentItem(idx, status, sr) {
-  const item = document.getElementById('sentItem' + idx);
-  if (!item) return;
-  const isOk = status === 'ok';
-  const sent = state.sentences[idx] || '';
-  const issue = sr?.issue ? `<div class="sentence-issue">${sr.issue}</div>` : '';
-  item.className = `sentence-item ${isOk ? 'ok' : 'retry'}`;
-  item.innerHTML = `
-    <div class="sentence-icon">${isOk ? '✅' : '❌'}</div>
-    <div class="sentence-content"><div class="sentence-text">${sent}</div>${issue}</div>
-    <div class="sentence-actions">
-      <button class="tts-btn" onclick="playTTS('${sent.replace(/'/g, "\\'")}')">🔊 듣기</button>
-        <button class="tts-btn" onclick="stopTTS()" style="background:var(--yellow-bg);border-color:#fcd34d;color:var(--yellow);">⏹ 멈춤</button>
-        ${isOk ? '' : `<button class="retry-sent-btn" onclick="openSentModal(${i})">🎙️ 재도전</button>`}
-        ${isOk ? '' : `<button class="retry-sent-btn" onclick="requestHelp(${i},'${sent.replace(/'/g,"\\'")}')">🆘 교사 호출</button>`}
-    </div>`;
+    var item = document.getElementById('sentItem' + idx);
+    if (!item) return;
+    var isOk = status === 'ok';
+    var sent = state.sentences[idx] || '';
+    var issue = sr && sr.issue ? '<div class="sentence-issue">' + sr.issue + '</div>' : '';
+    item.className = 'sentence-item ' + (isOk ? 'ok' : 'retry');
+    item.innerHTML =
+        '<div class="sentence-icon">' + (isOk ? '✅' : '❌') + '</div>' +
+        '<div class="sentence-content"><div class="sentence-text">' + sent + '</div>' + issue + '</div>' +
+        '<div class="sentence-actions">' +
+        '<button class="tts-btn" onclick="playTTS(\'' + sent.replace(/'/g, "\\'") + '\')">🔊</button>' +
+        (isOk ? '' : '<button class="retry-sent-btn" onclick="openSentModal(' + idx + ')">🎙️ 재도전</button>') +
+        '</div>';
 }
 
 function updateGoalUI() {
-  const okCount = state.sentenceStatuses.filter(s => s === 'ok').length;
-  const total = state.sentences.length;
-  const allClear = okCount === total;
-  const pct = total > 0 ? Math.round(okCount / total * 100) : 0;
-  document.getElementById('goalCount').textContent = `${okCount} / ${total}`;
-  document.getElementById('goalBar').style.width = pct + '%';
-  document.getElementById('goalBar').style.background = allClear ? 'var(--green)' : pct >= 70 ? 'var(--yellow)' : 'var(--red)';
-  document.getElementById('goalHint').textContent = allClear ? '🎉 모든 문장 통과! 최종 제출이 가능합니다.' : `아직 ${total - okCount}개 문장이 남았어요.`;
-  document.getElementById('submitBtn').disabled = !allClear;
-  document.getElementById('submitHint').textContent = allClear ? '' : `모든 문장(${total}개)을 통과해야 제출할 수 있어요.`;
-  if (allClear) {
-    document.getElementById('resultBanner').className = 'result-banner all-clear';
-    document.getElementById('resultBannerTitle').textContent = '🎉 모든 문장 통과!';
-    document.getElementById('resultBannerSub').textContent = '최종 제출 버튼을 눌러주세요.';
-  }
+    var okCount = state.sentenceStatuses.filter(function(s) { return s === 'ok'; }).length;
+    var total = state.sentences.length;
+    var allClear = okCount === total;
+    var pct = total > 0 ? Math.round(okCount / total * 100) : 0;
+    document.getElementById('goalCount').textContent = okCount + ' / ' + total;
+    document.getElementById('goalBar').style.width = pct + '%';
+    document.getElementById('goalBar').style.background = allClear ? 'var(--green)' : pct >= 70 ? 'var(--yellow)' : 'var(--red)';
+    document.getElementById('goalHint').textContent = allClear ? '🎉 모든 문장 통과! 최종 제출이 가능합니다.' : '아직 ' + (total - okCount) + '개 문장이 남았어요.';
+    document.getElementById('submitBtn').disabled = !allClear;
+    document.getElementById('submitHint').textContent = allClear ? '' : '모든 문장(' + total + '개)을 통과해야 제출할 수 있어요.';
+    if (allClear) {
+        document.getElementById('resultBanner').className = 'result-banner all-clear';
+        document.getElementById('resultBannerTitle').textContent = '🎉 모든 문장 통과!';
+        document.getElementById('resultBannerSub').textContent = '최종 제출 버튼을 눌러주세요.';
+    }
 }
 
-// ── 최종 제출 ──
 async function finalSubmit() {
-  const okCount = state.sentenceStatuses.filter(s => s === 'ok').length;
-  if (okCount < state.sentences.length) { alert('아직 통과하지 못한 문장이 있어요!'); return; }
-  if (!confirm('최종 제출하시겠습니까?\n제출 후에도 제출 내역 보기에서 확인할 수 있어요.')) return;
-  showLoading('최종 제출 중...');
-  await saveSubmission(true);
-  state.currentSubmissionData = {
-    ...(state.currentSubmissionData || {}),
-    ppt_url: state.pptDataUrl, ppt_filename: state.pptFilename,
-    worksheet_url: state.wsDataUrl, worksheet_filename: state.wsFilename,
-    submitted_at: state.currentSubmissionData?.submitted_at || new Date().toISOString(),
-    final_submitted_at: new Date().toISOString(),
-    ppt_updated_at: state.pptDataUrl ? new Date().toISOString() : null,
-    worksheet_updated_at: state.wsDataUrl ? new Date().toISOString() : null,
-  };
-  await refreshCurrentSubmission();
-  hideLoading();
-  document.getElementById('mySubmitViewBtn').style.display = 'inline-flex';
-  showMySubmission();
-}
-
-// ── 제출 내역 보기 ──
-function showMySubmission() {
-  const r = state.lastResult;
-  const sub = state.currentSubmissionData || {};
-  const approvedList = state.teacherApprovedSentences || [];
-  let wrap = document.getElementById('mySubmissionWrap');
-  if (!wrap) {
-    wrap = document.createElement('div');
-    wrap.id = 'mySubmissionWrap';
-    wrap.style.cssText = 'position:fixed;inset:0;background:var(--bg);z-index:300;overflow-y:auto;padding-top:60px;';
-    document.body.appendChild(wrap);
-  }
-  wrap.innerHTML = '';
-  const cont = document.createElement('div');
-  cont.style.cssText = 'max-width:840px;margin:0 auto;padding:32px;';
-  // 헤더
-  const hdr = document.createElement('div');
-  hdr.style.cssText = 'display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;flex-wrap:wrap;gap:12px;';
-  hdr.innerHTML = `
-    <div>
-      <h2 style="font-size:22px;font-weight:700;color:var(--text);">📋 나의 제출 내역</h2>
-      <p style="font-size:13px;color:var(--text2);margin-top:4px;">${state.user?.name} · 《${state.currentBook?.book||''}》</p>
-    </div>
-    <div style="display:flex;gap:8px;">
-      <button class="btn btn-ghost" onclick="showUpdateFiles()">📎 자료 수정</button>
-      <button class="btn btn-ghost" onclick="document.getElementById('mySubmissionWrap').remove();goToStep(3);">← 결과로 돌아가기</button>
-    </div>`;
-  cont.appendChild(hdr);
-  // 제출 정보
-  const info = document.createElement('div');
-  info.className = 'card';
-  info.style.marginBottom = '16px';
-  info.innerHTML = `
-    <div class="card-title">제출 정보</div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;font-size:13px;">
-      <div><span style="color:var(--text2);">최초 제출:</span> <strong>${sub.submitted_at?new Date(sub.submitted_at).toLocaleString('ko-KR'):'-'}</strong></div>
-      <div><span style="color:var(--text2);">최종 제출:</span> <strong style="color:var(--green);">${sub.final_submitted_at?new Date(sub.final_submitted_at).toLocaleString('ko-KR'):'-'}</strong></div>
-      <div><span style="color:var(--text2);">총 도전 횟수:</span> <strong>${state.attemptCount}회</strong></div>
-      <div><span style="color:var(--text2);">통과 문장:</span> <strong>${state.sentenceStatuses.filter(s=>s==='ok').length} / ${state.sentences.length}개</strong></div>
-    </div>`;
-  cont.appendChild(info);
-  // 자료
-  const files = document.createElement('div');
-  files.className = 'card';
-  files.style.marginBottom = '16px';
-  files.innerHTML = `<div class="card-title">제출 자료</div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
-      <div>
-        <div style="font-size:13px;font-weight:600;color:var(--text2);margin-bottom:8px;">📊 PPT</div>
-        ${state.pptDataUrl?`<a href="${state.pptDataUrl}" download="${state.pptFilename}" class="btn btn-ghost btn-sm">📥 ${state.pptFilename}</a>${sub.ppt_updated_at?`<div style="font-size:11px;color:var(--text3);margin-top:4px;">수정: ${new Date(sub.ppt_updated_at).toLocaleString('ko-KR')}</div>`:'`'}`:
-        '<div style="color:var(--text3);font-size:13px;">제출 없음</div>'}
-      </div>
-      <div>
-        <div style="font-size:13px;font-weight:600;color:var(--text2);margin-bottom:8px;">📝 활동지</div>
-        ${state.wsDataUrl?`<a href="${state.wsDataUrl}" download="${state.wsFilename}" class="btn btn-ghost btn-sm">📥 ${state.wsFilename}</a>${sub.worksheet_updated_at?`<div style="font-size:11px;color:var(--text3);margin-top:4px;">수정: ${new Date(sub.worksheet_updated_at).toLocaleString('ko-KR')}</div>`:''}`:
-        '<div style="color:var(--text3);font-size:13px;">제출 없음</div>'}
-      </div>
-    </div>`;
-  cont.appendChild(files);
-  // 문장별
-  const sents = document.createElement('div');
-  sents.className = 'card';
-  sents.style.marginBottom = '16px';
-  sents.innerHTML = '<div class="card-title">문장별 발화 결과</div>';
-  const sentList = document.createElement('div');
-  sentList.style.cssText = 'display:flex;flex-direction:column;gap:8px;';
-  state.sentences.forEach((sent, i) => {
-    const isOk = state.sentenceStatuses[i] === 'ok';
-    const teacherOk = approvedList.includes(i);
-    const label = isOk ? (teacherOk ? '✅ 교사 승인' : '✅ 통과') : '❌ 미통과';
-    const div = document.createElement('div');
-    div.style.cssText = `padding:10px 14px;border-radius:8px;background:${isOk?'var(--green-bg)':'var(--red-bg)'};border:1.5px solid ${isOk?'var(--green-border)':'var(--red-border)'};font-size:13px;`;
-    div.innerHTML = `<span style="font-weight:700;color:${isOk?'var(--green)':'var(--red)'};">${label}</span><div style="margin-top:4px;color:var(--text);">${sent}</div>`;
-    sentList.appendChild(div);
-  });
-  sents.appendChild(sentList);
-  cont.appendChild(sents);
-  // 피드백
-  const fb = document.createElement('div');
-  fb.className = 'card';
-  const pfb = r?.pronunciationFeedback||r?.pronunciation_feedback||'-';
-  const cfb = r?.contentFeedback||r?.content_feedback||'-';
-  const ffb = r?.fluencyFeedback||r?.fluency_feedback||'-';
-  const ofb = r?.overallFeedback||r?.overall_feedback||'-';
-  fb.innerHTML = `<div class="card-title">AI 피드백</div>
-    <div class="feedback-grid">
-      <div class="feedback-item"><div class="feedback-icon">🔊</div><div class="feedback-title">발음</div><div class="feedback-text">${pfb}</div></div>
-      <div class="feedback-item"><div class="feedback-icon">📖</div><div class="feedback-title">내용</div><div class="feedback-text">${cfb}</div></div>
-      <div class="feedback-item"><div class="feedback-icon">💬</div><div class="feedback-title">유창성</div><div class="feedback-text">${ffb}</div></div>
-      <div class="feedback-item"><div class="feedback-icon">⭐</div><div class="feedback-title">종합</div><div class="feedback-text">${ofb}</div></div>
-    </div>`;
-  cont.appendChild(fb);
-  wrap.appendChild(cont);
-}
-
-function showUpdateFiles() {
-  const modal = document.createElement('div');
-  modal.id = 'updateFilesModal';
-  modal.style.cssText = 'position:fixed;inset:0;background:rgba(15,23,42,.5);z-index:400;display:flex;align-items:center;justify-content:center;';
-  modal.innerHTML = `<div style="background:var(--white);border-radius:16px;padding:28px;max-width:480px;width:90%;box-shadow:var(--shadow-lg);">
-    <div style="font-size:17px;font-weight:700;margin-bottom:12px;">📎 자료 수정</div>
-    <div style="font-size:13px;color:var(--text2);margin-bottom:16px;">새 파일을 선택하면 기존 파일이 교체됩니다.</div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px;">
-      <div>
-        <div style="font-size:13px;font-weight:600;color:var(--text2);margin-bottom:6px;">📊 PPT</div>
-        <div class="upload-area" onclick="document.getElementById('updatePptFile').click()" id="updatePptArea" style="padding:16px;">
-          <div style="font-size:20px;margin-bottom:4px;">📎</div>
-          <div style="font-size:12px;color:var(--text2);" id="updatePptText">${state.pptFilename||'클릭하여 선택'}</div>
-        </div>
-        <input type="file" id="updatePptFile" accept="*/*" style="display:none;" onchange="handleUpdateFile('ppt',this)"/>
-      </div>
-      <div>
-        <div style="font-size:13px;font-weight:600;color:var(--text2);margin-bottom:6px;">📝 활동지</div>
-        <div class="upload-area" onclick="document.getElementById('updateWsFile').click()" id="updateWsArea" style="padding:16px;">
-          <div style="font-size:20px;margin-bottom:4px;">📄</div>
-          <div style="font-size:12px;color:var(--text2);" id="updateWsText">${state.wsFilename||'클릭하여 선택'}</div>
-        </div>
-        <input type="file" id="updateWsFile" accept="*/*" style="display:none;" onchange="handleUpdateFile('ws',this)"/>
-      </div>
-    </div>
-    <div style="display:flex;gap:8px;justify-content:flex-end;">
-      <button class="btn btn-ghost btn-sm" onclick="document.getElementById('updateFilesModal').remove()">취소</button>
-      <button class="btn btn-primary btn-sm" onclick="submitFileUpdate()">수정 제출</button>
-    </div>
-  </div>`;
-  document.body.appendChild(modal);
-}
-
-function handleUpdateFile(type, input) {
-  const file = input.files[0];
-  if (!file) return;
-  if (file.size > 30*1024*1024) { alert('30MB 이하 파일만 가능합니다.'); return; }
-  const reader = new FileReader();
-  reader.onloadend = () => {
-    if (type==='ppt') {
-      state.pptDataUrl=reader.result; state.pptFilename=file.name;
-      document.getElementById('updatePptArea').classList.add('has-file');
-      document.getElementById('updatePptText').textContent='✓ '+file.name;
-    } else {
-      state.wsDataUrl=reader.result; state.wsFilename=file.name;
-      document.getElementById('updateWsArea').classList.add('has-file');
-      document.getElementById('updateWsText').textContent='✓ '+file.name;
-    }
-  };
-  reader.readAsDataURL(file);
-}
-
-async function submitFileUpdate() {
-  showLoading('자료 수정 중...');
-  await saveSubmission(false);
-  await refreshCurrentSubmission();
-  hideLoading();
-  document.getElementById('updateFilesModal').remove();
-  showMySubmission();
-  alert('자료가 수정되었습니다!');
-}
-async function requestHelp(sentenceIdx, sentenceText) {
-  if (!state.submissionId) { alert('먼저 스크립트를 제출하고 녹음해주세요.'); return; }
-  if (!confirm(`"${sentenceText.substring(0,40)}..." 문장에 대해 교사에게 도움을 요청하시겠습니까?`)) return;
-  try {
-    const res = await fetch('/api/help', {
-      method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        submissionId: state.submissionId,
-        studentId: state.user.id,
-        studentName: state.user.name,
-        classId: state.user.classId,
-        sentenceIndex: sentenceIdx,
-        sentenceText
-      })
+    var okCount = state.sentenceStatuses.filter(function(s) { return s === 'ok'; }).length;
+    if (okCount < state.sentences.length) { alert('아직 통과하지 못한 문장이 있어요!'); return; }
+    if (!confirm('최종 제출하시겠습니까?\n제출 후에도 제출 내역 보기에서 확인할 수 있어요.')) return;
+    showLoading('최종 제출 중...');
+    await saveSubmission(true);
+    state.currentSubmissionData = Object.assign({}, state.currentSubmissionData || {}, {
+        ppt_url: state.pptDataUrl, ppt_filename: state.pptFilename,
+        worksheet_url: state.wsDataUrl, worksheet_filename: state.wsFilename,
+        submitted_at: (state.currentSubmissionData && state.currentSubmissionData.submitted_at) || new Date().toISOString(),
+        final_submitted_at: new Date().toISOString(),
+        ppt_updated_at: state.pptDataUrl ? new Date().toISOString() : null,
+        worksheet_updated_at: state.wsDataUrl ? new Date().toISOString() : null,
     });
-    const data = await res.json();
-    if (data.success) {
-      alert('✅ 교사에게 도움 요청을 보냈어요!\n교사 승인 후 해당 문장이 통과 처리됩니다.');
+    await refreshCurrentSubmission();
+    hideLoading();
+    document.getElementById('mySubmitViewBtn').style.display = 'inline-flex';
+    showMySubmission();
+}
+
+function showMySubmission() {
+    var r = state.lastResult;
+    var sub = state.currentSubmissionData || {};
+    var approvedList = state.teacherApprovedSentences || [];
+    var userName = state.user ? state.user.name : '';
+    var bookName = state.currentBook ? (state.currentBook.book || '') : '';
+    var okCount = state.sentenceStatuses.filter(function(s) { return s === 'ok'; }).length;
+    var submittedAt = sub.submitted_at ? new Date(sub.submitted_at).toLocaleString('ko-KR') : '-';
+    var finalSubmittedAt = sub.final_submitted_at ? new Date(sub.final_submitted_at).toLocaleString('ko-KR') : '-';
+    var pptUpdatedAt = sub.ppt_updated_at ? new Date(sub.ppt_updated_at).toLocaleString('ko-KR') : '';
+    var wsUpdatedAt = sub.worksheet_updated_at ? new Date(sub.worksheet_updated_at).toLocaleString('ko-KR') : '';
+    var pfb = r ? (r.pronunciationFeedback || r.pronunciation_feedback || '-') : '-';
+    var cfb = r ? (r.contentFeedback || r.content_feedback || '-') : '-';
+    var ffb = r ? (r.fluencyFeedback || r.fluency_feedback || '-') : '-';
+    var ofb = r ? (r.overallFeedback || r.overall_feedback || '-') : '-';
+
+    var pptSection = '<div style="color:var(--text3);font-size:13px;">제출 없음</div>';
+    if (state.pptDataUrl) {
+        pptSection = '<a href="' + state.pptDataUrl + '" download="' + state.pptFilename + '" class="btn btn-ghost btn-sm" style="margin-bottom:8px;">📥 ' + state.pptFilename + '</a>';
+        if (pptUpdatedAt) pptSection += '<div style="font-size:11px;color:var(--text3);margin-top:4px;">수정: ' + pptUpdatedAt + '</div>';
     }
-  } catch(err) { alert('요청 오류: ' + err.message); }
+    var wsSection = '<div style="color:var(--text3);font-size:13px;">제출 없음</div>';
+    if (state.wsDataUrl) {
+        wsSection = '<a href="' + state.wsDataUrl + '" download="' + state.wsFilename + '" class="btn btn-ghost btn-sm" style="margin-bottom:8px;">📥 ' + state.wsFilename + '</a>';
+        if (wsUpdatedAt) wsSection += '<div style="font-size:11px;color:var(--text3);margin-top:4px;">수정: ' + wsUpdatedAt + '</div>';
+    }
+
+    var sentenceRows = state.sentences.map(function(sent, i) {
+        var isOk = state.sentenceStatuses[i] === 'ok';
+        var teacherOk = approvedList.includes(i);
+        var label = isOk ? (teacherOk ? '✅ 교사 승인' : '✅ 통과') : '❌ 미통과';
+        return '<div style="padding:10px 14px;border-radius:8px;background:' + (isOk ? 'var(--green-bg)' : 'var(--red-bg)') + ';border:1.5px solid ' + (isOk ? 'var(--green-border)' : 'var(--red-border)') + ';font-size:13px;">' +
+            '<span style="font-weight:700;color:' + (isOk ? 'var(--green)' : 'var(--red)') + ';">' + label + '</span>' +
+            '<div style="margin-top:4px;color:var(--text);">' + sent + '</div></div>';
+    }).join('');
+
+    var html =
+        '<div style="max-width:840px;margin:0 auto;padding:32px;">' +
+        '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;flex-wrap:wrap;gap:12px;">' +
+        '<div><h2 style="font-size:22px;font-weight:700;color:var(--text);">📋 나의 제출 내역</h2>' +
+        '<p style="font-size:13px;color:var(--text2);margin-top:4px;">' + userName + ' · 《' + bookName + '》</p></div>' +
+        '<button class="btn btn-ghost" onclick="document.getElementById(\'mySubmissionWrap\').remove();goToStep(3);" style="font-size:13px;">← 결과로 돌아가기</button>' +
+        '</div>' +
+        '<div class="card" style="margin-bottom:16px;"><div class="card-title">제출 정보</div>' +
+        '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;font-size:13px;">' +
+        '<div><span style="color:var(--text2);">최초 제출:</span> <strong>' + submittedAt + '</strong></div>' +
+        '<div><span style="color:var(--text2);">최종 제출:</span> <strong style="color:var(--green);">' + finalSubmittedAt + '</strong></div>' +
+        '<div><span style="color:var(--text2);">총 도전 횟수:</span> <strong>' + state.attemptCount + '회</strong></div>' +
+        '<div><span style="color:var(--text2);">통과 문장:</span> <strong>' + okCount + ' / ' + state.sentences.length + '개</strong></div>' +
+        '</div></div>' +
+        '<div class="card" style="margin-bottom:16px;"><div class="card-title">제출 자료</div>' +
+        '<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">' +
+        '<div><div style="font-size:13px;font-weight:600;color:var(--text2);margin-bottom:8px;">📊 PPT / 발표 자료</div>' + pptSection + '</div>' +
+        '<div><div style="font-size:13px;font-weight:600;color:var(--text2);margin-bottom:8px;">📝 활동지</div>' + wsSection + '</div>' +
+        '</div></div>' +
+        '<div class="card" style="margin-bottom:16px;"><div class="card-title">문장별 발화 결과</div>' +
+        '<div style="display:flex;flex-direction:column;gap:8px;">' + sentenceRows + '</div></div>' +
+        '<div class="card"><div class="card-title">AI 피드백</div><div class="feedback-grid">' +
+        '<div class="feedback-item"><div class="feedback-icon">🔊</div><div class="feedback-title">발음</div><div class="feedback-text">' + pfb + '</div></div>' +
+        '<div class="feedback-item"><div class="feedback-icon">📖</div><div class="feedback-title">내용</div><div class="feedback-text">' + cfb + '</div></div>' +
+        '<div class="feedback-item"><div class="feedback-icon">💬</div><div class="feedback-title">유창성</div><div class="feedback-text">' + ffb + '</div></div>' +
+        '<div class="feedback-item"><div class="feedback-icon">⭐</div><div class="feedback-title">종합</div><div class="feedback-text">' + ofb + '</div></div>' +
+        '</div></div></div>';
+
+    var wrap = document.createElement('div');
+    wrap.id = 'mySubmissionWrap';
+    wrap.style.cssText = 'position:fixed;inset:0;background:var(--white);z-index:200;overflow-y:auto;';
+    wrap.innerHTML = html;
+    document.body.appendChild(wrap);
 }
+
 function toBase64(blob) {
-  return new Promise((resolve,reject)=>{
-    const reader=new FileReader();
-    reader.onloadend=()=>resolve(reader.result.split(',')[1]);
-    reader.onerror=reject;
-    reader.readAsDataURL(blob);
-  });
+    return new Promise(function(resolve, reject) {
+        var reader = new FileReader();
+        reader.onloadend = function() { resolve(reader.result.split(',')[1]); };
+        reader.onerror = reject;
+        reader.readAsDataURL(blob);
+    });
 }
-function showLoading(t,s){
-  document.getElementById('loadingOverlay').classList.add('active');
-  document.getElementById('loadingText').textContent=t||'처리 중...';
-  document.getElementById('loadingStep').textContent=s||'';
-}
-function setLoadingStep(s){document.getElementById('loadingStep').textContent=s;}
-function hideLoading(){document.getElementById('loadingOverlay').classList.remove('active');}
 </script>
 </body>
 </html>
