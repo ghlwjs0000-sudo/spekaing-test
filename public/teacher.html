@@ -762,9 +762,16 @@ async function openDetail(id) {
   const freshData = await freshRes.json();
   hideLoading();
   const fresh = Array.isArray(freshData) && freshData[0] ? freshData[0] : s;
-  const sents = s.sentences || [];
-  const srs = s.sentence_results || [];
-  const approvedList = s.teacher_approved_sentences || [];
+  // 최신 데이터 직접 조회
+  let freshS = s;
+  try {
+    const fr = await fetch('/api/submit?studentId=' + s.student_id);
+    const fd = await fr.json();
+    if (Array.isArray(fd) && fd[0]) freshS = fd[0];
+  } catch(e) {}
+  const sents = freshS.sentences || s.sentences || [];
+  const srs = freshS.sentence_results || s.sentence_results || [];
+  const approvedList = freshS.teacher_approved_sentences || s.teacher_approved_sentences || [];
   document.getElementById('detailSentences').innerHTML = sents.map((sent,i)=>{
     const sr=srs[i]||{};
     const aiOk=sr.status==='ok';
