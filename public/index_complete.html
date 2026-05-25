@@ -838,7 +838,7 @@ async function submitRecording() {
         script: state.script, audioBase64: base64, mimeType: state.audioBlob.type
       })
     });
-    if (!res.ok) { const e = await res.json().catch(() => ({})); throw new Error(e.error || '서버 오류'); }
+   if (!res.ok) { let e = {}; try { e = await res.json(); } catch(ex) {} throw new Error(e.error || '서버 오류'); }
     const result = await res.json();
     state.lastResult = result;
     state.sentences = result.sentences || state.sentences;
@@ -1025,7 +1025,7 @@ async function submitModalRecording() {
         singleSentence: true, sentenceIdx: idx
       })
     });
-    if (!res.ok) { const e = await res.json().catch(() => ({})); throw new Error(e.error || '서버 오류'); }
+    if (!res.ok) { let e = {}; try { e = await res.json(); } catch(ex) {} throw new Error(e.error || '서버 오류'); }
     const result = await res.json();
     hideLoading(); closeModal();
     const sr = (result.sentenceResults || [])[0];
