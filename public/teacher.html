@@ -143,6 +143,10 @@ h2{font-size:20px;font-weight:700;color:var(--text);margin-bottom:4px;}
 <div class="layout">
   <aside class="sidebar">
     <div class="sidebar-section">메뉴</div>
+    <div class="sidebar-item" onclick="showTab('help')" id="tab-help">
+      <span>🆘</span> 교사 호출
+      <span id="helpBadge" style="display:none;background:var(--red);color:#fff;border-radius:999px;font-size:10px;font-weight:700;padding:1px 6px;margin-left:4px;">0</span>
+    </div>
     <div class="sidebar-item active" onclick="showTab('roster')" id="tab-roster"><span>📋</span> 전체 명단</div>
     <div class="sidebar-item" onclick="showTab('submissions')" id="tab-submissions"><span>📊</span> 제출 현황</div>
     <div class="sidebar-item" onclick="showTab('students')" id="tab-students"><span>👥</span> 학생 관리</div>
@@ -152,7 +156,25 @@ h2{font-size:20px;font-weight:700;color:var(--text);margin-bottom:4px;}
   </aside>
 
   <main class="content">
-
+<!-- 교사 호출 -->
+    <div id="panel-help" style="display:none;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:10px;">
+        <div><h2>교사 호출</h2><p class="text-muted">학생이 도움을 요청한 문장을 확인하고 승인하세요.</p></div>
+        <button class="btn btn-primary btn-sm" onclick="loadHelpRequests()">🔄 새로고침</button>
+      </div>
+      <div class="card" style="padding:0;overflow:hidden;">
+        <div class="table-wrap">
+          <table>
+            <thead><tr>
+              <th>학생</th><th>반</th><th>요청 문장</th><th>요청 시각</th><th>처리</th>
+            </tr></thead>
+            <tbody id="helpTable">
+              <tr><td colspan="5" style="text-align:center;color:var(--text3);padding:40px;">교사 호출 요청이 없습니다.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
     <!-- 전체 명단 -->
     <div id="panel-roster">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:10px;">
@@ -383,6 +405,8 @@ async function teacherLogin() {
     buildClassTabs();
     loadClassDropdowns();
     loadRoster();
+    loadHelpBadge();
+    setInterval(loadHelpBadge, 30000);
   } catch(err) { hideLoading(); showErr('loginError','서버 오류: '+err.message); }
 }
 
@@ -400,13 +424,14 @@ function showScreen(name) {
 
 // ── 탭 ──
 function showTab(name) {
-  ['roster','submissions','students','classes'].forEach(t=>{
+  ['help','roster','submissions','students','classes'].forEach(t=>{
     const panel = document.getElementById('panel-'+t);
     const tab = document.getElementById('tab-'+t);
     if(panel) panel.style.display = t===name?'block':'none';
     if(tab) tab.classList.toggle('active', t===name);
   });
   state.currentTab = name;
+  if (name==='help') loadHelpRequests();
   if (name==='roster') loadRoster();
   if (name==='submissions') loadSubmissions();
   if (name==='students') loadStudents();
@@ -428,7 +453,82 @@ function filterByClass(classId, el) {
   if(el) el.classList.add('active');
   filterSubmissions();
 }
+// ── 교사 호출 ──
+async function loadHelpBadge() {
+  try {
+    const classIds = state.teacher?.classIds || [];
+    const isMaster = state.teacher?.isMaster || false;
+    let url = '/api/help?status=pending';
+    if (!isMaster && classIds.length) url += `&classIds=${classIds.join(',')}`;
+    const res = await fetch(url);
+    const data = await res.json();
+    const badge = document.getElementById('helpBadge');
+    if (badge) {
+      badge.textContent = data.length;
+      badge.style.display = data.length ? 'inline' : 'none';
+    }
+  } catch(err) {}
+}
 
+async function loadHelpRequests() {
+  showLoading('교사 호출 목록 로딩 중...');
+  try {
+    const classIds = state.teacher?.classIds || [];
+    const isMaster = state.teacher?.isMaster || false;
+    let url = '/api/help?status=pending';
+    if (!isMaster && classIds.length) url += `&classIds=${classIds.join(',')}`;
+    const res = await fetch(url);
+    const data = await res.json();
+    hideLoading();
+    renderHelpRequests(data);
+    const badge = document.getElementById('helpBadge');
+    if (badge) {
+      badge.textContent = data.length;
+      badge.style.display = data.length ? 'inline' : 'none';
+    }
+  } catch(err) { hideLoading(); alert('로딩 오류: ' + err.message); }
+}
+
+function renderHelpRequests(data) {
+  const tbody = document.getElementById('helpTable');
+  if (!data.length) {
+    tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;color:var(--text3);padding:40px;">🎉 교사 호출 요청이 없습니다.</td></tr>`;
+    return;
+  }
+  tbody.innerHTML = data.map(r => {
+    const cls = state.classes.find(c => c.id === r.class_id);
+    const t = new Date(r.created_at).toLocaleString('ko-KR',{month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'});
+    return `<tr>
+      <td style="font-weight:600;">${r.student_name||'-'}</td>
+      <td>${cls?`<span class="badge badge-blue">${cls.name}</span>`:'-'}</td>
+      <td style="max-width:280px;font-size:13px;">${r.sentence_text||'-'}</td>
+      <td style="color:var(--text3);font-size:12px;">${t}</td>
+      <td style="display:flex;gap:6px;">
+        <button class="btn btn-success btn-sm" onclick="handleHelpRequest('${r.id}','approve','${r.submission_id}',${r.sentence_index})">✅ 승인</button>
+        <button class="btn btn-danger btn-sm" onclick="handleHelpRequest('${r.id}','reject','${r.submission_id}',${r.sentence_index})">❌ 거절</button>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+async function handleHelpRequest(id, action, submissionId, sentenceIndex) {
+  const label = action==='approve'?'승인':'거절';
+  if (!confirm(`이 요청을 ${label}하시겠습니까?`)) return;
+  showLoading(`${label} 처리 중...`);
+  try {
+    await fetch('/api/help', {
+      method: 'PATCH', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id, action, submissionId, sentenceIndex })
+    });
+    hideLoading();
+    await loadHelpRequests();
+    await loadSubmissions();
+    if (action==='approve') alert('✅ 승인되었습니다! 학생의 해당 문장이 통과 처리됩니다.');
+    else alert('거절되었습니다.');
+  } catch(err) { hideLoading(); alert('오류: ' + err.message); }
+}
+
+// ── 전체 명단 ──
 // ── 전체 명단 ──
 let rosterData = [];
 let rosterClassFilter = '';
