@@ -684,7 +684,8 @@ async function saveSubmissionLight() {
             aiScore: r.total, finalScore: r.total, grade: r.grade,
             pronunciation: r.pronunciation, content: r.content,
             fluency: r.fluency, completeness: r.completeness,
-            sentences: state.sentences, sentenceResults: r.sentenceResults,
+            sentences: state.sentences, 
+            sentenceResults: r.sentenceResults || state.lastResult?.sentenceResults || [],
             attemptCount: state.attemptCount,
             isPassed: state.sentenceStatuses.every(function(s) { return s === 'ok'; }),
             isFinalSubmitted: false,
@@ -852,6 +853,7 @@ async function submitRecording() {
           throw new Error('응답 파싱 오류: ' + resultText.substring(0, 300));
         }
         state.lastResult = result;
+        state.lastResult.sentenceResults = result.sentenceResults || [];
         state.sentences = result.sentences || state.sentences;
         var approvedList = state.teacherApprovedSentences || [];
 state.sentenceStatuses = (result.sentenceResults || []).map(function(sr) {
