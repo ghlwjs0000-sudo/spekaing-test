@@ -723,7 +723,13 @@ function renderSubmissions(data) {
 
 // ── 제출 상세 ──
 async function openDetail(id) {
-  await loadSubmissions();
+  showLoading('최신 데이터 로딩 중...');
+  try {
+    const freshRes = await fetch('/api/teacher?action=submissions');
+    const freshData = await freshRes.json();
+    if (Array.isArray(freshData)) state.submissions = freshData;
+  } catch(e) {}
+  hideLoading();
   const s = state.submissions.find(x=>x.id===id);
   if (!s) return;
   state.currentDetail = s;
@@ -756,9 +762,9 @@ async function openDetail(id) {
   const freshData = await freshRes.json();
   hideLoading();
   const fresh = Array.isArray(freshData) && freshData[0] ? freshData[0] : s;
-  const sents = fresh.sentences || s.sentences || [];
-  const srs = fresh.sentence_results || s.sentence_results || [];
-  const approvedList = fresh.teacher_approved_sentences || s.teacher_approved_sentences || [];
+  const sents = s.sentences || [];
+  const srs = s.sentence_results || [];
+  const approvedList = s.teacher_approved_sentences || [];
   document.getElementById('detailSentences').innerHTML = sents.map((sent,i)=>{
     const sr=srs[i]||{};
     const aiOk=sr.status==='ok';
