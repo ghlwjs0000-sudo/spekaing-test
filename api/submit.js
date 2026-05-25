@@ -49,7 +49,9 @@ module.exports = async (req, res) => {
     // 기존 제출 확인
     const existing = await supabaseReq('GET', 'submissions', null, `?student_id=eq.${studentId}&select=id`);
     const existingId = Array.isArray(existing) && existing.length ? existing[0].id : null;
-
+// 기존 teacher_approved_sentences 보존
+    const existingFull = existingId ? await supabaseReq('GET', 'submissions', null, `?id=eq.${existingId}&select=teacher_approved_sentences,final_speaking_result,final_speaking_history,final_speaking_audio,final_speaking_mime,final_speaking_at,is_final_speaking_submitted`) : null;
+    const existingData = Array.isArray(existingFull) && existingFull[0] ? existingFull[0] : {};
     const payload = {
       student_id: studentId,
       student_name: studentName,
@@ -81,14 +83,14 @@ module.exports = async (req, res) => {
       overall_feedback: overallFeedback || null,
       transcript: transcript || null,
       updated_at: new Date().toISOString(),
-      teacher_approved_sentences: teacherApprovedSentences || [],
+      teacher_approved_sentences: teacherApprovedSentences !== undefined ? teacherApprovedSentences : (existingData.teacher_approved_sentences || []),
       is_final_submitted: isFinalSubmitted || false,
       final_submitted_at: isFinalSubmitted ? new Date().toISOString() : undefined,
-      is_final_speaking_submitted: isFinalSpeakingSubmitted || false,
-      final_speaking_audio: finalSpeakingAudio || undefined,
-      final_speaking_mime: finalSpeakingMimeType || undefined,
-      final_speaking_result: finalSpeakingResult || undefined,
-      final_speaking_at: finalSpeakingAt || undefined,
+      is_final_speaking_submitted: isFinalSpeakingSubmitted || existingData.is_final_speaking_submitted || false,
+      final_speaking_audio: finalSpeakingAudio || existingData.final_speaking_audio || undefined,
+      final_speaking_mime: finalSpeakingMimeType || existingData.final_speaking_mime || undefined,
+      final_speaking_result: finalSpeakingResult || existingData.final_speaking_result || undefined,
+      final_speaking_at: finalSpeakingAt || existingData.final_speaking_at || undefined,
       ppt_updated_at: pptDataUrl ? new Date().toISOString() : undefined,
       worksheet_updated_at: worksheetDataUrl ? new Date().toISOString() : undefined,
     };
