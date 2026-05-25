@@ -170,11 +170,10 @@ module.exports = async (req, res) => {
       return res.status(200).json({ success: true });
     }
 
-    // 문장별 교사 승인
+   // 문장별 교사 승인
     if (action === 'approveSentence' && req.method === 'PATCH') {
       const { id, sentenceIndex, approved } = req.body;
-      // 현재 승인 목록 가져오기
-      const current = await sb('GET', 'submissions', null, `?id=eq.${id}&select=teacher_approved_sentences,sentences,sentence_results,is_passed`);
+      const current = await sb('GET', 'submissions', null, `?id=eq.${id}&select=teacher_approved_sentences,sentences,sentence_results,is_passed,pronunciation,fluency,content,final_speaking_result`);
       if (!current.length) return res.status(404).json({ error: '제출 없음' });
       const sub = current[0];
       let approved_list = sub.teacher_approved_sentences || [];
@@ -183,23 +182,17 @@ module.exports = async (req, res) => {
       } else {
         approved_list = approved_list.filter(i => i !== sentenceIndex);
       }
-      // 모든 문장 통과 여부 확인 (AI 통과 + 교사 승인 합산)
       const sentences = sub.sentences || [];
       const srs = sub.sentence_results || [];
       const allPassed = sentences.every((_, i) => {
-        const aiOk = srs[i]?.status === 'ok';
-        const teacherOk = approved_list.includes(i);
-        return aiOk || teacherOk;
+        return srs[i]?.status === 'ok' || approved_list.includes(i);
       });
-     // 현재 점수 및 최종 말하기 결과 가져오기
-      const scoreData = await sb('GET', 'submissions', null, `?id=eq.${id}&select=pronunciation,fluency,content,final_speaking_result`);
-      const scoreRow = Array.isArray(scoreData) && scoreData[0] ? scoreData[0] : {};
-      const finalResult = scoreRow.final_speaking_result || {};
-      const pronunciation = finalResult.pronunciation || scoreRow.pronunciation || 0;
-      const fluency = finalResult.fluency || scoreRow.fluency || 0;
-      const baseContent = finalResult.content || scoreRow.content || 0;
 
-      // 승인 문장 비율로 점수 보정
+      // 점수 재계산
+      const finalResult = sub.final_speaking_result || {};
+      const pronunciation = finalResult.pronunciation || sub.pronunciation || 0;
+      const fluency = finalResult.fluency || sub.fluency || 0;
+      const baseContent = finalResult.content || sub.content || 0;
       const totalSents = sentences.length;
       const aiOkCount = srs.filter(sr => sr && sr.status === 'ok').length;
       const totalOk = Math.min(totalSents, aiOkCount + approved_list.length);
@@ -208,82 +201,6 @@ module.exports = async (req, res) => {
       const newContent = Math.min(30, baseContent + contentBonus);
       const newTotal = pronunciation + newContent + fluency + completenessScore;
       const newGrade = newTotal >= 90 ? 'A+' : newTotal >= 80 ? 'A' : newTotal >= 70 ? 'B+' : newTotal >= 60 ? 'B' : newTotal >= 50 ? 'C+' : newTotal >= 40 ? 'C' : 'D';
-
-      const updatedResult = Object.assign({}, finalResult, {
-        content: newContent,
-        completeness: completenessScore,
-        total: newTotal,
-        grade: newGrade
-      });
-
-      // 현재 점수 및 최종 말하기 결과 가져오기
-      const scoreData = await sb('GET', 'submissions', null, `?id=eq.${id}&select=pronunciation,fluency,content,final_speaking_result`);
-      const scoreRow = Array.isArray(scoreData) && scoreData[0] ? scoreData[0] : {};
-      const finalResult = scoreRow.final_speaking_result || {};
-      const pronunciation = finalResult.pronunciation || scoreRow.pronunciation || 0;
-      const fluency = finalResult.fluency || scoreRow.fluency || 0;
-      const baseContent = finalResult.content || scoreRow.content || 0;
-
-      // 승인 문장 비율로 점수 보정
-      const totalSents = sentences.length;
-      const aiOkCount = srs.filter(sr => sr && sr.status === 'ok').length;
-      const totalOk = Math.min(totalSents, aiOkCount + approved_list.length);
-      const completenessScore = totalSents > 0 ? Math.round((totalOk / totalSents) * 10) : 0;
-      const contentBonus = totalSents > 0 ? Math.round((approved_list.length / totalSents) * 10) : 0;
-      const newContent = Math.min(30, baseContent + contentBonus);
-      const newTotal = pronunciation + newContent + fluency + completenessScore;
-      const newGrade = newTotal >= 90 ? 'A+' : newTotal >= 80 ? 'A' : newTotal >= 70 ? 'B+' : newTotal >= 60 ? 'B' : newTotal >= 50 ? 'C+' : newTotal >= 40 ? 'C' : 'D';
-
-      const updatedResult = Object.assign({}, finalResult, {
-        content: newContent,
-        completeness: completenessScore,
-        total: newTotal,
-        grade: newGrade
-      });
-
-      // 현재 점수 및 최종 말하기 결과 가져오기
-      const scoreData = await sb('GET', 'submissions', null, `?id=eq.${id}&select=pronunciation,fluency,content,final_speaking_result`);
-      const scoreRow = Array.isArray(scoreData) && scoreData[0] ? scoreData[0] : {};
-      const finalResult = scoreRow.final_speaking_result || {};
-      const pronunciation = finalResult.pronunciation || scoreRow.pronunciation || 0;
-      const fluency = finalResult.fluency || scoreRow.fluency || 0;
-      const baseContent = finalResult.content || scoreRow.content || 0;
-
-      // 승인 문장 비율로 점수 보정
-      const totalSents = sentences.length;
-      const aiOkCount = srs.filter(sr => sr && sr.status === 'ok').length;
-      const totalOk = Math.min(totalSents, aiOkCount + approved_list.length);
-      const completenessScore = totalSents > 0 ? Math.round((totalOk / totalSents) * 10) : 0;
-      const contentBonus = totalSents > 0 ? Math.round((approved_list.length / totalSents) * 10) : 0;
-      const newContent = Math.min(30, baseContent + contentBonus);
-      const newTotal = pronunciation + newContent + fluency + completenessScore;
-      const newGrade = newTotal >= 90 ? 'A+' : newTotal >= 80 ? 'A' : newTotal >= 70 ? 'B+' : newTotal >= 60 ? 'B' : newTotal >= 50 ? 'C+' : newTotal >= 40 ? 'C' : 'D';
-
-      const updatedResult = Object.assign({}, finalResult, {
-        content: newContent,
-        completeness: completenessScore,
-        total: newTotal,
-        grade: newGrade
-      });
-
-    // 현재 점수 및 최종 말하기 결과 가져오기
-      const scoreData = await sb('GET', 'submissions', null, `?id=eq.${id}&select=pronunciation,fluency,content,final_speaking_result`);
-      const scoreRow = Array.isArray(scoreData) && scoreData[0] ? scoreData[0] : {};
-      const finalResult = scoreRow.final_speaking_result || {};
-      const pronunciation = finalResult.pronunciation || scoreRow.pronunciation || 0;
-      const fluency = finalResult.fluency || scoreRow.fluency || 0;
-      const baseContent = finalResult.content || scoreRow.content || 0;
-
-      // 승인 문장 비율로 점수 보정
-      const totalSents = sentences.length;
-      const aiOkCount = srs.filter(sr => sr && sr.status === 'ok').length;
-      const totalOk = Math.min(totalSents, aiOkCount + approved_list.length);
-      const completenessScore = totalSents > 0 ? Math.round((totalOk / totalSents) * 10) : 0;
-      const contentBonus = totalSents > 0 ? Math.round((approved_list.length / totalSents) * 10) : 0;
-      const newContent = Math.min(30, baseContent + contentBonus);
-      const newTotal = pronunciation + newContent + fluency + completenessScore;
-      const newGrade = newTotal >= 90 ? 'A+' : newTotal >= 80 ? 'A' : newTotal >= 70 ? 'B+' : newTotal >= 60 ? 'B' : newTotal >= 50 ? 'C+' : newTotal >= 40 ? 'C' : 'D';
-
       const updatedResult = Object.assign({}, finalResult, {
         content: newContent,
         completeness: completenessScore,
