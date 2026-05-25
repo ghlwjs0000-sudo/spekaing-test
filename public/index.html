@@ -478,6 +478,7 @@ function goToStep(n) {
             if (line) line.className = i < n ? 'step-line done' : 'step-line';
         }
     });
+    if (n === 3) { startPolling(); } else { stopPolling(); }
     window.scrollTo(0, 0);
 }
 
@@ -1110,6 +1111,46 @@ function toBase64(blob) {
         reader.onerror = reject;
         reader.readAsDataURL(blob);
     });
+}
+// ── 교사 승인 실시간 반영 폴링 ──
+var pollingInterval = null;
+
+function startPolling() {
+    if (pollingInterval) return;
+    pollingInterval = setInterval(async function() {
+        if (!state.user || !state.submissionId) return;
+        try {
+            var res = await fetch('/api/submit?studentId=' + state.user.id);
+            var data = await res.json();
+            if (!Array.isArray(data) || !data.length) return;
+            var prev = data[0];
+            var newApproved = prev.teacher_approved_sentences || [];
+            var oldApproved = state.teacherApprovedSentences || [];
+            // 새로 승인된 문장이 있으면 반영
+            if (newApproved.length !== oldApproved.length ||
+                newApproved.some(function(i) { return !oldApproved.includes(i); })) {
+                state.teacherApprovedSentences = newApproved;
+                newApproved.forEach(function(i) {
+                    state.sentenceStatuses[i] = 'ok';
+                });
+                updateGoalUI();
+                // 문장 아이템 UI 업데이트
+                newApproved.forEach(function(i) {
+                    var item = document.getElementById('sentItem' + i);
+                    if (item && !item.classList.contains('ok')) {
+                        updateSentItem(i, 'ok', { issue: '' });
+                        // 교사 승인 표시
+                        var icon = item.querySelector('.sentence-icon');
+                        if (icon) icon.textContent = '✅ 교사 승인';
+                    }
+                });
+            }
+        } catch (err) { console.error('폴링 오류:', err); }
+    }, 10000); // 10초마다
+}
+
+function stopPolling() {
+    if (pollingInterval) { clearInterval(pollingInterval); pollingInterval = null; }
 }
 </script>
 </body>
