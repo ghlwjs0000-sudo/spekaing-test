@@ -1906,7 +1906,16 @@
   <div class="feedback-item"><div class="feedback-icon">📖</div><div class="feedback-title">내용</div><div class="feedback-text">${r?.contentFeedback || r?.content_feedback || '-'}</div></div>
         <div class="feedback-item"><div class="feedback-icon">💬</div><div class="feedback-title">유창성</div><div class="feedback-text">${r?.fluencyFeedback || r?.fluency_feedback || '-'}</div></div>
         <div class="feedback-item"><div class="feedback-icon">⭐</div><div class="feedback-title">종합</div><div class="feedback-text">${r?.overallFeedback || r?.overall_feedback || '-'}</div></div>
-  `;
+      </div>
+    </div>
+  </div>`;
+
+  let wrap = document.createElement('div');
+  wrap.id = 'mySubmissionWrap';
+  wrap.style.cssText = 'position:fixed;inset:0;background:var(--white);z-index:200;overflow-y:auto;';
+  wrap.innerHTML = html;
+  document.body.appendChild(wrap);
+}
 
   let wrap = document.createElement('div');
   wrap.id = 'mySubmissionWrap';
@@ -1916,5 +1925,4 @@
 }
     </script>
 </body>
-
 </html>
