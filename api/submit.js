@@ -42,7 +42,8 @@ module.exports = async (req, res) => {
       sentences, sentenceResults, attemptCount, isPassed,
       pptDataUrl, pptFilename, worksheetDataUrl, worksheetFilename,
      pronunciationFeedback, contentFeedback, fluencyFeedback, overallFeedback, transcript,
-      teacherApprovedSentences, isFinalSubmitted, pptUpdatedAt, worksheetUpdatedAt
+      teacherApprovedSentences, isFinalSubmitted, pptUpdatedAt, worksheetUpdatedAt,
+      isFinalSpeakingSubmitted, finalSpeakingAudio, finalSpeakingMimeType, finalSpeakingResult, finalSpeakingAt
     } = req.body;
 
     // 기존 제출 확인
@@ -83,6 +84,11 @@ module.exports = async (req, res) => {
       teacher_approved_sentences: teacherApprovedSentences || [],
       is_final_submitted: isFinalSubmitted || false,
       final_submitted_at: isFinalSubmitted ? new Date().toISOString() : undefined,
+      is_final_speaking_submitted: isFinalSpeakingSubmitted || false,
+      final_speaking_audio: finalSpeakingAudio || undefined,
+      final_speaking_mime: finalSpeakingMimeType || undefined,
+      final_speaking_result: finalSpeakingResult || undefined,
+      final_speaking_at: finalSpeakingAt || undefined,
       ppt_updated_at: pptDataUrl ? new Date().toISOString() : undefined,
       worksheet_updated_at: worksheetDataUrl ? new Date().toISOString() : undefined,
     };
