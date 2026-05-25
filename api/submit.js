@@ -89,35 +89,17 @@ module.exports = async (req, res) => {
       final_speaking_mime: finalSpeakingMimeType || undefined,
       final_speaking_result: finalSpeakingResult || undefined,
       final_speaking_at: finalSpeakingAt || undefined,
-      final_speaking_history: isFinalSpeakingSubmitted ? { append: true } : undefined,
       ppt_updated_at: pptDataUrl ? new Date().toISOString() : undefined,
       worksheet_updated_at: worksheetDataUrl ? new Date().toISOString() : undefined,
     };
 
-    let result;
+   let result;
     if (existingId) {
-      // 최종 말하기 제출이면 히스토리에 추가
       if (isFinalSpeakingSubmitted && finalSpeakingResult) {
-        const current = await supabaseReq('GET', 'submissions', null, `?id=eq.${existingId}&select=final_speaking_history`);
-        const history = (Array.isArray(current) && current[0]?.final_speaking_history) || [];
+        const current = await supabaseReq('GET', 'submissions', null, `?id=eq.${existingId}&select=final_speaking_history,attempt_count`);
+        const prev = Array.isArray(current) && current[0] ? current[0] : {};
+        const history = prev.final_speaking_history || [];
         history.push({
-          result: finalSpeakingResult,
-          audio: finalSpeakingAudio,
-          mime: finalSpeakingMimeType,
-          at: finalSpeakingAt || new Date().toISOString()
-        });
-        payload.final_speaking_history = history;
-        // 최종 말하기 후 학생 화면 초기화용
-        payload.sentence_results = [];
-        payload.attempt_count = (payload.attempt_count || 0);
-        payload.is_passed = false;
-        payload.teacher_approved_sentences = [];
-      }
-      delete payload.final_speaking_history;
-      if (isFinalSpeakingSubmitted && finalSpeakingResult) {
-        const current2 = await supabaseReq('GET', 'submissions', null, `?id=eq.${existingId}&select=final_speaking_history`);
-        const history2 = (Array.isArray(current2) && current2[0]?.final_speaking_history) || [];
-        history2.push({
           result: finalSpeakingResult,
           audio: finalSpeakingAudio,
           mime: finalSpeakingMimeType,
