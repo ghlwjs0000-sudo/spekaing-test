@@ -1098,63 +1098,173 @@ function showMySubmission() {
   const r = state.lastResult;
   const sub = state.currentSubmissionData || {};
   const approvedList = state.teacherApprovedSentences || [];
-  let html = `<div style="max-width:840px;margin:0 auto;padding:32px;">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;flex-wrap:wrap;gap:12px;">
-      <div><h2 style="font-size:22px;font-weight:700;color:var(--text);">📋 나의 제출 내역</h2>
-      <p style="font-size:13px;color:var(--text2);margin-top:4px;">${state.user?.name} · 《${state.currentBook?.book || ''}》</p></div>
-      <div style="display:flex;gap:8px;">
-        <button class="btn btn-ghost" onclick="showUpdateFiles()" style="font-size:13px;">📎 자료 수정</button>
-        <button class="btn btn-ghost" onclick="document.getElementById('mySubmissionWrap').remove();goToStep(3);" style="font-size:13px;">← 결과로 돌아가기</button>
-      </div>
+  let wrap = document.getElementById('mySubmissionWrap');
+  if (!wrap) {
+    wrap = document.createElement('div');
+    wrap.id = 'mySubmissionWrap';
+    wrap.style.cssText = 'position:fixed;inset:0;background:var(--bg);z-index:300;overflow-y:auto;padding-top:60px;';
+    document.body.appendChild(wrap);
+  }
+  wrap.innerHTML = '';
+  const cont = document.createElement('div');
+  cont.style.cssText = 'max-width:840px;margin:0 auto;padding:32px;';
+  // 헤더
+  const hdr = document.createElement('div');
+  hdr.style.cssText = 'display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;flex-wrap:wrap;gap:12px;';
+  hdr.innerHTML = `
+    <div>
+      <h2 style="font-size:22px;font-weight:700;color:var(--text);">📋 나의 제출 내역</h2>
+      <p style="font-size:13px;color:var(--text2);margin-top:4px;">${state.user?.name} · 《${state.currentBook?.book||''}》</p>
     </div>
-    <div class="card" style="margin-bottom:16px;">
-      <div class="card-title">제출 정보</div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;font-size:13px;">
-        <div><span style="color:var(--text2);">최초 제출:</span> <strong>${sub.submitted_at ? new Date(sub.submitted_at).toLocaleString('ko-KR') : '-'}</strong></div>
-        <div><span style="color:var(--text2);">최종 제출:</span> <strong style="color:var(--green);">${sub.final_submitted_at ? new Date(sub.final_submitted_at).toLocaleString('ko-KR') : '-'}</strong></div>
-        <div><span style="color:var(--text2);">총 도전 횟수:</span> <strong>${state.attemptCount}회</strong></div>
-        <div><span style="color:var(--text2);">통과 문장:</span> <strong>${state.sentenceStatuses.filter(s => s === 'ok').length} / ${state.sentences.length}개</strong></div>
+    <div style="display:flex;gap:8px;">
+      <button class="btn btn-ghost" onclick="showUpdateFiles()">📎 자료 수정</button>
+      <button class="btn btn-ghost" onclick="document.getElementById('mySubmissionWrap').remove();goToStep(3);">← 결과로 돌아가기</button>
+    </div>`;
+  cont.appendChild(hdr);
+  // 제출 정보
+  const info = document.createElement('div');
+  info.className = 'card';
+  info.style.marginBottom = '16px';
+  info.innerHTML = `
+    <div class="card-title">제출 정보</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;font-size:13px;">
+      <div><span style="color:var(--text2);">최초 제출:</span> <strong>${sub.submitted_at?new Date(sub.submitted_at).toLocaleString('ko-KR'):'-'}</strong></div>
+      <div><span style="color:var(--text2);">최종 제출:</span> <strong style="color:var(--green);">${sub.final_submitted_at?new Date(sub.final_submitted_at).toLocaleString('ko-KR'):'-'}</strong></div>
+      <div><span style="color:var(--text2);">총 도전 횟수:</span> <strong>${state.attemptCount}회</strong></div>
+      <div><span style="color:var(--text2);">통과 문장:</span> <strong>${state.sentenceStatuses.filter(s=>s==='ok').length} / ${state.sentences.length}개</strong></div>
+    </div>`;
+  cont.appendChild(info);
+  // 자료
+  const files = document.createElement('div');
+  files.className = 'card';
+  files.style.marginBottom = '16px';
+  files.innerHTML = `<div class="card-title">제출 자료</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+      <div>
+        <div style="font-size:13px;font-weight:600;color:var(--text2);margin-bottom:8px;">📊 PPT</div>
+        ${state.pptDataUrl?`<a href="${state.pptDataUrl}" download="${state.pptFilename}" class="btn btn-ghost btn-sm">📥 ${state.pptFilename}</a>${sub.ppt_updated_at?`<div style="font-size:11px;color:var(--text3);margin-top:4px;">수정: ${new Date(sub.ppt_updated_at).toLocaleString('ko-KR')}</div>`:'`'}`:
+        '<div style="color:var(--text3);font-size:13px;">제출 없음</div>'}
       </div>
-    </div>
-    <div class="card" style="margin-bottom:16px;">
-      <div class="card-title">제출 자료</div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
-        <div>
-          <div style="font-size:13px;font-weight:600;color:var(--text2);margin-bottom:8px;">📊 PPT / 발표 자료</div>
-          ${state.pptDataUrl ? `
-            <a href="${state.pptDataUrl}" download="${state.pptFilename}" class="btn btn-ghost btn-sm" style="margin-bottom:8px;">📥 ${state.pptFilename}</a>
-            ${state.pptFilename?.endsWith('.pdf') ? `<embed src="${state.pptDataUrl}" type="application/pdf" width="100%" height="180px" style="border-radius:6px;border:1px solid var(--border);margin-top:6px;">` : ''}
-            ${state.pptFilename?.match(/\.(jpg|jpeg|png|gif|webp)$/i) ? `<img src="${state.pptDataUrl}" style="max-width:100%;max-height:180px;border-radius:6px;border:1px solid var(--border);margin-top:6px;">` : ''}
-            ${sub.ppt_updated_at ? `<div style="font-size:11px;color:var(--text3);margin-top:4px;">수정: ${new Date(sub.ppt_updated_at).toLocaleString('ko-KR')}</div>` : ''}
-          ` : '<div style="color:var(--text3);font-size:13px;">제출 없음</div>'}
+      <div>
+        <div style="font-size:13px;font-weight:600;color:var(--text2);margin-bottom:8px;">📝 활동지</div>
+        ${state.wsDataUrl?`<a href="${state.wsDataUrl}" download="${state.wsFilename}" class="btn btn-ghost btn-sm">📥 ${state.wsFilename}</a>${sub.worksheet_updated_at?`<div style="font-size:11px;color:var(--text3);margin-top:4px;">수정: ${new Date(sub.worksheet_updated_at).toLocaleString('ko-KR')}</div>`:''}`:
+        '<div style="color:var(--text3);font-size:13px;">제출 없음</div>'}
+      </div>
+    </div>`;
+  cont.appendChild(files);
+  // 문장별
+  const sents = document.createElement('div');
+  sents.className = 'card';
+  sents.style.marginBottom = '16px';
+  sents.innerHTML = '<div class="card-title">문장별 발화 결과</div>';
+  const sentList = document.createElement('div');
+  sentList.style.cssText = 'display:flex;flex-direction:column;gap:8px;';
+  state.sentences.forEach((sent, i) => {
+    const isOk = state.sentenceStatuses[i] === 'ok';
+    const teacherOk = approvedList.includes(i);
+    const label = isOk ? (teacherOk ? '✅ 교사 승인' : '✅ 통과') : '❌ 미통과';
+    const div = document.createElement('div');
+    div.style.cssText = `padding:10px 14px;border-radius:8px;background:${isOk?'var(--green-bg)':'var(--red-bg)'};border:1.5px solid ${isOk?'var(--green-border)':'var(--red-border)'};font-size:13px;`;
+    div.innerHTML = `<span style="font-weight:700;color:${isOk?'var(--green)':'var(--red)'};">${label}</span><div style="margin-top:4px;color:var(--text);">${sent}</div>`;
+    sentList.appendChild(div);
+  });
+  sents.appendChild(sentList);
+  cont.appendChild(sents);
+  // 피드백
+  const fb = document.createElement('div');
+  fb.className = 'card';
+  const pfb = r?.pronunciationFeedback||r?.pronunciation_feedback||'-';
+  const cfb = r?.contentFeedback||r?.content_feedback||'-';
+  const ffb = r?.fluencyFeedback||r?.fluency_feedback||'-';
+  const ofb = r?.overallFeedback||r?.overall_feedback||'-';
+  fb.innerHTML = `<div class="card-title">AI 피드백</div>
+    <div class="feedback-grid">
+      <div class="feedback-item"><div class="feedback-icon">🔊</div><div class="feedback-title">발음</div><div class="feedback-text">${pfb}</div></div>
+      <div class="feedback-item"><div class="feedback-icon">📖</div><div class="feedback-title">내용</div><div class="feedback-text">${cfb}</div></div>
+      <div class="feedback-item"><div class="feedback-icon">💬</div><div class="feedback-title">유창성</div><div class="feedback-text">${ffb}</div></div>
+      <div class="feedback-item"><div class="feedback-icon">⭐</div><div class="feedback-title">종합</div><div class="feedback-text">${ofb}</div></div>
+    </div>`;
+  cont.appendChild(fb);
+  wrap.appendChild(cont);
+}
+
+function showUpdateFiles() {
+  const modal = document.createElement('div');
+  modal.id = 'updateFilesModal';
+  modal.style.cssText = 'position:fixed;inset:0;background:rgba(15,23,42,.5);z-index:400;display:flex;align-items:center;justify-content:center;';
+  modal.innerHTML = `<div style="background:var(--white);border-radius:16px;padding:28px;max-width:480px;width:90%;box-shadow:var(--shadow-lg);">
+    <div style="font-size:17px;font-weight:700;margin-bottom:12px;">📎 자료 수정</div>
+    <div style="font-size:13px;color:var(--text2);margin-bottom:16px;">새 파일을 선택하면 기존 파일이 교체됩니다.</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px;">
+      <div>
+        <div style="font-size:13px;font-weight:600;color:var(--text2);margin-bottom:6px;">📊 PPT</div>
+        <div class="upload-area" onclick="document.getElementById('updatePptFile').click()" id="updatePptArea" style="padding:16px;">
+          <div style="font-size:20px;margin-bottom:4px;">📎</div>
+          <div style="font-size:12px;color:var(--text2);" id="updatePptText">${state.pptFilename||'클릭하여 선택'}</div>
         </div>
-        <div>
-          <div style="font-size:13px;font-weight:600;color:var(--text2);margin-bottom:8px;">📝 활동지</div>
-          ${state.wsDataUrl ? `
-            <a href="${state.wsDataUrl}" download="${state.wsFilename}" class="btn btn-ghost btn-sm" style="margin-bottom:8px;">📥 ${state.wsFilename}</a>
-            ${state.wsFilename?.endsWith('.pdf') ? `<embed src="${state.wsDataUrl}" type="application/pdf" width="100%" height="180px" style="border-radius:6px;border:1px solid var(--border);margin-top:6px;">` : ''}
-            ${state.wsFilename?.match(/\.(jpg|jpeg|png|gif|webp)$/i) ? `<img src="${state.wsDataUrl}" style="max-width:100%;max-height:180px;border-radius:6px;border:1px solid var(--border);margin-top:6px;">` : ''}
-            ${sub.worksheet_updated_at ? `<div style="font-size:11px;color:var(--text3);margin-top:4px;">수정: ${new Date(sub.worksheet_updated_at).toLocaleString('ko-KR')}</div>` : ''}
-          ` : '<div style="color:var(--text3);font-size:13px;">제출 없음</div>'}
+        <input type="file" id="updatePptFile" accept="*/*" style="display:none;" onchange="handleUpdateFile('ppt',this)"/>
+      </div>
+      <div>
+        <div style="font-size:13px;font-weight:600;color:var(--text2);margin-bottom:6px;">📝 활동지</div>
+        <div class="upload-area" onclick="document.getElementById('updateWsFile').click()" id="updateWsArea" style="padding:16px;">
+          <div style="font-size:20px;margin-bottom:4px;">📄</div>
+          <div style="font-size:12px;color:var(--text2);" id="updateWsText">${state.wsFilename||'클릭하여 선택'}</div>
         </div>
+        <input type="file" id="updateWsFile" accept="*/*" style="display:none;" onchange="handleUpdateFile('ws',this)"/>
       </div>
     </div>
-    <div class="card" style="margin-bottom:16px;">
-      <div class="card-title">문장별 발화 결과</div>
-      <div style="display:flex;flex-direction:column;gap:8px;">
-        ${state.sentences.map((sent, i) => {
-          const isOk = state.sentenceStatuses[i] === 'ok';
-          const teacherOk = approvedList.includes(i);
-          const label = isOk ? (teacherOk ? '✅ 교사 승인' : '✅ 통과') : '❌ 미통과';
-          return `<div style="padding:10px 14px;border-radius:8px;background:${isOk ? 'var(--green-bg)' : 'var(--red-bg)'};border:1.5px solid ${isOk ? 'var(--green-border)' : 'var(--red-border)'};font-size:13px;">
-            <span style="font-weight:700;color:${isOk ? 'var(--green)' : 'var(--red)'};">${label}</span>
-            <div style="margin-top:4px;color:var(--text);">${sent}</div>
-          </div>`;
-        }).join('')}
-      </div>
+    <div style="display:flex;gap:8px;justify-content:flex-end;">
+      <button class="btn btn-ghost btn-sm" onclick="document.getElementById('updateFilesModal').remove()">취소</button>
+      <button class="btn btn-primary btn-sm" onclick="submitFileUpdate()">수정 제출</button>
     </div>
-    <div class="card">
-      <div class="card-title">AI 피드백</div>
-      <div class="feedback-grid">
-        <div class="feedback-item"><div class="feedback-icon">🔊</div><div class="feedback-title">발음</div><div class="feedback-text">${r?.pronunciationFeedback || r?.pronunciation_feedback || '-'}</div></div>
-        <div class="feedback-item"><div class="feedback-icon">📖</div><div class="feedback-title">내용</div><div class="feedback-text">${r?.contentFeedback || r?.content_feedback 
+  </div>`;
+  document.body.appendChild(modal);
+}
+
+function handleUpdateFile(type, input) {
+  const file = input.files[0];
+  if (!file) return;
+  if (file.size > 30*1024*1024) { alert('30MB 이하 파일만 가능합니다.'); return; }
+  const reader = new FileReader();
+  reader.onloadend = () => {
+    if (type==='ppt') {
+      state.pptDataUrl=reader.result; state.pptFilename=file.name;
+      document.getElementById('updatePptArea').classList.add('has-file');
+      document.getElementById('updatePptText').textContent='✓ '+file.name;
+    } else {
+      state.wsDataUrl=reader.result; state.wsFilename=file.name;
+      document.getElementById('updateWsArea').classList.add('has-file');
+      document.getElementById('updateWsText').textContent='✓ '+file.name;
+    }
+  };
+  reader.readAsDataURL(file);
+}
+
+async function submitFileUpdate() {
+  showLoading('자료 수정 중...');
+  await saveSubmission(false);
+  await refreshCurrentSubmission();
+  hideLoading();
+  document.getElementById('updateFilesModal').remove();
+  showMySubmission();
+  alert('자료가 수정되었습니다!');
+}
+
+function toBase64(blob) {
+  return new Promise((resolve,reject)=>{
+    const reader=new FileReader();
+    reader.onloadend=()=>resolve(reader.result.split(',')[1]);
+    reader.onerror=reject;
+    reader.readAsDataURL(blob);
+  });
+}
+function showLoading(t,s){
+  document.getElementById('loadingOverlay').classList.add('active');
+  document.getElementById('loadingText').textContent=t||'처리 중...';
+  document.getElementById('loadingStep').textContent=s||'';
+}
+function setLoadingStep(s){document.getElementById('loadingStep').textContent=s;}
+function hideLoading(){document.getElementById('loadingOverlay').classList.remove('active');}
+</script>
+</body>
+</html>
