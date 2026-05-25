@@ -868,7 +868,7 @@ function renderResults() {
             '<div class="sentence-actions">' +
             '<button class="tts-btn" onclick="playTTS(\'' + sent.replace(/'/g, "\\'") + '\')">🔊</button>' +
             (isOk ? '' : '<button class="retry-sent-btn" onclick="openSentModal(' + i + ')">🎙️ 재도전</button>') +
-(isOk ? '' : '<button class="tts-btn" style="border-color:#ff4444;color:#ff4444;" onclick="sendSOS(' + i + ', \'' + sent.replace(/'/g, "\\'") + '\')">🆘</button>') +
+'<button class="tts-btn" style="border-color:#ff4444;color:#ff4444;" onclick="sendSOS(' + i + ', \'' + sent.replace(/'/g, "\\'") + '\')">🆘</button>' +
             '</div></div>';
     }).join('');
     var pfb = r.pronunciationFeedback || r.pronunciation_feedback || '';
@@ -996,6 +996,7 @@ function updateSentItem(idx, status, sr) {
         '<div class="sentence-actions">' +
         '<button class="tts-btn" onclick="playTTS(\'' + sent.replace(/'/g, "\\'") + '\')">🔊</button>' +
         (isOk ? '' : '<button class="retry-sent-btn" onclick="openSentModal(' + idx + ')">🎙️ 재도전</button>') +
+'<button class="tts-btn" style="border-color:#ff4444;color:#ff4444;" onclick="sendSOS(' + idx + ', \'' + sent.replace(/'/g, "\\'") + '\')">🆘</button>' +
         '</div>';
 }
 
