@@ -405,6 +405,45 @@ function showScreen(name) {
   document.getElementById('screen-' + name).classList.add('active');
 }
 
+function lockUploadIfFinalSubmitted() {
+  if (!state.currentSubmissionData?.is_final_submitted) return;
+  ['pptUpload','wsUpload'].forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.style.pointerEvents = 'none';
+    el.style.opacity = '.6';
+  });
+  const card = document.getElementById('pptUpload')?.closest('.card');
+  if (card && !card.querySelector('.lock-notice')) {
+    const notice = document.createElement('div');
+    notice.className = 'lock-notice';
+    notice.style.cssText = 'margin-top:10px;padding:8px 12px;background:var(--yellow-bg);border:1.5px solid #fcd34d;border-radius:var(--radius-sm);font-size:12px;color:var(--yellow);';
+    notice.textContent = '🔒 최종 제출 완료 — 자료 수정은 제출 내역 보기에서 가능해요.';
+    card.appendChild(notice);
+  }
+}
+
+function lockUploadIfFinalSubmitted() {
+  if (!state.currentSubmissionData?.is_final_submitted) return;
+  // 업로드 영역 잠금
+  ['pptUpload','wsUpload'].forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.style.pointerEvents = 'none';
+    el.style.opacity = '.6';
+    el.title = '최종 제출 후에는 제출 내역에서만 수정 가능합니다.';
+  });
+  // 안내 문구 추가
+  const card = document.getElementById('pptUpload')?.closest('.card');
+  if (card && !card.querySelector('.lock-notice')) {
+    const notice = document.createElement('div');
+    notice.className = 'lock-notice';
+    notice.style.cssText = 'margin-top:10px;padding:8px 12px;background:var(--yellow-bg);border:1.5px solid #fcd34d;border-radius:var(--radius-sm);font-size:12px;color:var(--yellow);';
+    notice.textContent = '🔒 최종 제출 완료 — 자료 수정은 제출 내역 보기에서 가능해요.';
+    card.appendChild(notice);
+  }
+}
+
 // ── 이전 데이터 불러오기 ──
 async function loadPreviousSubmission() {
   try {
@@ -462,7 +501,13 @@ async function loadPreviousSubmission() {
         sr.status === 'ok' || approvedList.includes(i) ? 'ok' : 'retry'
       );
     }
+// 최종 제출 후 업로드 잠금
+    if (prev.is_final_submitted) {
+      setTimeout(() => lockUploadIfFinalSubmitted(), 500);
+    }
 
+    // 결과가 있으면 3단계로 이동
+    if (prev.attempt_count > 0 && prev.sentence_results && prev.sentence_results.length) {
     // 결과가 있으면 3단계로 이동
     if (prev.attempt_count > 0 && prev.sentence_results && prev.sentence_results.length) {
       state.lastResult = {
@@ -872,13 +917,15 @@ function goToStep2Again() {
   document.getElementById('recordTimer').textContent = '00:00';
   document.getElementById('waveform').classList.remove('active');
   state.audioBlob = null;
+  // 교사 승인 문장 제외하고 전체 초기화
+  const approvedList = state.teacherApprovedSentences || [];
+  state.sentenceStatuses = state.sentences.map((_, i) =>
+    approvedList.includes(i) ? 'ok' : 'retry'
+  );
   updateAttemptUI();
-  if (state.lastResult) {
-    const retry = state.sentenceStatuses.filter(s => s === 'retry').length;
-    const ok = state.sentenceStatuses.length - retry;
-    document.getElementById('prevSummary').style.display = 'block';
-    document.getElementById('prevSummary').textContent = `이전 결과: ${ok}개 통과 · ${retry}개 재도전 필요 — 빨간 문장에 집중해서 다시 말해보세요!`;
-  }
+  const prevSummary = document.getElementById('prevSummary');
+  prevSummary.style.display = 'block';
+  prevSummary.textContent = '전체 다시 녹음 — 이전 통과 기록이 초기화되었어요. 처음부터 다시 말해보세요!';
   goToStep(2);
 }
 
@@ -939,14 +986,28 @@ function renderResults() {
 }
 
 // ── TTS ──
+let currentAudio = null;
+
 async function playTTS(text) {
   if (!text) return;
+  if (currentAudio) { currentAudio.pause(); currentAudio = null; }
   if (state.ttsCache[text]) { playAudioBase64(state.ttsCache[text]); return; }
   try {
     const res = await fetch('/api/tts', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ text }) });
     const data = await res.json();
     if (data.audio) { state.ttsCache[text] = data.audio; playAudioBase64(data.audio); }
   } catch(err) { console.error('TTS 오류:', err); }
+}
+
+function stopTTS() {
+  if (currentAudio) { currentAudio.pause(); currentAudio.currentTime = 0; currentAudio = null; }
+}
+
+function playAudioBase64(base64) {
+  currentAudio = new Audio('data:audio/mp3;base64,' + base64);
+  currentAudio.play();
+  currentAudio.onended = () => { currentAudio = null; };
+}
 }
 function playAudioBase64(base64) { new Audio('data:audio/mp3;base64,' + base64).play(); }
 
@@ -1048,8 +1109,10 @@ function updateSentItem(idx, status, sr) {
     <div class="sentence-icon">${isOk ? '✅' : '❌'}</div>
     <div class="sentence-content"><div class="sentence-text">${sent}</div>${issue}</div>
     <div class="sentence-actions">
-      <button class="tts-btn" onclick="playTTS('${sent.replace(/'/g, "\\'")}')">🔊</button>
-      ${isOk ? '' : `<button class="retry-sent-btn" onclick="openSentModal(${idx})">🎙️ 재도전</button>`}
+      <button class="tts-btn" onclick="playTTS('${sent.replace(/'/g, "\\'")}')">🔊 듣기</button>
+        <button class="tts-btn" onclick="stopTTS()" style="background:var(--yellow-bg);border-color:#fcd34d;color:var(--yellow);">⏹ 멈춤</button>
+        ${isOk ? '' : `<button class="retry-sent-btn" onclick="openSentModal(${i})">🎙️ 재도전</button>`}
+        ${isOk ? '' : `<button class="retry-sent-btn" onclick="requestHelp(${i},'${sent.replace(/'/g,"\\'")}')">🆘 교사 호출</button>`}
     </div>`;
 }
 
