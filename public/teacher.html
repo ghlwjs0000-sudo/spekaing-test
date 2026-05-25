@@ -733,7 +733,7 @@ async function openDetail(id) {
   const s = state.submissions.find(x=>x.id===id);
   if (!s) return;
   state.currentDetail = s;
-  document.getElementById('detailTitle').textContent = `${s.student_name} (${s.student_number}) · 《${s.book_title}》`;
+  document.getElementById('detailTitle').innerHTML = `${s.student_name} (${s.student_number}) · 《${s.book_title}》 <button onclick="openDetail('${s.id}')" style="font-size:11px;padding:3px 8px;border-radius:4px;border:1px solid var(--border);background:var(--surface2);cursor:pointer;margin-left:8px;">🔄 새로고침</button>`;
   document.getElementById('detailAiScore').value = s.ai_score??'-';
   document.getElementById('detailFinalScore').value = s.final_score??'';
   document.getElementById('detailNote').value = s.teacher_note||'';
@@ -791,6 +791,9 @@ async function openDetail(id) {
   }).join('')||'<span style="color:var(--text3);font-size:13px;">문장 데이터 없음</span>';
 
   document.getElementById('detailAttempts').innerHTML='<div style="color:var(--text3);font-size:13px;padding:8px;">로딩 중...</div>';
+  document.getElementById('detailTitle').innerHTML = 
+    `${s.student_name} (${s.student_number}) · 《${s.book_title}》 
+    <button onclick="openDetail('${s.id}')" style="font-size:11px;padding:3px 8px;border-radius:4px;border:1px solid var(--border);background:var(--surface2);cursor:pointer;margin-left:8px;">🔄 새로고침</button>`;
   document.getElementById('detailModal').style.display='flex';
 
   try {
