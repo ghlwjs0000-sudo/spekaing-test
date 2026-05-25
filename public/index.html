@@ -543,6 +543,18 @@ function addSentence() {
     var errEl = document.getElementById('sentenceInputError');
     if (!val) return;
     if (!val.endsWith('.') && !val.endsWith('!') && !val.endsWith('?')) {
+        errEl.textContent = '마침표(.)로 끝내야 다음 문장을 추가할 수 있어요.';
+        errEl.style.display = 'block';
+        return;
+    }
+    var wordCount = val.split(/\s+/).filter(function(x) { return x; }).length;
+    if (wordCount < 15) {
+        errEl.textContent = '한 문장은 반드시 15단어 이상이어야 해요. (현재: ' + wordCount + '단어)';
+        errEl.style.display = 'block';
+        return;
+    }
+    if (scriptSentences.length >= 20) {
+        errEl.textContent = '스크립트는 최대 20문장까지 작성할 수 있어요.';
         errEl.style.display = 'block';
         return;
     }
@@ -584,7 +596,7 @@ async function submitScript() {
     var author = document.getElementById('bookAuthor').value.trim();
     var script = document.getElementById('scriptText').value.trim();
     if (!book || !script) { alert('책 제목과 스크립트를 입력해주세요.'); return; }
-    if (script.split(/\s+/).filter(function(x) { return x; }).length < 10) { alert('스크립트가 너무 짧습니다.'); return; }
+    if (scriptSentences.length < 20) { alert('스크립트는 반드시 20문장을 작성해야 제출할 수 있어요. (현재: ' + scriptSentences.length + '문장)'); return; }
     state.currentBook = { book: book, author: author };
     state.script = script;
     state.sentences = script.split(/[.!?]+\s+/).filter(function(s) { return s.trim().length > 3; });
