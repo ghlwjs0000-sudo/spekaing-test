@@ -173,7 +173,13 @@ total = pronunciation+content+fluency+completeness exactly.`;
     let rawContent = gptData.choices[0].message.content;
     // 백틱 마크다운 제거
     rawContent = rawContent.replace(/```json/g, '').replace(/```/g, '').trim();
-    const result = JSON.parse(rawContent);
+    let result;
+    try {
+      result = JSON.parse(rawContent);
+    } catch(parseErr) {
+      console.error('JSON 파싱 오류:', rawContent);
+      return res.status(500).json({ error: 'AI 응답 파싱 오류: ' + parseErr.message + ' / 원본: ' + rawContent.substring(0, 200) });
+    }
     result.sentences = sentences;
 
     // 4단계: 시도 기록 저장
