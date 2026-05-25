@@ -141,6 +141,10 @@ module.exports = async (req, res) => {
     // 학생 삭제
     if (action === 'deleteStudent' && req.method === 'DELETE') {
       const { studentId } = req.query;
+      // 관련 데이터 먼저 삭제
+      await sb('DELETE', 'submissions', null, `?student_id=eq.${studentId}`);
+      await sb('DELETE', 'attempt_logs', null, `?student_id=eq.${studentId}`);
+      await sb('DELETE', 'help_requests', null, `?student_id=eq.${studentId}`);
       await sb('DELETE', 'students', null, `?id=eq.${studentId}`);
       return res.status(200).json({ success: true });
     }
