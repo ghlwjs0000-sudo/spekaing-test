@@ -204,10 +204,10 @@ p{color:var(--text2);font-size:14px;}
     </div>
     <div class="card">
       <div class="card-title">말하기 스크립트 (영어)</div>
-      <div class="alert-info">💡 문장을 마침표(.)로 끝내면 AI가 문장별로 분석해드려요.</div>
-      <div class="form-group">
-        <textarea class="form-textarea" id="scriptText" placeholder="Today, I would like to introduce a book called ...&#10;&#10;This story is about...&#10;&#10;I recommend this book because..."></textarea>
-      </div>
+      <div class="alert-info">💡 한 문장씩 작성하세요. 마침표(.)로 끝내야 다음 문장을 입력할 수 있어요.</div>
+      <div id="sentenceInputList" style="display:flex;flex-direction:column;gap:10px;margin-bottom:14px;"></div>
+      <button class="btn btn-ghost btn-sm" id="addSentenceBtn" onclick="addSentenceInput()" style="margin-bottom:14px;">+ 문장 직접 추가</button>
+      <textarea class="form-textarea" id="scriptText" style="display:none;"></textarea>
       <div class="progress-wrap"><div class="progress-bar" id="scriptProgress"></div></div>
       <div class="text-muted mt-2" id="wordCount">단어 수: 0 / 50</div>
     </div>
@@ -486,7 +486,12 @@ async function loadPreviousSubmission() {
     if (bookAuthorEl) bookAuthorEl.value = prev.book_author || '';
     if (scriptTextEl) {
       scriptTextEl.value = prev.script || '';
-      const w = (prev.script || '').trim().split(/\s+/).filter(x => x).length;
+      if (scriptTextEl) scriptTextEl.value = prev.script || '';
+    // 문장별 입력칸 복원
+    if (prev.sentences && prev.sentences.length) {
+      setTimeout(() => initSentenceInputs(prev.sentences), 400);
+    }
+    const w = (prev.script || '').trim().split(/\s+/).filter(x => x).length;
       const wc = document.getElementById('wordCount');
       const sp = document.getElementById('scriptProgress');
       if (wc) wc.textContent = `단어 수: ${w} / 50`;
@@ -620,13 +625,129 @@ function handleFile(type, input) {
 
 // ── 스크립트 제출 ──
 document.addEventListener('DOMContentLoaded', () => {
-  const el = document.getElementById('scriptText');
-  if (el) el.addEventListener('input', function() {
-    const w = this.value.trim().split(/\s+/).filter(x => x).length;
-    document.getElementById('wordCount').textContent = `단어 수: ${w} / 50`;
-    document.getElementById('scriptProgress').style.width = Math.min(w / 50 * 100, 100) + '%';
-  });
+  initSentenceInputs();
 });
+
+let sentenceInputCount = 0;
+
+function initSentenceInputs(existingSentences) {
+  const list = document.getElementById('sentenceInputList');
+  if (!list) return;
+  list.innerHTML = '';
+  sentenceInputCount = 0;
+  if (existingSentences && existingSentences.length) {
+    existingSentences.forEach(s => addSentenceInput(s, true));
+    // 마지막에 새 입력칸 하나 추가
+    addSentenceInput('', false);
+  } else {
+    addSentenceInput('', false);
+  }
+}
+
+function addSentenceInput(value, completed) {
+  const list = document.getElementById('sentenceInputList');
+  if (!list) return;
+  const idx = sentenceInputCount++;
+  const div = document.createElement('div');
+  div.id = `sentInput_${idx}`;
+  div.style.cssText = 'display:flex;gap:8px;align-items:flex-start;';
+  div.innerHTML = `
+    <div style="flex-shrink:0;width:26px;height:26px;border-radius:50%;background:var(--blue);color:#fff;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;margin-top:9px;">${idx+1}</div>
+    <div style="flex:1;">
+      <input type="text" class="form-input sent-input" id="sentInput_text_${idx}"
+        placeholder="영어로 문장을 입력하고 마침표(.)로 끝내세요."
+        value="${value ? value.replace(/"/g,"&quot;") : ''}"
+        ${completed ? 'disabled style="opacity:.8;background:var(--green-bg);border-color:var(--green-border);"' : ''}
+        oninput="onSentenceInput(${idx})"
+        onkeydown="onSentenceKeydown(event,${idx})"/>
+      <div id="sentInput_hint_${idx}" style="font-size:11px;color:var(--red);margin-top:3px;"></div>
+    </div>
+    ${completed
+      ? `<div style="color:var(--green);font-size:20px;margin-top:6px;">✅</div>`
+      : `<button class="btn btn-primary btn-sm" id="sentInput_btn_${idx}" onclick="completeSentence(${idx})" disabled style="margin-top:6px;white-space:nowrap;">완료 ↵</button>`
+    }
+    ${idx > 0
+      ? `<button onclick="removeSentenceInput(${idx})" style="background:none;border:none;color:var(--text3);font-size:18px;cursor:pointer;margin-top:6px;padding:0 4px;">✕</button>`
+      : ''
+    }`;
+  list.appendChild(div);
+  if (!completed) {
+    setTimeout(() => {
+      const input = document.getElementById(`sentInput_text_${idx}`);
+      if (input) input.focus();
+    }, 50);
+  }
+  updateScriptFromInputs();
+}
+
+function onSentenceInput(idx) {
+  const input = document.getElementById(`sentInput_text_${idx}`);
+  const btn = document.getElementById(`sentInput_btn_${idx}`);
+  const hint = document.getElementById(`sentInput_hint_${idx}`);
+  if (!input) return;
+  const val = input.value.trim();
+  const endsOk = val.endsWith('.') || val.endsWith('!') || val.endsWith('?');
+  if (btn) btn.disabled = !endsOk || val.length < 5;
+  if (hint) {
+    if (val.length > 3 && !endsOk) {
+      hint.textContent = '⚠️ 마침표(.)로 끝내야 완료할 수 있어요.';
+    } else {
+      hint.textContent = '';
+    }
+  }
+  updateScriptFromInputs();
+}
+
+function onSentenceKeydown(e, idx) {
+  if (e.key === 'Enter') { e.preventDefault(); completeSentence(idx); }
+}
+
+function completeSentence(idx) {
+  const input = document.getElementById(`sentInput_text_${idx}`);
+  if (!input) return;
+  const val = input.value.trim();
+  if (!val.endsWith('.') && !val.endsWith('!') && !val.endsWith('?')) {
+    alert('문장 끝에 마침표(.)를 입력해주세요!'); return;
+  }
+  if (val.length < 5) { alert('문장이 너무 짧습니다.'); return; }
+  // 완료 처리
+  input.disabled = true;
+  input.style.opacity = '.8';
+  input.style.background = 'var(--green-bg)';
+  input.style.borderColor = 'var(--green-border)';
+  const btn = document.getElementById(`sentInput_btn_${idx}`);
+  if (btn) {
+    btn.outerHTML = `<div style="color:var(--green);font-size:20px;margin-top:6px;">✅</div>`;
+  }
+  const hint = document.getElementById(`sentInput_hint_${idx}`);
+  if (hint) hint.textContent = '';
+  updateScriptFromInputs();
+  // 다음 문장 입력칸 자동 추가
+  addSentenceInput('', false);
+}
+
+function removeSentenceInput(idx) {
+  const div = document.getElementById(`sentInput_${idx}`);
+  if (div) div.remove();
+  updateScriptFromInputs();
+}
+
+function updateScriptFromInputs() {
+  const inputs = document.querySelectorAll('.sent-input');
+  const sentences = [];
+  inputs.forEach(inp => {
+    const val = inp.value.trim();
+    if (val) sentences.push(val);
+  });
+  const script = sentences.join(' ');
+  const scriptEl = document.getElementById('scriptText');
+  if (scriptEl) scriptEl.value = script;
+  const w = script.trim().split(/\s+/).filter(x => x).length;
+  const wc = document.getElementById('wordCount');
+  const sp = document.getElementById('scriptProgress');
+  if (wc) wc.textContent = `단어 수: ${w} / 50`;
+  if (sp) sp.style.width = Math.min(w / 50 * 100, 100) + '%';
+}
 
 async function submitScript() {
   const book = document.getElementById('bookTitle').value.trim();
@@ -1312,7 +1433,27 @@ async function submitFileUpdate() {
   showMySubmission();
   alert('자료가 수정되었습니다!');
 }
-
+async function requestHelp(sentenceIdx, sentenceText) {
+  if (!state.submissionId) { alert('먼저 스크립트를 제출하고 녹음해주세요.'); return; }
+  if (!confirm(`"${sentenceText.substring(0,40)}..." 문장에 대해 교사에게 도움을 요청하시겠습니까?`)) return;
+  try {
+    const res = await fetch('/api/help', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        submissionId: state.submissionId,
+        studentId: state.user.id,
+        studentName: state.user.name,
+        classId: state.user.classId,
+        sentenceIndex: sentenceIdx,
+        sentenceText
+      })
+    });
+    const data = await res.json();
+    if (data.success) {
+      alert('✅ 교사에게 도움 요청을 보냈어요!\n교사 승인 후 해당 문장이 통과 처리됩니다.');
+    }
+  } catch(err) { alert('요청 오류: ' + err.message); }
+}
 function toBase64(blob) {
   return new Promise((resolve,reject)=>{
     const reader=new FileReader();
