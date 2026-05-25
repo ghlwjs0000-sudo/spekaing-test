@@ -919,7 +919,7 @@ async function deleteStudent(id,name){
   showLoading('삭제 중...');
   try{
     await fetch(`/api/teacher?action=deleteStudent&studentId=${id}`,{method:'DELETE'});
-    hideLoading(); loadStudents();
+    hideLoading(); loadStudents(); loadRoster();
   }catch(err){hideLoading();alert('삭제 오류: '+err.message);}
 }
 
