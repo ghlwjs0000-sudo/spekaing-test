@@ -1382,7 +1382,7 @@ async function submitFinalRecording() {
                 bookAuthor: state.currentBook ? state.currentBook.author : '',
                 script: state.script,
                 isFinalSpeakingSubmitted: true,
-                finalSpeakingAudio: base64,
+                finalSpeakingAudio: audioUrl || null,
                 finalSpeakingMimeType: state.finalAudioBlob.type,
                 finalSpeakingResult: result,
                 finalSpeakingAt: new Date().toISOString()
