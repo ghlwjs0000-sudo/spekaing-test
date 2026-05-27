@@ -19,9 +19,8 @@ module.exports = async (req, res) => {
     const buffer = Buffer.from(base64Data, 'base64');
 
     // 파일 확장자 추출
-    const ext = filename.split('.').pop();
-  const safeName = filename.replace(/[^a-zA-Z0-9._-]/g, '_');
-  const path = `${studentId}/${fileType}_${Date.now()}_${safeName}`;
+    const ext = filename.split('.').pop().toLowerCase();
+  const path = `${studentId}/${fileType}_${Date.now()}.${ext}`;
 
     // Supabase Storage 업로드
     const uploadRes = await fetch(
@@ -56,6 +55,11 @@ module.exports = async (req, res) => {
 function getContentType(filename) {
   const ext = filename.split('.').pop().toLowerCase();
   const types = {
+    'webm': 'audio/webm',
+    'ogg': 'audio/ogg',
+    'mp4': 'audio/mp4',
+    'mp3': 'audio/mpeg',
+    'm4a': 'audio/mp4',
     'pdf': 'application/pdf',
     'ppt': 'application/vnd.ms-powerpoint',
     'pptx': 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
