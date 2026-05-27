@@ -1057,6 +1057,12 @@ document.querySelectorAll('input,textarea').forEach(function(el){
   }
 });
 renderSec3(); renderGuide(); renderExamples(); updProg();
+// 학번 자동 입력
+var savedStudentNum = localStorage.getItem('worksheet_student_number');
+if (savedStudentNum) {
+    var metaId = document.getElementById('meta-id');
+    if (metaId && !metaId.value) metaId.value = savedStudentNum;
+}
 setTimeout(loadWorksheetFromLocal, 300);
 
 async function submitToSpeakingTest() {

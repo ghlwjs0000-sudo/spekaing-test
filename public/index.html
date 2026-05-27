@@ -209,7 +209,7 @@
     <div class="card-title">활동지</div>
     <div class="alert-info">💡 활동지는 별도 웹사이트에서 제출해주세요.</div>
     <div style="margin-top:12px;">
-        <a href="https://speakingtest-git-main-jin-you-jeong-s-projects.vercel.app/worksheet.html" target="_blank" class="btn btn-ghost btn-sm">📝 활동지로 돌아가기 →</a>
+        <a href="https://speakingtest-git-main-jin-you-jeong-s-projects.vercel.app/worksheet.html" target="_blank" class="btn btn-ghost btn-sm" onclick="saveStudentNumberForWorksheet()">📝 활동지로 돌아가기 →</a>
     </div>
 </div>
             <div style="display:flex;justify-content:flex-end;">
@@ -374,6 +374,11 @@ async function login() {
 function showLoginError(msg) {
     const el = document.getElementById('loginError');
     el.textContent = msg; el.style.display = 'block';
+}
+function saveStudentNumberForWorksheet() {
+    if (state.user && state.user.studentNumber) {
+        localStorage.setItem('worksheet_student_number', state.user.studentNumber);
+    }
 }
 function logout() {
     state.user = null;
