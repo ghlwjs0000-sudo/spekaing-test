@@ -432,13 +432,15 @@ async function loadPreviousSubmission() {
         }
         async function loadPreviousSubmission() {
     try {
-        ...
-        // 활동지에서 제출한 스크립트가 있으면 1단계로 이동
-        if (prev.worksheet_submitted_at && prev.script && !prev.attempt_count) {
-            ...
-            return;
+        // 활동지에서 제출한 스크립트가 있으면 반영
+        if (prev.worksheet_submitted_at && prev.script && (!prev.attempt_count || prev.attempt_count === 0)) {
+            state.script = prev.script;
+            var scriptEl = document.getElementById('scriptText');
+            if (scriptEl) {
+                scriptEl.value = prev.script;
+                updateScriptCount();
+            }
         }
-        ...
     } catch (err) { console.error('이전 데이터 로딩 오류:', err); }
 }
             state.lastResult = {
