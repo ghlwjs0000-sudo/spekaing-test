@@ -20,7 +20,8 @@ module.exports = async (req, res) => {
 
     // 파일 확장자 추출
     const ext = filename.split('.').pop();
-    const path = `${studentId}/${fileType}_${Date.now()}.${ext}`;
+  const safeName = filename.replace(/[^a-zA-Z0-9._-]/g, '_');
+  const path = `${studentId}/${fileType}_${Date.now()}_${safeName}`;
 
     // Supabase Storage 업로드
     const uploadRes = await fetch(
@@ -60,6 +61,11 @@ function getContentType(filename) {
     'jpg': 'image/jpeg', 'jpeg': 'image/jpeg',
     'png': 'image/png', 'gif': 'image/gif',
     'webp': 'image/webp',
+    'webm': 'audio/webm',
+    'ogg': 'audio/ogg',
+    'mp4': 'audio/mp4',
+    'mp3': 'audio/mpeg',
+    'm4a': 'audio/mp4',
     'doc': 'application/msword',
     'docx': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
     'hwp': 'application/x-hwp',
