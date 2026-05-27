@@ -1003,10 +1003,6 @@ async function submitToSpeakingTest() {
         alert('스크립트는 15문장 이상이어야 해요. (현재: ' + sentences.length + '문장)');
         return;
     }
-    var shortSents = sentences.filter(function(s) { return wordCount(s) < 15; });
-    // 단어 수 체크 제거
-    }
-
     // 학번 확인
     var studentNumber = document.getElementById('meta-id') ? document.getElementById('meta-id').value.trim() : '';
     if (!studentNumber) {
