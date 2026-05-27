@@ -3,6 +3,14 @@
     { "source": "/api/(.*)", "destination": "/api/$1" },
     { "source": "/teacher.html", "destination": "/public/teacher.html" },
     { "source": "/worksheet.html", "destination": "/public/worksheet.html" },
-    { "source": "/(.*)", "destination": "/public/index_complete.html" }
-  ]
+    { "source": "/(.*)", "destination": "/public/index.html" }
+  ],
+  "functions": {
+    "api/score.js": {
+      "maxDuration": 60
+    },
+    "api/submit.js": {
+      "maxDuration": 60
+    }
+  }
 }
