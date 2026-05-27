@@ -632,7 +632,7 @@ async function saveSubmissionLight() {
             pronunciation: r.pronunciation, content: r.content,
             fluency: r.fluency, completeness: r.completeness,
             sentences: state.sentences, 
-            sentenceResults: r.sentenceResults || state.lastResult?.sentenceResults || [],
+            sentenceResults: (r.sentenceResults && r.sentenceResults.length > 0) ? r.sentenceResults : [],
             attemptCount: state.attemptCount,
             isPassed: state.sentenceStatuses.every(function(s) { return s === 'ok'; }),
             isFinalSubmitted: false,
@@ -906,8 +906,8 @@ function renderResults() {
         var status = state.sentenceStatuses[i] || 'retry';
         var sr = srs[i] || {};
         var isOk = status === 'ok';
-        var teacherOk = approvedList.includes(i) && !sr.status !== 'ok';
         var aiOk = sr && sr.status === 'ok';
+        var teacherOk = !aiOk && approvedList.includes(i);
         var label = aiOk ? '✅ 통과' : teacherOk ? '✅ 교사 승인' : '❌';
         var finalOk = aiOk || teacherOk;
         var issue = sr.issue ? '<div class="sentence-issue">' + sr.issue + '</div>' : '';
