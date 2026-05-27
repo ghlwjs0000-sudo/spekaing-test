@@ -1044,35 +1044,57 @@ setTimeout(loadWorksheetFromLocal, 300);
 
 async function submitToSpeakingTest() {
     alert('제출 시작!');
+    async function submitToSpeakingTest() {
+    async function submitToSpeakingTest() {
     var script = document.getElementById('script-area').value.trim();
-    alert('스크립트 길이: ' + script.length);
     if (!script) { alert('스크립트를 먼저 작성해주세요!'); return; }
     var sentences = parseSentences(script);
-    alert('문장 수: ' + sentences.length);
     if (sentences.length < 15) {
         alert('스크립트는 15문장 이상이어야 해요. (현재: ' + sentences.length + '문장)');
         return;
     }
     var studentNumber = document.getElementById('meta-id') ? document.getElementById('meta-id').value.trim() : '';
-    alert('학번: ' + studentNumber);
     if (!studentNumber) {
         alert('학번을 입력해주세요!');
         return;
     }
-    alert('fetch 시작!');
     try {
+        var worksheetInputs = {};
+        var fieldLabels = [
+          '학번', '이름', '책 제목', '저자', '날짜',
+          '발표 대상', '발표 목적', '청중 적합 이유(한국어)', '청중 적합 이유(English)',
+          'Hook 방식', 'Hook 아이디어(한국어)', 'Hook 문장(English)',
+          'Setting(한국어)', 'Setting(English)', '주인공(한국어)', '주인공(English)',
+          '갈등(한국어)', '갈등(English)', '핵심 사건(한국어)', '핵심 사건(English)',
+          '결말(한국어)', '결말(English)',
+          '인상 깊은 구절', '중요한 이유(한국어)', '중요한 이유(English)',
+          '언어 분석(한국어)', '언어 분석(English)',
+          '내 말로 바꾸기(한국어)', '내 말로 바꾸기(English)',
+          '바꾼 이유(한국어)', '바꾼 이유(English)',
+          '책 메시지(한국어)', '책 메시지(English)',
+          '동의 여부(한국어)', '동의 여부(English)',
+          '현실 연결(한국어)', '현실 연결(English)',
+          '스크립트'
+        ];
+        document.querySelectorAll('input[type=text], textarea').forEach(function(el, i) {
+            var label = fieldLabels[i] || ('항목' + (i+1));
+            worksheetInputs[label] = el.value || '';
+        });
         var res = await fetch('https://speakingtest-git-main-jin-you-jeong-s-projects.vercel.app/api/worksheet', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ studentNumber: studentNumber, script: script })
+            body: JSON.stringify({
+                studentNumber: studentNumber,
+                script: script,
+                worksheetData: worksheetInputs,
+                bookType: bType
+            })
         });
         var data = await res.json();
-        alert('서버 응답: ' + JSON.stringify(data));
         if (!data.success) {
             alert('오류: ' + (data.error || '학번을 확인해주세요.'));
             return;
         }
-        // 활동지 내용 localStorage에 저장
         var allInputsSave = document.querySelectorAll('input[type=text], textarea');
         var arrSave = [];
         allInputsSave.forEach(function(el) { arrSave.push(el.value); });
@@ -1081,8 +1103,9 @@ async function submitToSpeakingTest() {
         alert('✅ 활동지가 제출되었습니다! 말하기 수행평가로 이동합니다.');
         window.location.href = 'https://speakingtest-git-main-jin-you-jeong-s-projects.vercel.app';
     } catch(err) {
-        alert('catch 오류: ' + err.message + ' / ' + err.stack);
+        alert('오류: ' + err.message);
     }
+}
 </script>
     var script = document.getElementById('script-area').value.trim();
     if (!script) { alert('스크립트를 먼저 작성해주세요!'); return; }
