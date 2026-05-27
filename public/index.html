@@ -1324,16 +1324,30 @@ function retryFinalRecording() {
 async function submitFinalRecording() {
     if (!state.finalAudioBlob) { alert('먼저 녹음해주세요.'); return; }
     if (!confirm('최종 말하기를 제출하시겠습니까?\n제출 후에는 수정할 수 없어요.')) return;
-    showLoading('최종 말하기 제출 중...', 'AI 채점 중');
+    showLoading('최종 말하기 제출 중...', '오디오 업로드 중...');
     try {
         var base64 = await toBase64(state.finalAudioBlob);
+        var ext = state.finalAudioBlob.type.includes('webm') ? 'webm' : state.finalAudioBlob.type.includes('mp4') ? 'mp4' : 'ogg';
+        var uploadRes = await fetch('/api/upload', {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                fileBase64: base64,
+                filename: 'final_' + Date.now() + '.' + ext,
+                studentId: state.user.id,
+                fileType: 'audio'
+            })
+        });
+        var uploadData = await uploadRes.json();
+        setLoadingStep('AI 채점 중...');
+        var audioUrl = uploadData.success ? uploadData.url : null;
         var res = await fetch('/api/score', {
             method: 'POST', headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 studentId: state.user.id,
                 submissionId: state.submissionId,
                 script: state.script,
-                audioBase64: base64,
+                audioBase64: audioUrl ? null : base64,
+                audioUrl: audioUrl,
                 mimeType: state.finalAudioBlob.type,
                 isFinalSpeaking: true
             })
