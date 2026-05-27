@@ -1045,8 +1045,10 @@ setTimeout(loadWorksheetFromLocal, 300);
 async function submitToSpeakingTest() {
     alert('제출 시작!');
     var script = document.getElementById('script-area').value.trim();
+    alert('스크립트 길이: ' + script.length);
     if (!script) { alert('스크립트를 먼저 작성해주세요!'); return; }
     var sentences = parseSentences(script);
+    alert('문장 수: ' + sentences.length);
     if (sentences.length < 15) {
         alert('스크립트는 15문장 이상이어야 해요. (현재: ' + sentences.length + '문장)');
         return;
