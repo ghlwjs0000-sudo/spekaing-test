@@ -96,7 +96,7 @@ module.exports = async (req, res) => {
       practice_audio: req.body.practiceAudio || existingData.practice_audio || undefined,
       practice_audio_mime: req.body.practiceAudioMime || existingData.practice_audio_mime || undefined,
       is_final_speaking_submitted: isFinalSpeakingSubmitted === true ? true : (existingData.is_final_speaking_submitted || false),
-      final_speaking_audio: finalSpeakingAudio || existingData.final_speaking_audio || undefined,
+      final_speaking_audio: (finalSpeakingAudio && finalSpeakingAudio.startsWith('http')) ? finalSpeakingAudio : (existingData.final_speaking_audio || null),
       final_speaking_mime: finalSpeakingMimeType || existingData.final_speaking_mime || undefined,
       final_speaking_result: finalSpeakingResult || existingData.final_speaking_result || undefined,
       final_speaking_at: finalSpeakingAt || existingData.final_speaking_at || undefined,

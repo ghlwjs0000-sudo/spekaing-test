@@ -1354,7 +1354,10 @@ async function submitFinalRecording() {
         });
         var uploadData = await uploadRes.json();
         setLoadingStep('AI 채점 중...');
-        var audioUrl = uploadData.success ? uploadData.url : null;
+        if (!uploadData.success) {
+            throw new Error('오디오 업로드 실패: ' + (uploadData.error || '알 수 없는 오류'));
+        }
+        var audioUrl = uploadData.url;
         var res = await fetch('/api/score', {
             method: 'POST', headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
