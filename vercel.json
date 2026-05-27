@@ -7,10 +7,12 @@
   ],
   "functions": {
     "api/score.js": {
-      "maxDuration": 60
+      "maxDuration": 60,
+      "memory": 1024
     },
     "api/submit.js": {
-      "maxDuration": 60
+      "maxDuration": 60,
+      "memory": 1024
     }
   }
 }
