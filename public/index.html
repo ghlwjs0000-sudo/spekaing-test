@@ -430,7 +430,19 @@ async function loadPreviousSubmission() {
                 return sr.status === 'ok' || approvedList.includes(i) ? 'ok' : 'retry';
             });
         }
-        if (prev.attempt_count > 0 && prev.sentence_results && prev.sentence_results.length) {
+        // 활동지에서 제출한 스크립트가 있으면 1단계로 이동
+        if (prev.worksheet_submitted_at && prev.script && !prev.attempt_count) {
+            state.script = prev.script;
+            var scriptEl = document.getElementById('scriptText');
+            if (scriptEl) {
+                scriptEl.value = prev.script;
+                updateScriptCount();
+            }
+            var bookTitleEl2 = document.getElementById('bookTitle');
+            if (bookTitleEl2 && !bookTitleEl2.value) bookTitleEl2.value = prev.book_title || '';
+            goToStep(1);
+            return;
+        }
             state.lastResult = {
                 total: prev.ai_score, grade: prev.grade,
                 pronunciation: prev.pronunciation, content: prev.content,
