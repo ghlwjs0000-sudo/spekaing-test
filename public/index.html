@@ -418,7 +418,6 @@ async function loadPreviousSubmission() {
             scriptTextEl.value = prev.script || '';
             updateScriptCount();
         }
-        }
         if (prev.sentence_results && prev.sentence_results.length) {
             var approvedList = prev.teacher_approved_sentences || [];
             state.teacherApprovedSentences = approvedList;
