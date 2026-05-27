@@ -882,6 +882,8 @@ function startDetailPolling(submissionId, studentId) {
 function stopDetailPolling() {
   if (detailPollingInterval) { clearInterval(detailPollingInterval); detailPollingInterval = null; }
 }
+
+async function toggleSentenceApproval(submissionId, sentenceIndex, approve, btn) {
   const orig = btn.textContent; btn.disabled=true; btn.textContent='처리 중...';
   try {
     const res = await fetch('/api/teacher?action=approveSentence',{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({id:submissionId,sentenceIndex,approved:approve})});
