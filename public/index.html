@@ -204,19 +204,10 @@
     <div class="progress-wrap" style="margin-top:8px;"><div class="progress-bar" id="scriptProgress"></div></div>
     <div class="text-muted mt-2" id="wordCount">단어 수: 0</div>
 </div>
-            <div class="card">
-                <div class="card-title">발표 자료 업로드</div>
-                <div>
-    <div style="font-size:13px;font-weight:600;color:var(--text2);margin-bottom:8px;">📝 활동지</div>
-    <div class="upload-area" id="wsUpload" onclick="document.getElementById('wsFile').click()">
-        <div style="font-size:24px;margin-bottom:6px;">📄</div>
-        <div style="font-size:13px;color:var(--text2);" id="wsUploadText">클릭하여 선택</div>
-        <div style="font-size:11px;color:var(--text3);">모든 파일 · 최대 30MB</div>
-    </div>
-    <input type="file" id="wsFile" accept="*/*" style="display:none;" onchange="handleFile('ws',this)"/>
-    <div id="wsPreview" style="display:none;margin-top:8px;"></div>
+           <div class="card">
+    <div class="card-title">활동지</div>
+    <div class="alert-info">💡 활동지는 별도 웹사이트에서 제출해주세요.</div>
 </div>
-            </div>
             <div style="display:flex;justify-content:flex-end;">
                 <button class="btn btn-primary btn-lg" onclick="submitScript()">제출 후 녹음 시작 →</button>
             </div>
@@ -638,6 +629,8 @@ async function saveSubmissionLight() {
             fluencyFeedback: r.fluencyFeedback || '',
             overallFeedback: r.overallFeedback || '',
             transcript: r.transcript || '',
+            practiceAudio: state.lastAudioBase64 || undefined,
+            practiceAudioMime: state.lastAudioMime || undefined,
         };
         if (state.pptDataUrl && state.pptDataUrl.startsWith('http')) { body.pptDataUrl = state.pptDataUrl; body.pptFilename = state.pptFilename; }
         if (state.wsDataUrl && state.wsDataUrl.startsWith('http')) { body.worksheetDataUrl = state.wsDataUrl; body.worksheetFilename = state.wsFilename; }
@@ -741,11 +734,37 @@ async function startRecording() {
             var m = String(Math.floor(state.recordSeconds / 60)).padStart(2, '0');
             var s = String(state.recordSeconds % 60).padStart(2, '0');
             document.getElementById('recordTimer').textContent = m + ':' + s;
-            if (state.recordSeconds >= 180) stopRecording();
+            if (state.recordSeconds >= 240) stopRecording(); // 4분 제한
         }, 1000);
         state.waveInterval = setInterval(function() {
             document.querySelectorAll('#waveform .wave-bar').forEach(function(b) { b.style.height = (Math.random() * 26 + 4) + 'px'; });
         }, 100);
+
+        // 침묵 감지 (5초 이상 무음 시 실격)
+        var audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        var analyser = audioContext.createAnalyser();
+        var source = audioContext.createMediaStreamSource(stream);
+        source.connect(analyser);
+        analyser.fftSize = 256;
+        var dataArray = new Uint8Array(analyser.frequencyBinCount);
+        state.silenceSeconds = 0;
+        state.silenceInterval = setInterval(function() {
+            if (!state.isRecording) { clearInterval(state.silenceInterval); return; }
+            analyser.getByteFrequencyData(dataArray);
+            var avg = dataArray.reduce(function(a, b) { return a + b; }, 0) / dataArray.length;
+            if (avg < 5) {
+                state.silenceSeconds++;
+                if (state.silenceSeconds >= 5) {
+                    clearInterval(state.silenceInterval);
+                    stopRecording();
+                    alert('⚠️ 실격 처리: 5초 이상 말을 하지 않아 녹음이 중지되었습니다. 다시 녹음해주세요.');
+                    retryRecording();
+                }
+            } else {
+                state.silenceSeconds = 0;
+            }
+        }, 1000);
+
     } catch (err) { alert('마이크 접근 권한이 필요합니다.'); }
 }
 
@@ -754,6 +773,7 @@ function stopRecording() {
     state.mediaRecorder.stop();
     state.mediaRecorder.stream.getTracks().forEach(function(t) { t.stop(); });
     clearInterval(state.recordingInterval); clearInterval(state.waveInterval);
+    clearInterval(state.silenceInterval);
     state.isRecording = false;
     document.getElementById('recordBtn').classList.remove('recording');
     document.getElementById('recordIcon').textContent = '🎙️';
@@ -770,6 +790,7 @@ function retryRecording() {
 
 async function submitRecording() {
     if (!state.audioBlob) { alert('먼저 녹음해주세요.'); return; }
+    if (state.recordSeconds < 60) { alert('최소 1분 이상 말해야 해요. (현재: ' + state.recordSeconds + '초)'); return; }
     state.attemptCount++;
     updateAttemptUI();
     showLoading('AI 분석 중...', '음성을 텍스트로 변환 중');
@@ -805,6 +826,9 @@ state.sentenceStatuses = (result.sentenceResults || []).map(function(sr) {
         hideLoading();
         renderResults();
         goToStep(3);
+       // 녹음본 저장
+        state.lastAudioBase64 = base64;
+        state.lastAudioMime = state.audioBlob.type;
         await saveSubmissionLight();
     } catch (err) {
         hideLoading();
