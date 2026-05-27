@@ -1080,8 +1080,9 @@ async function submitToSpeakingTest() {
         localStorage.setItem('worksheet_btype', bType);
         alert('✅ 활동지가 제출되었습니다! 말하기 수행평가로 이동합니다.');
         window.location.href = 'https://speakingtest-git-main-jin-you-jeong-s-projects.vercel.app';
-    } catch(err) { alert('오류: ' + err.message); }
-}
+    } catch(err) {
+        alert('catch 오류: ' + err.message + ' / ' + err.stack);
+    }
 </script>
     var script = document.getElementById('script-area').value.trim();
     if (!script) { alert('스크립트를 먼저 작성해주세요!'); return; }
