@@ -36,20 +36,25 @@ module.exports = async (req, res) => {
     const existing = await sb('GET', 'submissions', null, `?student_id=eq.${student.id}&select=id`);
     const existingId = existing.length ? existing[0].id : null;
 
+   const { worksheetData, bookType } = req.body;
+
     if (existingId) {
-      // 기존 제출 업데이트
       await sb('PATCH', 'submissions', {
         script: script,
+        worksheet_data: worksheetData || null,
+        worksheet_book_type: bookType || null,
         worksheet_submitted_at: new Date().toISOString(),
         updated_at: new Date().toISOString()
       }, `?id=eq.${existingId}`);
     } else {
-      // 새 제출 생성
       await sb('POST', 'submissions', {
         student_id: student.id,
         student_name: student.name,
+        student_number: student.student_number,
         class_id: student.class_id,
         script: script,
+        worksheet_data: worksheetData || null,
+        worksheet_book_type: bookType || null,
         worksheet_submitted_at: new Date().toISOString(),
         submitted_at: new Date().toISOString(),
         attempt_count: 0,

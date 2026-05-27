@@ -150,7 +150,7 @@ h2{font-size:20px;font-weight:700;color:var(--text);margin-bottom:4px;}
     <div class="sidebar-item active" onclick="showTab('roster')" id="tab-roster"><span>📋</span> 전체 명단</div>
     <div class="sidebar-item" onclick="showTab('submissions')" id="tab-submissions"><span>📊</span> 제출 현황</div>
     <div class="sidebar-item" onclick="showTab('final')" id="tab-final"><span>🎤</span> 최종 말하기</div>
-    <div class="sidebar-item" onclick="showTab('students')" id="tab-students"><span>👥</span> 학생 관리</div>
+    <div class="sidebar-item" onclick="showTab('worksheet')" id="tab-worksheet"><span>📝</span> 활동지</div>
     <div class="sidebar-item" onclick="showTab('classes')" id="tab-classes"><span>🏫</span> 반 관리</div>
     <div class="sidebar-section">내보내기</div>
     <div class="sidebar-item" onclick="exportCSV()"><span>📥</span> CSV 내보내기</div>
@@ -479,7 +479,7 @@ function showScreen(name) {
 
 // ── 탭 ──
 function showTab(name) {
-  ['help','roster','submissions','final','students','classes'].forEach(t=>{
+  ['help','roster','submissions','final','worksheet','students','classes'].forEach(t=>{
     const panel = document.getElementById('panel-'+t);
     const tab = document.getElementById('tab-'+t);
     if(panel) panel.style.display = t===name?'block':'none';
@@ -492,6 +492,7 @@ function showTab(name) {
   if (name==='students') loadStudents();
   if (name==='classes') loadClasses();
 if (name==='final') loadFinalSpeaking();
+if (name==='worksheet') loadWorksheets();
 }
 
 // ── 반 탭 ──
@@ -876,7 +877,114 @@ function startDetailPolling(submissionId, studentId) {
 function stopDetailPolling() {
   if (detailPollingInterval) { clearInterval(detailPollingInterval); detailPollingInterval = null; }
 }
+// ── 활동지 ──
+var worksheetData = [];
+async function loadWorksheets() {
+  showLoading('활동지 로딩 중...');
+  try {
+    const isMaster = state.teacher?.isMaster || false;
+    const classIds = state.teacher?.classIds || [];
+    let url = '/api/teacher?action=submissions';
+    if (!isMaster && classIds.length > 0) url += '&classIds=' + classIds.join(',');
+    const res = await fetch(url);
+    const data = await res.json();
+    worksheetData = Array.isArray(data) ? data.filter(s => s.worksheet_submitted_at) : [];
+    hideLoading();
+    buildWorksheetClassTabs();
+    renderWorksheetTable(worksheetData);
+  } catch(err) { hideLoading(); alert('로딩 오류: ' + err.message); }
+}
 
+function buildWorksheetClassTabs() {
+  const el = document.getElementById('worksheetClassTabs');
+  if (!el) return;
+  el.innerHTML = `<button class="class-tab active" onclick="filterWorksheetByClass('',this)">전체</button>` +
+    state.classes.map(c => `<button class="class-tab" onclick="filterWorksheetByClass('${c.id}',this)">${c.name}</button>`).join('');
+}
+
+function filterWorksheetByClass(classId, el) {
+  document.querySelectorAll('#worksheetClassTabs .class-tab').forEach(t => t.classList.remove('active'));
+  if (el) el.classList.add('active');
+  const filtered = classId ? worksheetData.filter(s => s.class_id === classId) : worksheetData;
+  renderWorksheetTable(filtered);
+}
+
+function renderWorksheetTable(data) {
+  const tbody = document.getElementById('worksheetTable');
+  if (!data.length) {
+    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--text3);padding:40px;">제출된 활동지가 없습니다.</td></tr>';
+    return;
+  }
+  tbody.innerHTML = data.map(s => {
+    const cls = state.classes.find(c => c.id === s.class_id);
+    const t = s.worksheet_submitted_at ? new Date(s.worksheet_submitted_at).toLocaleString('ko-KR', {month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'}) : '-';
+    const bookType = s.worksheet_book_type === 'fiction' ? '소설·문학' : s.worksheet_book_type === 'nonfiction' ? '비소설' : '-';
+    return `<tr>
+      <td style="font-weight:600;">${s.student_name||'-'}</td>
+      <td style="font-family:'DM Mono',monospace;font-size:12px;color:var(--text2);">${s.student_number||'-'}</td>
+      <td>${cls ? `<span class="badge badge-blue">${cls.name}</span>` : '-'}</td>
+      <td>《${s.book_title||'-'}》</td>
+      <td><span class="badge badge-purple">${bookType}</span></td>
+      <td style="color:var(--text3);font-size:12px;">${t}</td>
+      <td><button class="btn btn-ghost btn-sm" onclick="openWorksheetDetail('${s.id}')">상세보기</button></td>
+    </tr>`;
+  }).join('');
+}
+
+function openWorksheetDetail(id) {
+  const s = worksheetData.find(x => x.id === id);
+  if (!s) return;
+  document.getElementById('worksheetModalTitle').textContent = (s.student_name||'') + ' · 《' + (s.book_title||'') + '》 활동지';
+  const data = s.worksheet_data || {};
+  const t = s.worksheet_submitted_at ? new Date(s.worksheet_submitted_at).toLocaleString('ko-KR') : '-';
+  let html = `<div style="margin-bottom:12px;padding:10px;background:var(--blue-light);border-radius:8px;font-size:12px;">
+    <strong>제출 시각:</strong> ${t} · <strong>책 유형:</strong> ${s.worksheet_book_type === 'fiction' ? '소설·문학' : '비소설'}
+  </div>`;
+  html += '<div style="display:flex;flex-direction:column;gap:8px;">';
+  Object.entries(data).forEach(([key, value]) => {
+    if (value && value.trim()) {
+      html += `<div style="padding:8px 12px;background:var(--surface2);border-radius:6px;border:1px solid var(--border);">
+        <div style="font-size:11px;color:var(--text3);margin-bottom:3px;">${key}</div>
+        <div style="font-size:13px;color:var(--text);">${value}</div>
+      </div>`;
+    }
+  });
+  html += '</div>';
+  if (s.script) {
+    html += `<div style="margin-top:12px;"><div style="font-size:11px;font-weight:700;color:var(--text3);margin-bottom:6px;">📝 스크립트</div>
+    <div style="padding:12px;background:var(--blue-light);border:1.5px solid var(--blue-mid);border-radius:8px;font-size:13px;line-height:1.8;">${s.script}</div></div>`;
+  }
+  document.getElementById('worksheetModalContent').innerHTML = html;
+  document.getElementById('worksheetModal').style.display = 'flex';
+}
+
+function exportWorksheetCSV() {
+  if (!worksheetData.length) { alert('데이터가 없습니다.'); return; }
+  const headers = ['이름', '학번', '반', '책 제목', '책 유형', '제출 시각', '스크립트'];
+  const rows = worksheetData.map(s => {
+    const cls = state.classes.find(c => c.id === s.class_id);
+    const t = s.worksheet_submitted_at ? new Date(s.worksheet_submitted_at).toLocaleString('ko-KR') : '-';
+    const bookType = s.worksheet_book_type === 'fiction' ? '소설·문학' : s.worksheet_book_type === 'nonfiction' ? '비소설' : '-';
+    const data = s.worksheet_data || {};
+    const fieldValues = Object.values(data).join(' | ');
+    return [
+      s.student_name || '',
+      s.student_number || '',
+      cls?.name || '',
+      s.book_title || '',
+      bookType,
+      t,
+      s.script || '',
+      fieldValues
+    ];
+  });
+  const allHeaders = [...headers, '활동지 내용'];
+  const csv = [allHeaders, ...rows].map(r => r.map(v => `"${String(v||'').replace(/"/g,'""')}"`).join(',')).join('\n');
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' }));
+  a.download = `활동지_${new Date().toLocaleDateString('ko-KR').replace(/\./g,'').replace(/ /g,'')}.csv`;
+  a.click();
+}
 async function toggleSentenceApproval(submissionId, sentenceIndex, approve, btn) {
   const orig = btn.textContent; btn.disabled=true; btn.textContent='처리 중...';
   try {
@@ -888,7 +996,27 @@ async function toggleSentenceApproval(submissionId, sentenceIndex, approve, btn)
     if(data.allPassed) alert('🎉 모든 문장이 통과되었습니다!');
   } catch(err){ alert('오류: '+err.message); btn.disabled=false; btn.textContent=orig; }
 }
-
+<!-- 활동지 -->
+<div id="panel-worksheet" style="display:none;">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:10px;">
+    <div><h2>활동지</h2><p class="text-muted">학생별 활동지 작성 내용을 확인하세요.</p></div>
+    <div style="display:flex;gap:8px;">
+      <button class="btn btn-ghost btn-sm" onclick="exportWorksheetCSV()">📥 엑셀로 추출</button>
+      <button class="btn btn-primary btn-sm" onclick="loadWorksheets()">🔄 새로고침</button>
+    </div>
+  </div>
+  <div class="class-tabs" id="worksheetClassTabs"></div>
+  <div class="card" style="padding:0;overflow:hidden;">
+    <div class="table-wrap">
+      <table>
+        <thead><tr>
+          <th>이름</th><th>학번</th><th>반</th><th>책 제목</th><th>책 유형</th><th>제출 시각</th><th>상세</th>
+        </tr></thead>
+        <tbody id="worksheetTable"><tr><td colspan="7" style="text-align:center;color:var(--text3);padding:40px;">로딩 중...</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+</div>
 // ── 학생 관리 ──
 async function loadStudents() {
   const classId = document.getElementById('studentClassFilter')?.value||'';
@@ -1239,5 +1367,14 @@ function showErr(id,msg){const el=document.getElementById(id);if(el){el.textCont
 function showLoading(t){document.getElementById('loadingOverlay').classList.add('active');document.getElementById('loadingText').textContent=t;}
 function hideLoading(){document.getElementById('loadingOverlay').classList.remove('active');}
 </script>
+<div class="modal" id="worksheetModal">
+<div class="modal-box" style="max-width:700px;">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+    <div class="modal-title" id="worksheetModalTitle">활동지 상세</div>
+    <button onclick="closeModal('worksheetModal')" style="background:none;border:none;font-size:20px;cursor:pointer;color:var(--text3);">×</button>
+  </div>
+  <div id="worksheetModalContent" style="font-size:13px;"></div>
+</div>
+</div>
 </body>
 </html>

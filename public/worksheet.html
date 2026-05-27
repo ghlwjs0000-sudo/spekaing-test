@@ -1080,13 +1080,21 @@ async function submitToSpeakingTest() {
     }
 
     try {
+        // 활동지 전체 데이터 수집
+        var worksheetInputs = {};
+        document.querySelectorAll('input[type=text], textarea').forEach(function(el, i) {
+            worksheetInputs['field_' + i] = el.value;
+        });
+
         // 학생 확인 및 스크립트 저장
         var res = await fetch('https://speakingtest-git-main-jin-you-jeong-s-projects.vercel.app/api/worksheet', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 studentNumber: studentNumber,
-                script: script
+                script: script,
+                worksheetData: worksheetInputs,
+                bookType: bType
             })
         });
         var data = await res.json();
