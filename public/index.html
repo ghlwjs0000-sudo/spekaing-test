@@ -1011,6 +1011,13 @@ async function submitModalRecording() {
         var sr = (result.sentenceResults || [])[0];
         var newStatus = sr && sr.status === 'ok' ? 'ok' : 'retry';
         state.sentenceStatuses[idx] = newStatus;
+        // 재도전 녹음본 저장
+        var modalBase64 = await toBase64(state.modalAudioBlob);
+        if (!state.retrySentenceAudios) state.retrySentenceAudios = {};
+        state.retrySentenceAudios[idx] = {
+            audio: modalBase64,
+            mime: state.modalAudioBlob.type
+        };
         updateSentItem(idx, newStatus, sr);
         updateGoalUI();
         await saveSubmissionLight();
@@ -1023,14 +1030,19 @@ function updateSentItem(idx, status, sr) {
     var isOk = status === 'ok';
     var sent = state.sentences[idx] || '';
     var issue = sr && sr.issue ? '<div class="sentence-issue">' + sr.issue + '</div>' : '';
+    var audioHtml = '';
+    if (state.retrySentenceAudios && state.retrySentenceAudios[idx]) {
+        var audioData = state.retrySentenceAudios[idx];
+        audioHtml = '<audio controls style="width:100%;margin-top:6px;height:32px;" src="data:' + audioData.mime + ';base64,' + audioData.audio + '"></audio>';
+    }
     item.className = 'sentence-item ' + (isOk ? 'ok' : 'retry');
     item.innerHTML =
         '<div class="sentence-icon">' + (isOk ? '✅' : '❌') + '</div>' +
-        '<div class="sentence-content"><div class="sentence-text">' + sent + '</div>' + issue + '</div>' +
+        '<div class="sentence-content"><div class="sentence-text">' + sent + '</div>' + issue + audioHtml + '</div>' +
         '<div class="sentence-actions">' +
         '<button class="tts-btn" onclick="playTTS(\'' + sent.replace(/'/g, "\\'") + '\')">🔊</button>' +
         (isOk ? '' : '<button class="retry-sent-btn" onclick="openSentModal(' + idx + ')">🎙️ 재도전</button>') +
-'<button class="tts-btn" style="border-color:#ff4444;color:#ff4444;" onclick="sendSOS(' + idx + ', \'' + sent.replace(/'/g, "\\'") + '\')">🆘</button>' +
+        '<button class="tts-btn" style="border-color:#ff4444;color:#ff4444;" onclick="sendSOS(' + idx + ', \'' + sent.replace(/'/g, "\\'") + '\')">🆘</button>' +
         '</div>';
 }
 
