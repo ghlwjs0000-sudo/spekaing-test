@@ -1105,11 +1105,14 @@ async function submitToSpeakingTest() {
           '스크립트'
         ];
         document.querySelectorAll('input[type=text], textarea').forEach(function(el, i) {
-            if (el.value.trim()) {
-                var label = fieldLabels[i] || ('항목' + (i+1));
-                worksheetInputs[label] = el.value;
-            }
+            var label = fieldLabels[i] || ('항목' + (i+1));
+            worksheetInputs[label] = el.value || '';
         });
+
+        // 비어있어도 항상 저장
+        if (Object.keys(worksheetInputs).length === 0) {
+            worksheetInputs['data'] = 'empty';
+        }
 
         // 학생 확인 및 스크립트 저장
         var res = await fetch('https://speakingtest-git-main-jin-you-jeong-s-projects.vercel.app/api/worksheet', {

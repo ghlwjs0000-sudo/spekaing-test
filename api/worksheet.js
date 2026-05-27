@@ -24,8 +24,12 @@ module.exports = async (req, res) => {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
  const { studentNumber, script } = req.body;
-  const worksheetData = req.body.worksheetData || null;
+ let worksheetData = req.body.worksheetData || null;
   const bookType = req.body.bookType || null;
+  // 객체가 비어있으면 null로 처리하지 않음
+  if (worksheetData && typeof worksheetData === 'object' && Object.keys(worksheetData).length === 0) {
+    worksheetData = { empty: true };
+  }
   if (!studentNumber || !script) return res.status(400).json({ error: '학번과 스크립트가 필요합니다.' });
 
   try {
@@ -42,7 +46,7 @@ module.exports = async (req, res) => {
     if (existingId) {
       await sb('PATCH', 'submissions', {
         script: script,
-        worksheet_data: worksheetData || null,
+        worksheet_data: worksheetData ? JSON.stringify(worksheetData) : null,
         worksheet_book_type: bookType || null,
         worksheet_submitted_at: new Date().toISOString(),
         updated_at: new Date().toISOString()
