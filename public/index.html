@@ -906,10 +906,12 @@ function renderResults() {
         var status = state.sentenceStatuses[i] || 'retry';
         var sr = srs[i] || {};
         var isOk = status === 'ok';
-        var teacherOk = approvedList.includes(i);
-        var label = isOk ? (teacherOk ? '✅ 교사 승인' : '✅ 통과') : '❌';
+        var teacherOk = approvedList.includes(i) && !sr.status !== 'ok';
+        var aiOk = sr && sr.status === 'ok';
+        var label = aiOk ? '✅ 통과' : teacherOk ? '✅ 교사 승인' : '❌';
+        var finalOk = aiOk || teacherOk;
         var issue = sr.issue ? '<div class="sentence-issue">' + sr.issue + '</div>' : '';
-        return '<div class="sentence-item ' + (isOk ? 'ok' : 'retry') + '" id="sentItem' + i + '">' +
+       return '<div class="sentence-item ' + (finalOk ? 'ok' : 'retry') + '" id="sentItem' + i + '">' +
             '<div class="sentence-icon">' + label + '</div>' +
             '<div class="sentence-content"><div class="sentence-text">' + sent + '</div>' + issue + '</div>' +
             '<div class="sentence-actions">' +
