@@ -754,7 +754,12 @@ async function openDetail(id) {
       ${!isImage&&!isPdf?`<div style="padding:16px;text-align:center;color:var(--text2);font-size:13px;">📄 ${ext} 파일 — 다운로드 후 확인</div>`:''}
     </div>`;
   }
-  document.getElementById('detailFiles').innerHTML = renderFileSection(s.ppt_url,s.ppt_filename,'📊 발표 자료') + renderFileSection(s.worksheet_url,s.worksheet_filename,'📝 활동지');
+  var audioSection = '';
+  if (s.practice_audio) {
+    audioSection = '<div style="margin-bottom:10px;"><div style="font-size:13px;font-weight:600;color:var(--text2);margin-bottom:6px;">🎙️ 연습 녹음본</div>' +
+      '<audio controls style="width:100%;" src="data:' + (s.practice_audio_mime||'audio/webm') + ';base64,' + s.practice_audio + '"></audio></div>';
+  }
+  document.getElementById('detailFiles').innerHTML = audioSection + renderFileSection(s.worksheet_url,s.worksheet_filename,'📝 활동지');
 
   // 최신 데이터 다시 가져오기
   showLoading('최신 데이터 로딩 중...');
