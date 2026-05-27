@@ -351,6 +351,18 @@ async function login() {
         document.getElementById('userBadgeText').textContent = data.user.name + ' · ' + data.user.className;
         showScreen('student');
         await loadPreviousSubmission();
+        // 활동지에서 넘어온 스크립트 확인
+        var worksheetScript = localStorage.getItem('worksheet_script');
+        if (worksheetScript && !state.script) {
+            state.script = worksheetScript;
+            var scriptEl = document.getElementById('scriptText');
+            if (scriptEl) {
+                scriptEl.value = worksheetScript;
+                updateScriptCount();
+            }
+            localStorage.removeItem('worksheet_script');
+            localStorage.removeItem('worksheet_submitted_at');
+        }
         if (!state.lastResult) goToStep(1);
     } catch (err) { hideLoading(); showLoginError('서버 오류: ' + err.message); }
 }
@@ -404,6 +416,7 @@ async function loadPreviousSubmission() {
        if (scriptTextEl) {
             scriptTextEl.value = prev.script || '';
             updateScriptCount();
+        }
         }
         if (prev.sentence_results && prev.sentence_results.length) {
             var approvedList = prev.teacher_approved_sentences || [];
