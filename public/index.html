@@ -812,13 +812,28 @@ async function submitRecording() {
     showLoading('AI 분석 중...', '음성을 텍스트로 변환 중');
     try {
         var base64 = await toBase64(state.audioBlob);
+        setLoadingStep('오디오 업로드 중...');
+        var ext2 = state.audioBlob.type.includes('webm') ? 'webm' : state.audioBlob.type.includes('mp4') ? 'mp4' : 'ogg';
+        var uploadRes2 = await fetch('/api/upload', {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                fileBase64: base64,
+                filename: 'practice_' + Date.now() + '.' + ext2,
+                studentId: state.user.id,
+                fileType: 'audio'
+            })
+        });
+        var uploadData2 = await uploadRes2.json();
         setLoadingStep('문장별 발화 분석 중');
         var res = await fetch('/api/score', {
             method: 'POST', headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 studentId: state.user ? state.user.id : null,
                 submissionId: state.submissionId,
-                script: state.script, audioBase64: base64, mimeType: state.audioBlob.type
+                script: state.script,
+                audioUrl: uploadData2.success ? uploadData2.url : null,
+                audioBase64: uploadData2.success ? null : base64,
+                mimeType: state.audioBlob.type
             })
         });
         if (!res.ok) {
