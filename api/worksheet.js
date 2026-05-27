@@ -23,7 +23,9 @@ module.exports = async (req, res) => {
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
-  const { studentNumber, script } = req.body;
+ const { studentNumber, script } = req.body;
+  const worksheetData = req.body.worksheetData || null;
+  const bookType = req.body.bookType || null;
   if (!studentNumber || !script) return res.status(400).json({ error: '학번과 스크립트가 필요합니다.' });
 
   try {
@@ -36,7 +38,6 @@ module.exports = async (req, res) => {
     const existing = await sb('GET', 'submissions', null, `?student_id=eq.${student.id}&select=id`);
     const existingId = existing.length ? existing[0].id : null;
 
-   const { worksheetData, bookType } = req.body;
 
     if (existingId) {
       await sb('PATCH', 'submissions', {
