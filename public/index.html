@@ -417,11 +417,6 @@ async function loadPreviousSubmission() {
        if (scriptTextEl) {
             scriptTextEl.value = prev.script || '';
             updateScriptCount();
-            // 활동지에서 제출한 스크립트가 있으면 표시
-            if (prev.worksheet_submitted_at && prev.script) {
-                var wsInfo = document.getElementById('worksheetInfo');
-                if (wsInfo) wsInfo.style.display = 'block';
-            }
         }
         if (prev.sentence_results && prev.sentence_results.length) {
             var approvedList = prev.teacher_approved_sentences || [];
