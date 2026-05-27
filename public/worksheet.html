@@ -966,7 +966,24 @@ function secFilled(n){
   }catch(e){}
   return false;
 }
-
+function updateSent(el){
+  var sents=parseSentences(el.value);
+  var total=sents.length;
+  var short=sents.filter(function(s){return wordCount(s)<15;});
+  var pct=Math.min(total/15*100,100);
+  var fill=document.getElementById('sent-fill');
+  fill.style.width=pct+'%';
+  var allOk=total>=15&&short.length===0;
+  fill.className='sent-fill'+(allOk?' ok':'');
+  var lbl=document.getElementById('sent-lbl');
+  lbl.textContent='문장 수: '+total+' / 15개 · 짧은 문장(15단어 미만): '+short.length+'개';
+  lbl.className='sent-lbl'+(allOk?' ok':total>=15&&short.length>0?' warn':'');
+  document.getElementById('sent-check').textContent=allOk?'✓':'';
+  var warn=document.getElementById('short-warn');
+  if(short.length>0){warn.style.display='block';warn.textContent='⚠️ 15단어 미만인 문장이 '+short.length+'개 있어요. 각 문장을 더 자세하고 길게 보완해봐요!';}
+  else{warn.style.display='none';}
+  updProg();
+}
 function updProg(){
   var filled=0;
   for(var i=1;i<=6;i++){if(secFilled(i))filled++;}
