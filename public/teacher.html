@@ -725,7 +725,11 @@ function renderSubmissions(data) {
 async function openDetail(id) {
   showLoading('최신 데이터 로딩 중...');
   try {
-    const freshRes = await fetch('/api/teacher?action=submissions');
+    const isMaster = state.teacher?.isMaster || false;
+    const classIds = state.teacher?.classIds || [];
+    let url = '/api/teacher?action=submissions';
+    if (!isMaster && classIds.length > 0) url += '&classIds=' + classIds.join(',');
+    const freshRes = await fetch(url);
     const freshData = await freshRes.json();
     if (Array.isArray(freshData)) state.submissions = freshData;
   } catch(e) {}
@@ -768,15 +772,9 @@ async function openDetail(id) {
   hideLoading();
   const fresh = Array.isArray(freshData) && freshData[0] ? freshData[0] : s;
   // 최신 데이터 직접 조회
-  let freshS = s;
-  try {
-    const fr = await fetch('/api/submit?studentId=' + s.student_id);
-    const fd = await fr.json();
-    if (Array.isArray(fd) && fd[0]) freshS = fd[0];
-  } catch(e) {}
-  const sents = freshS.sentences || s.sentences || [];
-  const srs = freshS.sentence_results || s.sentence_results || [];
-  const approvedList = freshS.teacher_approved_sentences || s.teacher_approved_sentences || [];
+  const sents = s.sentences || [];
+  const srs = s.sentence_results || [];
+  const approvedList = s.teacher_approved_sentences || [];
   document.getElementById('detailSentences').innerHTML = sents.map((sent,i)=>{
     const sr=srs[i]||{};
     const aiOk=sr.status==='ok';
