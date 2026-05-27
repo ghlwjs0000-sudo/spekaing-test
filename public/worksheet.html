@@ -1004,10 +1004,7 @@ async function submitToSpeakingTest() {
         return;
     }
     var shortSents = sentences.filter(function(s) { return wordCount(s) < 15; });
-    if (shortSents.length > 0) {
-        if (!confirm('15단어 미만인 문장이 ' + shortSents.length + '개 있어요. 그래도 제출하시겠습니까?')) {
-            return;
-        }
+    // 단어 수 체크 제거
     }
 
     // 학번 확인
