@@ -1052,7 +1052,12 @@ async function submitToSpeakingTest() {
         return;
     }
     var studentNumber = document.getElementById('meta-id') ? document.getElementById('meta-id').value.trim() : '';
-    if (!studentNumber) { alert('학번을 입력해주세요!'); return; }
+    alert('학번: ' + studentNumber);
+    if (!studentNumber) {
+        alert('학번을 입력해주세요!');
+        return;
+    }
+    alert('fetch 시작!');
     try {
         var res = await fetch('https://speakingtest-git-main-jin-you-jeong-s-projects.vercel.app/api/worksheet', {
             method: 'POST',
