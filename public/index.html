@@ -430,19 +430,6 @@ async function loadPreviousSubmission() {
                 return sr.status === 'ok' || approvedList.includes(i) ? 'ok' : 'retry';
             });
         }
-        async function loadPreviousSubmission() {
-    try {
-        // 활동지에서 제출한 스크립트가 있으면 반영
-        if (prev.worksheet_submitted_at && prev.script && (!prev.attempt_count || prev.attempt_count === 0)) {
-            state.script = prev.script;
-            var scriptEl = document.getElementById('scriptText');
-            if (scriptEl) {
-                scriptEl.value = prev.script;
-                updateScriptCount();
-            }
-        }
-    } catch (err) { console.error('이전 데이터 로딩 오류:', err); }
-}
             state.lastResult = {
                 total: prev.ai_score, grade: prev.grade,
                 pronunciation: prev.pronunciation, content: prev.content,
@@ -478,6 +465,17 @@ function goToStep(n) {
             if (i < n) { dot.className = 'step-dot done'; }
             else if (i === n) { dot.className = 'step-dot active'; }
             else { dot.className = 'step-dot'; }
+            // 활동지에서 제출한 스크립트가 있으면 반영
+        if (prev.worksheet_submitted_at && prev.script && (!prev.attempt_count || prev.attempt_count === 0)) {
+            state.script = prev.script;
+            var scriptEl = document.getElementById('scriptText');
+            if (scriptEl) {
+                scriptEl.value = prev.script;
+                updateScriptCount();
+            }
+        }
+    } catch (err) { console.error('이전 데이터 로딩 오류:', err); }
+}
         }
         if (lbl) { lbl.className = i === n ? 'step-label active' : 'step-label'; }
         if (i < 3) {
