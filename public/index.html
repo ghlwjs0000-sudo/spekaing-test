@@ -462,6 +462,15 @@ function goToStep(n) {
             else if (i === n) { dot.className = 'step-dot active'; }
             else { dot.className = 'step-dot'; }
         }
+        if (lbl) { lbl.className = i === n ? 'step-label active' : 'step-label'; }
+        if (i < 3) {
+            var line = document.getElementById('line' + i + (i + 1));
+            if (line) line.className = i < n ? 'step-line done' : 'step-line';
+        }
+    });
+    if (n === 3) { startPolling(); } else { stopPolling(); }
+    window.scrollTo(0, 0);
+}
 
 function navigateToStep(n) {
     if (n === 2 && !state.script) { alert('먼저 스크립트를 제출해주세요.'); return; }
