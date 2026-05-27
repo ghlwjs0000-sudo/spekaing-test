@@ -972,6 +972,51 @@ function updProg(){
   for(var i=1;i<=6;i++){if(secFilled(i))filled++;}
   document.getElementById('prog-txt').textContent=filled+' / 6 완료';
   document.getElementById('prog-fill').style.width=(filled/6*100)+'%';
+  saveWorksheetToLocal();
+}
+
+function saveWorksheetToLocal() {
+  try {
+    var data = {};
+    document.querySelectorAll('input[type=text], textarea').forEach(function(el) {
+      if (el.id) data[el.id] = el.value;
+    });
+    // index 기반으로 id 없는 필드도 저장
+    var allInputs = document.querySelectorAll('input[type=text], textarea');
+    var arr = [];
+    allInputs.forEach(function(el) { arr.push(el.value); });
+    localStorage.setItem('worksheet_data', JSON.stringify(arr));
+    localStorage.setItem('worksheet_btype', bType);
+  } catch(e) {}
+}
+
+function loadWorksheetFromLocal() {
+  try {
+    var savedType = localStorage.getItem('worksheet_btype');
+    if (savedType && savedType !== bType) {
+      bType = savedType;
+      document.querySelectorAll('.type-btn').forEach(function(b) { b.classList.remove('active'); });
+      if (bType === 'nonfiction') {
+        var btns = document.querySelectorAll('.type-btn');
+        if (btns[1]) btns[1].classList.add('active');
+      } else {
+        var btns = document.querySelectorAll('.type-btn');
+        if (btns[0]) btns[0].classList.add('active');
+      }
+      renderSec3(); renderGuide(); renderExamples();
+    }
+    var saved = localStorage.getItem('worksheet_data');
+    if (!saved) return;
+    var arr = JSON.parse(saved);
+    var allInputs = document.querySelectorAll('input[type=text], textarea');
+    allInputs.forEach(function(el, i) {
+      if (arr[i] !== undefined) {
+        el.value = arr[i];
+        if (el.id === 'script-area') updateSent(el);
+      }
+    });
+    updProg();
+  } catch(e) {}
 }
 
 /* ── Field check marks ── */
@@ -995,6 +1040,7 @@ document.querySelectorAll('input,textarea').forEach(function(el){
   }
 });
 renderSec3(); renderGuide(); renderExamples(); updProg();
+setTimeout(loadWorksheetFromLocal, 300);
 
 async function submitToSpeakingTest() {
     var script = document.getElementById('script-area').value.trim();
