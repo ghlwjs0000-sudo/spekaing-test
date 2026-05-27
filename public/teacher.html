@@ -766,13 +766,6 @@ async function openDetail(id) {
   }
   document.getElementById('detailFiles').innerHTML = audioSection + renderFileSection(s.worksheet_url,s.worksheet_filename,'📝 활동지');
 
-  // 최신 데이터 다시 가져오기
-  showLoading('최신 데이터 로딩 중...');
-  const freshRes = await fetch('/api/submit?studentId=' + s.student_id);
-  const freshData = await freshRes.json();
-  hideLoading();
-  const fresh = Array.isArray(freshData) && freshData[0] ? freshData[0] : s;
-  // 최신 데이터 직접 조회
   const sents = s.sentences || [];
   const srs = s.sentence_results || [];
   const approvedList = s.teacher_approved_sentences || [];
