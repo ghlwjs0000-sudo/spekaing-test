@@ -194,22 +194,15 @@
                 <div class="form-group"><label class="form-label">책 제목</label><input class="form-input" id="bookTitle" placeholder="예: The Little Prince"/></div>
                 <div class="form-group"><label class="form-label">저자</label><input class="form-input" id="bookAuthor" placeholder="예: Antoine de Saint-Exupéry"/></div>
             </div>
-            <div class="card">
+           <div class="card">
     <div class="card-title">말하기 스크립트 (영어)</div>
-    <div class="alert-info">💡 한 문장씩 작성하고 반드시 마침표(.)로 끝내야 다음 문장을 작성할 수 있어요.</div>
-    <div id="sentenceInputList" style="display:flex;flex-direction:column;gap:10px;margin-bottom:12px;"></div>
-    <div id="addSentenceWrap">
-        <div style="display:flex;gap:8px;align-items:flex-start;">
-            <div style="flex:1;">
-                <input class="form-input" id="currentSentenceInput" placeholder="문장을 입력하고 마침표(.)로 끝내세요..." onkeydown="handleSentenceKey(event)"/>
-                <div id="sentenceInputError" style="color:var(--red);font-size:12px;margin-top:4px;display:none;">마침표(.)로 끝내야 다음 문장을 추가할 수 있어요.</div>
-            </div>
-            <button class="btn btn-primary btn-sm" onclick="addSentence()" style="margin-top:2px;">+ 추가</button>
-        </div>
+    <div class="alert-info">💡 15문장 이상 작성해주세요. 각 문장은 마침표(.), 물음표(?), 느낌표(!)로 끝내주세요.</div>
+    <div class="form-group">
+        <textarea class="form-textarea" id="scriptText" style="min-height:200px;" placeholder="Today, I would like to introduce a book called ...&#10;&#10;This story is about...&#10;&#10;I recommend this book because..."></textarea>
     </div>
-    <div class="progress-wrap" style="margin-top:12px;"><div class="progress-bar" id="scriptProgress"></div></div>
-    <div class="text-muted mt-2" id="wordCount">단어 수: 0 / 50</div>
-    <input type="hidden" id="scriptText"/>
+    <div id="sentenceCountInfo" style="font-size:13px;color:var(--text2);margin-top:6px;">문장 수: 0 / 15</div>
+    <div class="progress-wrap" style="margin-top:8px;"><div class="progress-bar" id="scriptProgress"></div></div>
+    <div class="text-muted mt-2" id="wordCount">단어 수: 0</div>
 </div>
             <div class="card">
                 <div class="card-title">발표 자료 업로드</div>
@@ -419,16 +412,7 @@ async function loadPreviousSubmission() {
         if (bookAuthorEl) bookAuthorEl.value = prev.book_author || '';
        if (scriptTextEl) {
             scriptTextEl.value = prev.script || '';
-            // 문장별 입력 복원
-            if (prev.script) {
-                scriptSentences = prev.script.split(/(?<=[.!?])\s+/).filter(function(s) { return s.trim().length > 0; });
-                renderSentenceList();
-            }
-            var w = (prev.script || '').trim().split(/\s+/).filter(function(x) { return x; }).length;
-            var wc = document.getElementById('wordCount');
-            var sp = document.getElementById('scriptProgress');
-            if (wc) wc.textContent = '단어 수: ' + w + ' / 50';
-            if (sp) sp.style.width = Math.min(w / 50 * 100, 100) + '%';
+            updateScriptCount();
         }
         if (prev.sentence_results && prev.sentence_results.length) {
             var approvedList = prev.teacher_approved_sentences || [];
@@ -528,78 +512,37 @@ function handleFile(type, input) {
 }
 
 document.addEventListener('DOMContentLoaded', function() {
-    scriptSentences = [];
+    var el = document.getElementById('scriptText');
+    if (el) el.addEventListener('input', function() {
+        updateScriptCount();
+    });
 });
-// ── 문장별 스크립트 입력 ──
-var scriptSentences = [];
 
-function handleSentenceKey(e) {
-    if (e.key === 'Enter') { e.preventDefault(); addSentence(); }
-}
-
-function addSentence() {
-    var input = document.getElementById('currentSentenceInput');
-    var val = input.value.trim();
-    var errEl = document.getElementById('sentenceInputError');
-    if (!val) return;
-    if (!val.endsWith('.') && !val.endsWith('!') && !val.endsWith('?')) {
-        errEl.textContent = '마침표(.)로 끝내야 다음 문장을 추가할 수 있어요.';
-        errEl.style.display = 'block';
-        return;
+function updateScriptCount() {
+    var text = document.getElementById('scriptText').value;
+    var sentences = text.split(/(?<=[.!?])\s+/).filter(function(s) { return s.trim().length > 0; });
+    var words = text.trim().split(/\s+/).filter(function(x) { return x; }).length;
+    var sentCount = sentences.length;
+    var countEl = document.getElementById('sentenceCountInfo');
+    var progressEl = document.getElementById('scriptProgress');
+    var wordEl = document.getElementById('wordCount');
+    if (countEl) {
+        countEl.textContent = '문장 수: ' + sentCount + ' / 15';
+        countEl.style.color = sentCount >= 15 ? 'var(--green)' : 'var(--text2)';
     }
-    var wordCount = val.split(/\s+/).filter(function(x) { return x; }).length;
-    if (wordCount < 15) {
-        errEl.textContent = '한 문장은 반드시 15단어 이상이어야 해요. (현재: ' + wordCount + '단어)';
-        errEl.style.display = 'block';
-        return;
-    }
-    if (scriptSentences.length >= 20) {
-        errEl.textContent = '스크립트는 최대 20문장까지 작성할 수 있어요.';
-        errEl.style.display = 'block';
-        return;
-    }
-    errEl.style.display = 'none';
-    scriptSentences.push(val);
-    input.value = '';
-    renderSentenceList();
-    updateScriptText();
-    input.focus();
-}
-
-function removeSentence(idx) {
-    scriptSentences.splice(idx, 1);
-    renderSentenceList();
-    updateScriptText();
-}
-
-function renderSentenceList() {
-    var list = document.getElementById('sentenceInputList');
-    if (!scriptSentences.length) { list.innerHTML = ''; return; }
-    list.innerHTML = scriptSentences.map(function(s, i) {
-        return '<div style="display:flex;align-items:center;gap:8px;padding:10px 14px;background:var(--blue-light);border:1.5px solid var(--blue-mid);border-radius:var(--radius-sm);">' +
-            '<span style="font-size:13px;color:var(--blue);font-weight:700;flex-shrink:0;">' + (i+1) + '.</span>' +
-            '<span style="flex:1;font-size:14px;color:var(--text);">' + s + '</span>' +
-            '<button onclick="removeSentence(' + i + ')" style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:16px;flex-shrink:0;">×</button>' +
-            '</div>';
-    }).join('');
-}
-
-function updateScriptText() {
-    var full = scriptSentences.join(' ');
-    document.getElementById('scriptText').value = full;
-    var w = full.trim().split(/\s+/).filter(function(x) { return x; }).length;
-    document.getElementById('wordCount').textContent = '단어 수: ' + w + ' / 50';
-    document.getElementById('scriptProgress').style.width = Math.min(w / 50 * 100, 100) + '%';
+    if (progressEl) progressEl.style.width = Math.min(sentCount / 15 * 100, 100) + '%';
+    if (wordEl) wordEl.textContent = '단어 수: ' + words;
 }
 async function submitScript() {
     var book = document.getElementById('bookTitle').value.trim();
     var author = document.getElementById('bookAuthor').value.trim();
     var script = document.getElementById('scriptText').value.trim();
     if (!book || !script) { alert('책 제목과 스크립트를 입력해주세요.'); return; }
-    if (scriptSentences.length < 20) { alert('스크립트는 반드시 20문장을 작성해야 제출할 수 있어요. (현재: ' + scriptSentences.length + '문장)'); return; }
+   var sentences = script.split(/(?<=[.!?])\s+/).filter(function(s) { return s.trim().length > 0; });
+    if (sentences.length < 15) { alert('스크립트는 반드시 15문장 이상 작성해야 제출할 수 있어요. (현재: ' + sentences.length + '문장)'); return; }
     state.currentBook = { book: book, author: author };
     state.script = script;
-    state.sentences = script.split(/[.!?]+\s+/).filter(function(s) { return s.trim().length > 3; });
+    state.sentences = sentences;
     if (!state.submissionId) {
         state.sentenceStatuses = state.sentences.map(function() { return 'retry'; });
         state.attemptCount = 0;
