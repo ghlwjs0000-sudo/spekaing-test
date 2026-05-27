@@ -43,16 +43,26 @@ module.exports = async (req, res) => {
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
- const { studentId, submissionId, script, audioBase64, mimeType, singleSentence, sentenceIdx, isFinalSpeaking } = req.body;
+ const { studentId, submissionId, script, audioBase64, audioUrl, mimeType, singleSentence, sentenceIdx, isFinalSpeaking } = req.body;
 
-  if (!script || !audioBase64) return res.status(400).json({ error: '스크립트와 녹음이 필요합니다.' });
+  if (!script || (!audioBase64 && !audioUrl)) return res.status(400).json({ error: '스크립트와 녹음이 필요합니다.' });
 
   try {
     // 1단계: Whisper STT
-    const audioBuffer = Buffer.from(audioBase64, 'base64');
     const ext = (mimeType || '').includes('mp4') ? 'mp4' : (mimeType || '').includes('ogg') ? 'ogg' : 'webm';
     const formData = new FormData();
-    formData.append('file', new Blob([audioBuffer], { type: mimeType || 'audio/webm' }), `rec.${ext}`);
+
+    if (audioUrl) {
+      // URL에서 오디오 다운로드
+      const audioFetch = await fetch(audioUrl);
+      const audioArrayBuffer = await audioFetch.arrayBuffer();
+      const audioBuffer = Buffer.from(audioArrayBuffer);
+      formData.append('file', new Blob([audioBuffer], { type: mimeType || 'audio/webm' }), `rec.${ext}`);
+    } else {
+      const audioBuffer = Buffer.from(audioBase64, 'base64');
+      formData.append('file', new Blob([audioBuffer], { type: mimeType || 'audio/webm' }), `rec.${ext}`);
+    }
+
     formData.append('model', 'whisper-1');
     formData.append('language', 'en');
 
