@@ -1043,6 +1043,7 @@ renderSec3(); renderGuide(); renderExamples(); updProg();
 setTimeout(loadWorksheetFromLocal, 300);
 
 async function submitToSpeakingTest() {
+    alert('제출 시작!');
     var script = document.getElementById('script-area').value.trim();
     if (!script) { alert('스크립트를 먼저 작성해주세요!'); return; }
     var sentences = parseSentences(script);
