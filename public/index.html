@@ -1026,6 +1026,10 @@ async function submitModalRecording() {
         var sr = (result.sentenceResults || [])[0];
         var newStatus = sr && sr.status === 'ok' ? 'ok' : 'retry';
         state.sentenceStatuses[idx] = newStatus;
+        // sentence_results 업데이트
+        if (state.lastResult && state.lastResult.sentenceResults) {
+            state.lastResult.sentenceResults[idx] = sr || { status: newStatus };
+        }
         // 재도전 녹음본 저장
         var modalBase64 = await toBase64(state.modalAudioBlob);
         if (!state.retrySentenceAudios) state.retrySentenceAudios = {};
