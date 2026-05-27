@@ -19,8 +19,9 @@ module.exports = async (req, res) => {
     const buffer = Buffer.from(base64Data, 'base64');
 
     // 파일 확장자 추출
-    const ext = filename.split('.').pop().toLowerCase();
-  const path = `${studentId}/${fileType}_${Date.now()}.${ext}`;
+    const ext = filename.split('.').pop().toLowerCase().replace(/[^a-z0-9]/g, '');
+  const safeExt = ext || 'bin';
+  const path = `uploads/${fileType}_${Date.now()}.${safeExt}`;
 
     // Supabase Storage 업로드
     const uploadRes = await fetch(
