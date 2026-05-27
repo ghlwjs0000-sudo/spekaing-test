@@ -1313,6 +1313,32 @@ async function startFinalRecording() {
                 b.style.height = (Math.random() * 26 + 4) + 'px';
             });
         }, 100);
+
+        // 침묵 감지 (5초 이상 무음 시 실격)
+        var finalAudioContext = new (window.AudioContext || window.webkitAudioContext)();
+        var finalAnalyser = finalAudioContext.createAnalyser();
+        var finalSource = finalAudioContext.createMediaStreamSource(stream);
+        finalSource.connect(finalAnalyser);
+        finalAnalyser.fftSize = 256;
+        var finalDataArray = new Uint8Array(finalAnalyser.frequencyBinCount);
+        state.finalSilenceSeconds = 0;
+        state.finalSilenceInterval = setInterval(function() {
+            if (!state.finalIsRecording) { clearInterval(state.finalSilenceInterval); return; }
+            finalAnalyser.getByteFrequencyData(finalDataArray);
+            var avg = finalDataArray.reduce(function(a, b) { return a + b; }, 0) / finalDataArray.length;
+            if (avg < 5) {
+                state.finalSilenceSeconds++;
+                if (state.finalSilenceSeconds >= 5) {
+                    clearInterval(state.finalSilenceInterval);
+                    stopFinalRecording();
+                    alert('⚠️ 실격 처리: 5초 이상 말을 하지 않아 녹음이 중지되었습니다. 다시 녹음해주세요.');
+                    retryFinalRecording();
+                }
+            } else {
+                state.finalSilenceSeconds = 0;
+            }
+        }, 1000);
+
     } catch (err) { alert('마이크 접근 권한이 필요합니다.'); }
 }
 
@@ -1320,8 +1346,8 @@ function stopFinalRecording() {
     if (!state.finalMediaRecorder) return;
     state.finalMediaRecorder.stop();
     state.finalMediaRecorder.stream.getTracks().forEach(function(t) { t.stop(); });
-    clearInterval(state.finalRecordingInterval);
-    clearInterval(state.finalWaveInterval);
+    clearInterval(state.finalRecordingInterval); clearInterval(state.finalWaveInterval);
+    clearInterval(state.finalSilenceInterval);
     state.finalIsRecording = false;
     document.getElementById('finalRecordBtn').classList.remove('recording');
     document.getElementById('finalRecordIcon').textContent = '🎙️';
@@ -1338,6 +1364,7 @@ function retryFinalRecording() {
 
 async function submitFinalRecording() {
     if (!state.finalAudioBlob) { alert('먼저 녹음해주세요.'); return; }
+    if (state.finalRecordSeconds < 60) { alert('최소 1분 이상 말해야 해요. (현재: ' + state.finalRecordSeconds + '초)'); return; }
     if (!confirm('최종 말하기를 제출하시겠습니까?\n제출 후에는 수정할 수 없어요.')) return;
     showLoading('최종 말하기 제출 중...', '오디오 업로드 중...');
     try {
