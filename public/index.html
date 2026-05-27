@@ -430,6 +430,7 @@ async function loadPreviousSubmission() {
                 return sr.status === 'ok' || approvedList.includes(i) ? 'ok' : 'retry';
             });
         }
+        if (prev.attempt_count > 0 && prev.sentence_results && prev.sentence_results.length) {
             state.lastResult = {
                 total: prev.ai_score, grade: prev.grade,
                 pronunciation: prev.pronunciation, content: prev.content,
