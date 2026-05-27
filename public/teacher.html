@@ -996,27 +996,7 @@ async function toggleSentenceApproval(submissionId, sentenceIndex, approve, btn)
     if(data.allPassed) alert('🎉 모든 문장이 통과되었습니다!');
   } catch(err){ alert('오류: '+err.message); btn.disabled=false; btn.textContent=orig; }
 }
-<!-- 활동지 -->
-<div id="panel-worksheet" style="display:none;">
-  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:10px;">
-    <div><h2>활동지</h2><p class="text-muted">학생별 활동지 작성 내용을 확인하세요.</p></div>
-    <div style="display:flex;gap:8px;">
-      <button class="btn btn-ghost btn-sm" onclick="exportWorksheetCSV()">📥 엑셀로 추출</button>
-      <button class="btn btn-primary btn-sm" onclick="loadWorksheets()">🔄 새로고침</button>
-    </div>
-  </div>
-  <div class="class-tabs" id="worksheetClassTabs"></div>
-  <div class="card" style="padding:0;overflow:hidden;">
-    <div class="table-wrap">
-      <table>
-        <thead><tr>
-          <th>이름</th><th>학번</th><th>반</th><th>책 제목</th><th>책 유형</th><th>제출 시각</th><th>상세</th>
-        </tr></thead>
-        <tbody id="worksheetTable"><tr><td colspan="7" style="text-align:center;color:var(--text3);padding:40px;">로딩 중...</td></tr></tbody>
-      </table>
-    </div>
-  </div>
-</div>
+
 // ── 학생 관리 ──
 async function loadStudents() {
   const classId = document.getElementById('studentClassFilter')?.value||'';
@@ -1134,7 +1114,27 @@ async function bulkAddStudents(){
     closeModal('bulkModal'); alert(`${data.count}명이 추가되었습니다.`); loadStudents();
   }catch(err){hideLoading();showErr('bulkError','오류: '+err.message);}
 }
-
+<!-- 활동지 -->
+<div id="panel-worksheet" style="display:none;">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:10px;">
+    <div><h2>활동지</h2><p class="text-muted">학생별 활동지 작성 내용을 확인하세요.</p></div>
+    <div style="display:flex;gap:8px;">
+      <button class="btn btn-ghost btn-sm" onclick="exportWorksheetCSV()">📥 엑셀로 추출</button>
+      <button class="btn btn-primary btn-sm" onclick="loadWorksheets()">🔄 새로고침</button>
+    </div>
+  </div>
+  <div class="class-tabs" id="worksheetClassTabs"></div>
+  <div class="card" style="padding:0;overflow:hidden;">
+    <div class="table-wrap">
+      <table>
+        <thead><tr>
+          <th>이름</th><th>학번</th><th>반</th><th>책 제목</th><th>책 유형</th><th>제출 시각</th><th>상세</th>
+        </tr></thead>
+        <tbody id="worksheetTable"><tr><td colspan="7" style="text-align:center;color:var(--text3);padding:40px;">로딩 중...</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+</div>
 // ── 반 관리 ──
 async function loadClasses(){
   showLoading('반 현황 로딩 중...');
