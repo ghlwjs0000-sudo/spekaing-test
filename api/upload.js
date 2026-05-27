@@ -40,6 +40,7 @@ module.exports = async (req, res) => {
 
     if (!uploadRes.ok) {
       const e = await uploadRes.text();
+      console.error('Storage 오류:', e);
       return res.status(500).json({ error: `Storage 업로드 실패: ${e}` });
     }
 
