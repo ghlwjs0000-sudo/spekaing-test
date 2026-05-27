@@ -995,7 +995,30 @@ document.querySelectorAll('input,textarea').forEach(function(el){
   }
 });
 renderSec3(); renderGuide(); renderExamples(); updProg();
+
 async function submitToSpeakingTest() {
+    var script = document.getElementById('script-area').value.trim();
+    if (!script) { alert('스크립트를 먼저 작성해주세요!'); return; }
+    var sentences = parseSentences(script);
+    if (sentences.length < 15) {
+        alert('스크립트는 15문장 이상이어야 해요. (현재: ' + sentences.length + '문장)');
+        return;
+    }
+    var studentNumber = document.getElementById('meta-id') ? document.getElementById('meta-id').value.trim() : '';
+    if (!studentNumber) { alert('학번을 입력해주세요!'); return; }
+    try {
+        var res = await fetch('https://speakingtest-git-main-jin-you-jeong-s-projects.vercel.app/api/worksheet', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ studentNumber: studentNumber, script: script })
+        });
+        var data = await res.json();
+        if (!data.success) { alert('오류: ' + (data.error || '학번을 확인해주세요.')); return; }
+        alert('✅ 활동지가 제출되었습니다! 말하기 수행평가로 이동합니다.');
+        window.location.href = 'https://speakingtest-git-main-jin-you-jeong-s-projects.vercel.app';
+    } catch(err) { alert('오류: ' + err.message); }
+}
+</script>
     var script = document.getElementById('script-area').value.trim();
     if (!script) { alert('스크립트를 먼저 작성해주세요!'); return; }
     var sentences = parseSentences(script);
