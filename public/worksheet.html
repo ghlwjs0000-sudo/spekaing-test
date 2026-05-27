@@ -1059,7 +1059,11 @@ async function submitToSpeakingTest() {
             body: JSON.stringify({ studentNumber: studentNumber, script: script })
         });
         var data = await res.json();
-        if (!data.success) { alert('오류: ' + (data.error || '학번을 확인해주세요.')); return; }
+        alert('서버 응답: ' + JSON.stringify(data));
+        if (!data.success) {
+            alert('오류: ' + (data.error || '학번을 확인해주세요.'));
+            return;
+        }
         // 활동지 내용 localStorage에 저장
         var allInputsSave = document.querySelectorAll('input[type=text], textarea');
         var arrSave = [];
