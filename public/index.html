@@ -461,17 +461,7 @@ function goToStep(n) {
             if (i < n) { dot.className = 'step-dot done'; }
             else if (i === n) { dot.className = 'step-dot active'; }
             else { dot.className = 'step-dot'; }
-            // 활동지에서 제출한 스크립트가 있으면 반영
-        if (prev.worksheet_submitted_at && prev.script && (!prev.attempt_count || prev.attempt_count === 0)) {
-            state.script = prev.script;
-            var scriptEl = document.getElementById('scriptText');
-            if (scriptEl) {
-                scriptEl.value = prev.script;
-                updateScriptCount();
-            }
         }
-    } catch (err) { console.error('이전 데이터 로딩 오류:', err); }
-}
 
 function navigateToStep(n) {
     if (n === 2 && !state.script) { alert('먼저 스크립트를 제출해주세요.'); return; }
@@ -1169,37 +1159,7 @@ function showMySubmission() {
     wrap.innerHTML = html;
     document.body.appendChild(wrap);
 }
-async function sendSOS() {
-    if (!state.user) return;
-    var btn = document.getElementById('sosBtn');
-    var status = document.getElementById('sosStatus');
-    btn.disabled = true;
-    status.textContent = '호출 중...';
-    try {
-        var res = await fetch('/api/sos', {
-            method: 'POST', headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                studentId: state.user.id,
-                studentName: state.user.name,
-                classId: state.user.classId,
-                submissionId: state.submissionId
-            })
-        });
-        var data = await res.json();
-        if (data.success) {
-            status.textContent = '✅ 선생님께 호출됐어요!';
-            setTimeout(function() {
-                btn.disabled = false;
-                status.textContent = '';
-            }, 30000); // 30초 후 재호출 가능
-        } else {
-            throw new Error(data.error || '호출 실패');
-        }
-    } catch (err) {
-        status.textContent = '❌ 호출 실패: ' + err.message;
-        btn.disabled = false;
-    }
-}async function sendSOS(sentenceIndex, sentenceText) {
+async function sendSOS(sentenceIndex, sentenceText) {
     if (!state.user || !state.submissionId) { alert('먼저 제출을 완료해주세요.'); return; }
     try {
         var res = await fetch('/api/help', {
