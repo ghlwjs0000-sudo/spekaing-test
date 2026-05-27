@@ -1005,8 +1005,9 @@ async function submitToSpeakingTest() {
     }
     var shortSents = sentences.filter(function(s) { return wordCount(s) < 15; });
     if (shortSents.length > 0) {
-        alert('15단어 미만인 문장이 ' + shortSents.length + '개 있어요. 각 문장을 더 길게 작성해주세요!');
-        return;
+        if (!confirm('15단어 미만인 문장이 ' + shortSents.length + '개 있어요. 그래도 제출하시겠습니까?')) {
+            return;
+        }
     }
 
     // 학번 확인
