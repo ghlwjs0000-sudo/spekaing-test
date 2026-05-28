@@ -1064,7 +1064,39 @@ if (savedStudentNum) {
     if (metaId && !metaId.value) metaId.value = savedStudentNum;
 }
 setTimeout(loadWorksheetFromLocal, 800);
-
+function generateWorksheetCSV() {
+    var rows = [];
+    var fieldLabels = [
+        '학번', '이름', '책 제목', '저자', '날짜',
+        '발표 대상', '발표 목적', '청중 적합 이유(한국어)', '청중 적합 이유(English)',
+        'Hook 방식', 'Hook 아이디어(한국어)', 'Hook 문장(English)',
+        'Setting(한국어)', 'Setting(English)', '주인공(한국어)', '주인공(English)',
+        '갈등(한국어)', '갈등(English)', '핵심 사건(한국어)', '핵심 사건(English)',
+        '결말(한국어)', '결말(English)',
+        '인상 깊은 구절', '중요한 이유(한국어)', '중요한 이유(English)',
+        '언어 분석(한국어)', '언어 분석(English)',
+        '내 말로 바꾸기(한국어)', '내 말로 바꾸기(English)',
+        '바꾼 이유(한국어)', '바꾼 이유(English)',
+        '책 메시지(한국어)', '책 메시지(English)',
+        '동의 여부(한국어)', '동의 여부(English)',
+        '현실 연결(한국어)', '현실 연결(English)',
+        '스크립트'
+    ];
+    var inputs = document.querySelectorAll('input[type=text], textarea');
+    inputs.forEach(function(el, i) {
+        var label = fieldLabels[i] || ('항목' + (i+1));
+        var value = el.value || '';
+        if (value.trim()) {
+            rows.push([label, value]);
+        }
+    });
+    rows.push(['책 유형', bType === 'fiction' ? '소설·문학' : '비소설']);
+    rows.push(['제출 시각', new Date().toLocaleString('ko-KR')]);
+    var csv = rows.map(function(r) {
+        return r.map(function(v) { return '"' + String(v).replace(/"/g, '""') + '"'; }).join(',');
+    }).join('\n');
+    return '\uFEFF' + csv;
+}
 async function submitToSpeakingTest() {
     var script = document.getElementById('script-area').value.trim();
     if (!script) { alert('스크립트를 먼저 작성해주세요!'); return; }
@@ -1100,6 +1132,25 @@ async function submitToSpeakingTest() {
             var label = fieldLabels[i] || ('항목' + (i+1));
             worksheetInputs[label] = el.value || '';
         });
+        // CSV 생성 후 base64 변환
+        var csvContent = generateWorksheetCSV();
+        var csvBase64 = btoa(unescape(encodeURIComponent(csvContent)));
+        var csvFilename = '활동지_' + studentNumber + '_' + new Date().toISOString().slice(0,10) + '.csv';
+
+        // Supabase Storage에 업로드
+        var uploadRes = await fetch('https://speakingtest-git-main-jin-you-jeong-s-projects.vercel.app/api/upload', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                fileBase64: csvBase64,
+                filename: csvFilename,
+                studentId: studentNumber,
+                fileType: 'worksheet_csv'
+            })
+        });
+        var uploadData = await uploadRes.json();
+        var csvUrl = uploadData.success ? uploadData.url : null;
+
         var res = await fetch('https://speakingtest-git-main-jin-you-jeong-s-projects.vercel.app/api/worksheet', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -1107,7 +1158,9 @@ async function submitToSpeakingTest() {
                 studentNumber: studentNumber,
                 script: script,
                 worksheetData: worksheetInputs,
-                bookType: bType
+                bookType: bType,
+                worksheetCsvUrl: csvUrl,
+                worksheetCsvFilename: csvFilename
             })
         });
         var data = await res.json();

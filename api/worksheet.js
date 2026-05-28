@@ -24,8 +24,10 @@ module.exports = async (req, res) => {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
  const { studentNumber, script } = req.body;
- let worksheetData = req.body.worksheetData || null;
+  const worksheetData = req.body.worksheetData || null;
   const bookType = req.body.bookType || null;
+  const worksheetCsvUrl = req.body.worksheetCsvUrl || null;
+  const worksheetCsvFilename = req.body.worksheetCsvFilename || null;
   // 객체가 비어있으면 null로 처리하지 않음
   if (worksheetData && typeof worksheetData === 'object' && Object.keys(worksheetData).length === 0) {
     worksheetData = { empty: true };
