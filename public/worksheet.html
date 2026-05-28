@@ -394,11 +394,11 @@ body {
 
   <!-- Meta -->
   <div class="meta-card">
-    <div class="meta-field"><label>학번 / Student ID</label><input type="text" id="meta-id" placeholder="학번을 써요" onblur="loadByStudentNumber(this.value)"></div>
-    <div class="meta-field"><label>Your Name / 이름</label><input type="text" placeholder="내 이름"></div>
-    <div class="meta-field"><label>Book Title / 책 제목</label><input type="text" placeholder="읽은 책 제목을 써요"></div>
-    <div class="meta-field"><label>Author / 저자</label><input type="text" placeholder="누가 썼나요?"></div>
-    <div class="meta-field"><label>Date / 날짜</label><input type="text" id="meta-date" placeholder="yyyy-mm-dd"></div>
+    <div class="meta-field"><label>학번 / Student ID</label><input type="text" id="meta-id" data-label="학번" placeholder="학번을 써요" onblur="loadByStudentNumber(this.value)"></div>
+<div class="meta-field"><label>Your Name / 이름</label><input type="text" data-label="이름" placeholder="내 이름"></div>
+<div class="meta-field"><label>Book Title / 책 제목</label><input type="text" data-label="책 제목" placeholder="읽은 책 제목을 써요"></div>
+<div class="meta-field"><label>Author / 저자</label><input type="text" data-label="저자" placeholder="누가 썼나요?"></div>
+<div class="meta-field"><label>Date / 날짜</label><input type="text" id="meta-date" data-label="날짜" placeholder="yyyy-mm-dd"></div>
   </div>
 
   <!-- Type toggle -->
@@ -435,12 +435,12 @@ body {
       <div class="field">
         <div class="field-lbl"><span class="field-lbl-en">Who am I talking to? / 내 발표를 듣는 사람은 누구인가요?</span></div>
         <div class="field-hint">💡 구체적일수록 좋아요! 예: 우리 반 친구들 / 책을 싫어하는 중학생 / 판타지를 좋아하는 친구들<br>e.g., my classmates / middle schoolers who hate reading / friends who love fantasy</div>
-        <input type="text" placeholder="내 발표를 들을 사람을 써봐요">
+        <input type="text" data-label="발표 대상" placeholder="내 발표를 들을 사람을 써봐요">
       </div>
       <div class="field">
         <div class="field-lbl"><span class="field-lbl-en">What do I want my audience to feel or do? / 발표 후 청중이 어떻게 되길 바라나요?</span></div>
         <div class="field-hint">💡 예: 이 책을 읽고 싶게 만들고 싶다 / 자유의 소중함을 느끼게 하고 싶다<br>e.g., make them want to read it / persuade them that freedom matters</div>
-        <input type="text" placeholder="발표의 목적을 써봐요">
+        <input type="text" data-label="발표 목적" placeholder="발표의 목적을 써봐요">
       </div>
       <div class="field">
         <div class="field-lbl"><span class="field-lbl-en">Why is this book a good fit for that audience? / 왜 이 책이 그 사람들에게 잘 맞나요?</span><span class="field-check" id="chk-s1-fit">✓</span></div>
@@ -656,7 +656,7 @@ body {
       <div class="field">
         <div class="field-lbl"><span class="field-lbl-en">여기에 발표 스크립트를 완성해요 / Write your full speech here</span></div>
         <div class="field-hint">💡 위 1~5번에서 쓴 내용을 자연스럽게 이어붙여봐요. 아래 문장 시작 도우미를 클릭하면 쉽게 시작할 수 있어요!</div>
-        <textarea style="min-height:240px;" id="script-area"
+        <textarea style="min-height:240px;" id="script-area" data-label="스크립트"
           placeholder="여기에 발표문을 써봐요!&#10;• 한 문장에 영어 단어가 15개 이상이어야 해요&#10;• 15문장 이상 써야 해요&#10;• 아래 문장 시작 도우미를 클릭하면 문장이 자동으로 들어와요 😊"
           oninput="updateSent(this)"></textarea>
         <div class="sent-row">
@@ -1106,24 +1106,38 @@ async function loadByStudentNumber(studentNumber) {
 }
 function generateWorksheetCSV() {
     var rows = [];
-    // 각 필드의 레이블을 직접 찾아서 수집
-    document.querySelectorAll('input[type=text], textarea').forEach(function(el) {
-        var value = el.value || '';
-        if (!value.trim()) return;
-        var label = '';
-        // 가장 가까운 field-lbl-en 찾기
-        var field = el.closest('.field, .bi-row, .meta-field');
-        if (field) {
-            var lbl = field.querySelector('.field-lbl-en, .bi-badge, label');
-            if (lbl) label = lbl.textContent.trim().substring(0, 60);
-        }
-        // id로 판별
-        if (!label && el.id) label = el.id;
-        if (!label) label = '항목';
-        rows.push([label, value]);
-    });
-    rows.push(['책 유형', bType === 'fiction' ? '소설·문학' : '비소설']);
     rows.push(['제출 시각', new Date().toLocaleString('ko-KR')]);
+    rows.push(['책 유형', bType === 'fiction' ? '소설·문학' : '비소설']);
+    
+    // 모든 input/textarea를 순서대로 수집하되 섹션 제목을 레이블로 사용
+    document.querySelectorAll('.sec-card, .meta-card').forEach(function(section) {
+        var sectionTitle = section.querySelector('.sec-titles h2, .meta-field label');
+        var secName = sectionTitle ? sectionTitle.textContent.trim() : '';
+        
+        section.querySelectorAll('input[type=text], textarea').forEach(function(el) {
+            var value = el.value || '';
+            if (!value.trim()) return;
+            
+            // 가장 가까운 레이블 찾기
+            var label = '';
+            var biRow = el.closest('.bi-row');
+            var field = el.closest('.field, .meta-field');
+            
+            if (biRow) {
+                var badge = biRow.querySelector('.bi-badge');
+                if (badge) label = badge.textContent.trim();
+                var fieldEl = el.closest('.field');
+                var fieldLbl = fieldEl ? fieldEl.querySelector('.field-lbl-en') : null;
+                if (fieldLbl) label = fieldLbl.textContent.trim().substring(0,40) + ' [' + label + ']';
+            } else if (field) {
+                var lbl = field.querySelector('.field-lbl-en, label');
+                if (lbl) label = lbl.textContent.trim().substring(0, 60);
+            }
+            if (!label) label = el.id || el.placeholder || '항목';
+            rows.push([label, value]);
+        });
+    });
+    
     var csv = rows.map(function(r) {
         return r.map(function(v) { return '"' + String(v).replace(/"/g, '""') + '"'; }).join(',');
     }).join('\n');
