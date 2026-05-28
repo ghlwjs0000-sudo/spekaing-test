@@ -1010,30 +1010,33 @@ function saveWorksheetToLocal() {
 function loadWorksheetFromLocal() {
   try {
     var savedType = localStorage.getItem('worksheet_btype');
-    if (savedType && savedType !== bType) {
+    if (savedType) {
       bType = savedType;
       document.querySelectorAll('.type-btn').forEach(function(b) { b.classList.remove('active'); });
       if (bType === 'nonfiction') {
-        var btns = document.querySelectorAll('.type-btn');
-        if (btns[1]) btns[1].classList.add('active');
+        var btns2 = document.querySelectorAll('.type-btn');
+        if (btns2[1]) btns2[1].classList.add('active');
       } else {
-        var btns = document.querySelectorAll('.type-btn');
-        if (btns[0]) btns[0].classList.add('active');
+        var btns3 = document.querySelectorAll('.type-btn');
+        if (btns3[0]) btns3[0].classList.add('active');
       }
       renderSec3(); renderGuide(); renderExamples();
     }
     var saved = localStorage.getItem('worksheet_data');
     if (!saved) return;
     var arr = JSON.parse(saved);
-    var allInputs = document.querySelectorAll('input[type=text], textarea');
-    allInputs.forEach(function(el, i) {
-      if (arr[i] !== undefined) {
-        el.value = arr[i];
-        if (el.id === 'script-area') updateSent(el);
-      }
-    });
-    updProg();
-  } catch(e) {}
+    // 섹션3이 동적으로 렌더링된 후 입력
+    setTimeout(function() {
+      var allInputs = document.querySelectorAll('input[type=text], textarea');
+      allInputs.forEach(function(el, i) {
+        if (arr[i] !== undefined && arr[i] !== '') {
+          el.value = arr[i];
+          if (el.id === 'script-area') updateSent(el);
+        }
+      });
+      updProg();
+    }, 500);
+  } catch(e) { console.error('로드 오류:', e); }
 }
 
 /* ── Field check marks ── */
@@ -1063,7 +1066,7 @@ if (savedStudentNum) {
     var metaId = document.getElementById('meta-id');
     if (metaId && !metaId.value) metaId.value = savedStudentNum;
 }
-setTimeout(loadWorksheetFromLocal, 800);
+setTimeout(loadWorksheetFromLocal, 500);
 function generateWorksheetCSV() {
     var rows = [];
     var fieldLabels = [
