@@ -1498,8 +1498,38 @@ async function uploadToSupabaseDirect(blob, filename) {
         var ext = filename.split('.').pop().toLowerCase();
         var path = 'uploads/audio_' + Date.now() + '.' + ext;
         var supabaseUrl = 'https://nhkhjsirnvqlvljgqsvz.supabase.co';
-        var supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5oa2hqc2lybnZxbHZsamdxc3Z6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDgzMTI4NTYsImV4cCI6MjA2Mzg4ODg1Nn0.Qb4yKMSPHNaFkFVljEJijQ9VqFdJSPwVMGRJHl37Bvg';
-        var uploadRes = await fetch(
+        var supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5oa2hqc2lybnZxbHZsamdxc3Z6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk2MjA4ODMsImV4cCI6MjA5NTE5Njg4M30.8d1O5asQmYRKevSO7bLZAA1TS0F688lg716KoIemPR4';
+
+        // 먼저 서명된 업로드 URL 요청
+        var signedRes = await fetch(
+            supabaseUrl + '/storage/v1/object/sign/submissions/' + path,
+            {
+                method: 'POST',
+                headers: {
+                    'apikey': supabaseKey,
+                    'Authorization': 'Bearer ' + supabaseKey,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ expiresIn: 3600 })
+            }
+        );
+
+        if (signedRes.ok) {
+            var signedData = await signedRes.json();
+            var signedUrl = supabaseUrl + signedData.signedURL;
+            var uploadRes = await fetch(signedUrl, {
+                method: 'PUT',
+                headers: { 'Content-Type': blob.type || 'audio/webm' },
+                body: blob
+            });
+            if (uploadRes.ok) {
+                var publicUrl = supabaseUrl + '/storage/v1/object/public/submissions/' + path;
+                return { success: true, url: publicUrl };
+            }
+        }
+
+        // 서명 방식 실패 시 직접 업로드 시도
+        var uploadRes2 = await fetch(
             supabaseUrl + '/storage/v1/object/submissions/' + path,
             {
                 method: 'POST',
@@ -1512,15 +1542,14 @@ async function uploadToSupabaseDirect(blob, filename) {
                 body: blob
             }
         );
-        if (!uploadRes.ok) {
-            var e = await uploadRes.text();
-            console.error('직접 업로드 오류:', e);
+        if (!uploadRes2.ok) {
+            var e = await uploadRes2.text();
             return { success: false, error: e };
         }
-        var publicUrl = supabaseUrl + '/storage/v1/object/public/submissions/' + path;
-        return { success: true, url: publicUrl };
+        var publicUrl2 = supabaseUrl + '/storage/v1/object/public/submissions/' + path;
+        return { success: true, url: publicUrl2 };
+
     } catch(err) {
-        console.error('업로드 오류:', err);
         return { success: false, error: err.message };
     }
 }
