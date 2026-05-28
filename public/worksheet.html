@@ -1008,35 +1008,37 @@ function saveWorksheetToLocal() {
 }
 
 function loadWorksheetFromLocal() {
-  try {
-    var savedType = localStorage.getItem('worksheet_btype');
-    if (savedType) {
-      bType = savedType;
-      document.querySelectorAll('.type-btn').forEach(function(b) { b.classList.remove('active'); });
-      if (bType === 'nonfiction') {
-        var btns2 = document.querySelectorAll('.type-btn');
-        if (btns2[1]) btns2[1].classList.add('active');
-      } else {
-        var btns3 = document.querySelectorAll('.type-btn');
-        if (btns3[0]) btns3[0].classList.add('active');
-      }
-      renderSec3(); renderGuide(); renderExamples();
-    }
-    var saved = localStorage.getItem('worksheet_data');
-    if (!saved) return;
-    var arr = JSON.parse(saved);
-    // 섹션3이 동적으로 렌더링된 후 입력
-    setTimeout(function() {
-      var allInputs = document.querySelectorAll('input[type=text], textarea');
-      allInputs.forEach(function(el, i) {
-        if (arr[i] !== undefined && arr[i] !== '') {
-          el.value = arr[i];
-          if (el.id === 'script-area') updateSent(el);
+    try {
+        var studentNumber = localStorage.getItem('worksheet_student_number');
+        if (studentNumber) {
+            // DB에서 불러오기
+            loadWorksheetFromDB(studentNumber);
+            return;
         }
-      });
-      updProg();
-    }, 500);
-  } catch(e) { console.error('로드 오류:', e); }
+        // localStorage에서 불러오기
+        var savedType = localStorage.getItem('worksheet_btype');
+        if (savedType) {
+            bType = savedType;
+            document.querySelectorAll('.type-btn').forEach(function(b) { b.classList.remove('active'); });
+            var btns = document.querySelectorAll('.type-btn');
+            if (bType === 'nonfiction' && btns[1]) btns[1].classList.add('active');
+            else if (btns[0]) btns[0].classList.add('active');
+            renderSec3(); renderGuide(); renderExamples();
+        }
+        var saved = localStorage.getItem('worksheet_data');
+        if (!saved) return;
+        var arr = JSON.parse(saved);
+        setTimeout(function() {
+            var allInputs = document.querySelectorAll('input[type=text], textarea');
+            allInputs.forEach(function(el, i) {
+                if (arr[i] !== undefined && arr[i] !== '') {
+                    el.value = arr[i];
+                    if (el.id === 'script-area') updateSent(el);
+                }
+            });
+            updProg();
+        }, 500);
+    } catch(e) {}
 }
 
 /* ── Field check marks ── */
@@ -1089,9 +1091,7 @@ function generateWorksheetCSV() {
     inputs.forEach(function(el, i) {
         var label = fieldLabels[i] || ('항목' + (i+1));
         var value = el.value || '';
-        if (value.trim()) {
-            rows.push([label, value]);
-        }
+        if (value.trim()) rows.push([label, value]);
     });
     rows.push(['책 유형', bType === 'fiction' ? '소설·문학' : '비소설']);
     rows.push(['제출 시각', new Date().toLocaleString('ko-KR')]);
@@ -1100,6 +1100,57 @@ function generateWorksheetCSV() {
     }).join('\n');
     return '\uFEFF' + csv;
 }
+
+async function loadWorksheetFromDB(studentNumber) {
+    try {
+        var res = await fetch('https://speakingtest-git-main-jin-you-jeong-s-projects.vercel.app/api/worksheet?studentNumber=' + studentNumber);
+        var data = await res.json();
+        if (!data.found || !data.data) return false;
+        var sub = data.data;
+        // 책 유형 설정
+        if (sub.worksheet_book_type) {
+            bType = sub.worksheet_book_type;
+            document.querySelectorAll('.type-btn').forEach(function(b) { b.classList.remove('active'); });
+            var btns = document.querySelectorAll('.type-btn');
+            if (bType === 'nonfiction' && btns[1]) btns[1].classList.add('active');
+            else if (btns[0]) btns[0].classList.add('active');
+            renderSec3(); renderGuide(); renderExamples();
+        }
+        // worksheet_data로 폼 채우기
+        if (sub.worksheet_data && typeof sub.worksheet_data === 'object') {
+            var fieldLabels = [
+                '학번', '이름', '책 제목', '저자', '날짜',
+                '발표 대상', '발표 목적', '청중 적합 이유(한국어)', '청중 적합 이유(English)',
+                'Hook 방식', 'Hook 아이디어(한국어)', 'Hook 문장(English)',
+                'Setting(한국어)', 'Setting(English)', '주인공(한국어)', '주인공(English)',
+                '갈등(한국어)', '갈등(English)', '핵심 사건(한국어)', '핵심 사건(English)',
+                '결말(한국어)', '결말(English)',
+                '인상 깊은 구절', '중요한 이유(한국어)', '중요한 이유(English)',
+                '언어 분석(한국어)', '언어 분석(English)',
+                '내 말로 바꾸기(한국어)', '내 말로 바꾸기(English)',
+                '바꾼 이유(한국어)', '바꾼 이유(English)',
+                '책 메시지(한국어)', '책 메시지(English)',
+                '동의 여부(한국어)', '동의 여부(English)',
+                '현실 연결(한국어)', '현실 연결(English)',
+                '스크립트'
+            ];
+            setTimeout(function() {
+                var allInputs = document.querySelectorAll('input[type=text], textarea');
+                allInputs.forEach(function(el, i) {
+                    var label = fieldLabels[i] || ('항목' + (i+1));
+                    var value = sub.worksheet_data[label];
+                    if (value) {
+                        el.value = value;
+                        if (el.id === 'script-area') updateSent(el);
+                    }
+                });
+                updProg();
+            }, 500);
+        }
+        return true;
+    } catch(e) { return false; }
+}
+
 async function submitToSpeakingTest() {
     var script = document.getElementById('script-area').value.trim();
     if (!script) { alert('스크립트를 먼저 작성해주세요!'); return; }
@@ -1109,38 +1160,35 @@ async function submitToSpeakingTest() {
         return;
     }
     var studentNumber = document.getElementById('meta-id') ? document.getElementById('meta-id').value.trim() : '';
-    if (!studentNumber) {
-        alert('학번을 입력해주세요!');
-        return;
-    }
+    if (!studentNumber) { alert('학번을 입력해주세요!'); return; }
     try {
+        // 활동지 데이터 수집
         var worksheetInputs = {};
         var fieldLabels = [
-          '학번', '이름', '책 제목', '저자', '날짜',
-          '발표 대상', '발표 목적', '청중 적합 이유(한국어)', '청중 적합 이유(English)',
-          'Hook 방식', 'Hook 아이디어(한국어)', 'Hook 문장(English)',
-          'Setting(한국어)', 'Setting(English)', '주인공(한국어)', '주인공(English)',
-          '갈등(한국어)', '갈등(English)', '핵심 사건(한국어)', '핵심 사건(English)',
-          '결말(한국어)', '결말(English)',
-          '인상 깊은 구절', '중요한 이유(한국어)', '중요한 이유(English)',
-          '언어 분석(한국어)', '언어 분석(English)',
-          '내 말로 바꾸기(한국어)', '내 말로 바꾸기(English)',
-          '바꾼 이유(한국어)', '바꾼 이유(English)',
-          '책 메시지(한국어)', '책 메시지(English)',
-          '동의 여부(한국어)', '동의 여부(English)',
-          '현실 연결(한국어)', '현실 연결(English)',
-          '스크립트'
+            '학번', '이름', '책 제목', '저자', '날짜',
+            '발표 대상', '발표 목적', '청중 적합 이유(한국어)', '청중 적합 이유(English)',
+            'Hook 방식', 'Hook 아이디어(한국어)', 'Hook 문장(English)',
+            'Setting(한국어)', 'Setting(English)', '주인공(한국어)', '주인공(English)',
+            '갈등(한국어)', '갈등(English)', '핵심 사건(한국어)', '핵심 사건(English)',
+            '결말(한국어)', '결말(English)',
+            '인상 깊은 구절', '중요한 이유(한국어)', '중요한 이유(English)',
+            '언어 분석(한국어)', '언어 분석(English)',
+            '내 말로 바꾸기(한국어)', '내 말로 바꾸기(English)',
+            '바꾼 이유(한국어)', '바꾼 이유(English)',
+            '책 메시지(한국어)', '책 메시지(English)',
+            '동의 여부(한국어)', '동의 여부(English)',
+            '현실 연결(한국어)', '현실 연결(English)',
+            '스크립트'
         ];
         document.querySelectorAll('input[type=text], textarea').forEach(function(el, i) {
             var label = fieldLabels[i] || ('항목' + (i+1));
             worksheetInputs[label] = el.value || '';
         });
-        // CSV 생성 후 base64 변환
+
+        // CSV 생성 후 업로드
         var csvContent = generateWorksheetCSV();
         var csvBase64 = btoa(unescape(encodeURIComponent(csvContent)));
         var csvFilename = '활동지_' + studentNumber + '_' + new Date().toISOString().slice(0,10) + '.csv';
-
-        // Supabase Storage에 업로드
         var uploadRes = await fetch('https://speakingtest-git-main-jin-you-jeong-s-projects.vercel.app/api/upload', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -1154,6 +1202,7 @@ async function submitToSpeakingTest() {
         var uploadData = await uploadRes.json();
         var csvUrl = uploadData.success ? uploadData.url : null;
 
+        // DB 저장
         var res = await fetch('https://speakingtest-git-main-jin-you-jeong-s-projects.vercel.app/api/worksheet', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -1167,15 +1216,16 @@ async function submitToSpeakingTest() {
             })
         });
         var data = await res.json();
-        if (!data.success) {
-            alert('오류: ' + (data.error || '학번을 확인해주세요.'));
-            return;
-        }
+        if (!data.success) { alert('오류: ' + (data.error || '학번을 확인해주세요.')); return; }
+
+        // localStorage에도 저장
         var allInputsSave = document.querySelectorAll('input[type=text], textarea');
         var arrSave = [];
         allInputsSave.forEach(function(el) { arrSave.push(el.value); });
         localStorage.setItem('worksheet_data', JSON.stringify(arrSave));
         localStorage.setItem('worksheet_btype', bType);
+        localStorage.setItem('worksheet_student_number', studentNumber);
+
         alert('✅ 활동지가 제출되었습니다! 말하기 수행평가로 이동합니다.');
         window.location.href = 'https://speakingtest-git-main-jin-you-jeong-s-projects.vercel.app';
     } catch(err) {
