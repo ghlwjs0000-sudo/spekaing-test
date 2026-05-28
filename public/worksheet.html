@@ -1106,27 +1106,21 @@ async function loadByStudentNumber(studentNumber) {
 }
 function generateWorksheetCSV() {
     var rows = [];
-    var fieldLabels = [
-        '학번', '이름', '책 제목', '저자', '날짜',
-        '발표 대상', '발표 목적', '청중 적합 이유(한국어)', '청중 적합 이유(English)',
-        'Hook 방식', 'Hook 아이디어(한국어)', 'Hook 문장(English)',
-        'Setting(한국어)', 'Setting(English)', '주인공(한국어)', '주인공(English)',
-        '갈등(한국어)', '갈등(English)', '핵심 사건(한국어)', '핵심 사건(English)',
-        '결말(한국어)', '결말(English)',
-        '인상 깊은 구절', '중요한 이유(한국어)', '중요한 이유(English)',
-        '언어 분석(한국어)', '언어 분석(English)',
-        '내 말로 바꾸기(한국어)', '내 말로 바꾸기(English)',
-        '바꾼 이유(한국어)', '바꾼 이유(English)',
-        '책 메시지(한국어)', '책 메시지(English)',
-        '동의 여부(한국어)', '동의 여부(English)',
-        '현실 연결(한국어)', '현실 연결(English)',
-        '스크립트'
-    ];
-    var inputs = document.querySelectorAll('input[type=text], textarea');
-    inputs.forEach(function(el, i) {
-        var label = fieldLabels[i] || ('항목' + (i+1));
+    // 각 필드의 레이블을 직접 찾아서 수집
+    document.querySelectorAll('input[type=text], textarea').forEach(function(el) {
         var value = el.value || '';
-        if (value.trim()) rows.push([label, value]);
+        if (!value.trim()) return;
+        var label = '';
+        // 가장 가까운 field-lbl-en 찾기
+        var field = el.closest('.field, .bi-row, .meta-field');
+        if (field) {
+            var lbl = field.querySelector('.field-lbl-en, .bi-badge, label');
+            if (lbl) label = lbl.textContent.trim().substring(0, 60);
+        }
+        // id로 판별
+        if (!label && el.id) label = el.id;
+        if (!label) label = '항목';
+        rows.push([label, value]);
     });
     rows.push(['책 유형', bType === 'fiction' ? '소설·문학' : '비소설']);
     rows.push(['제출 시각', new Date().toLocaleString('ko-KR')]);
