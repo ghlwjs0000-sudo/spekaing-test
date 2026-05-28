@@ -738,8 +738,7 @@ function renderSubmissions(data) {
         ${s.ppt_updated_at?`<div style="color:var(--blue);font-size:10px;">PPT수정: ${new Date(s.ppt_updated_at).toLocaleString('ko-KR',{month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'})}</div>`:''}
       </td>
       <td style="display:flex;gap:6px;">
-        <button class="btn btn-ghost btn-sm" onclick="openWorksheetDetail('${s.id}')">상세보기</button>
-        ${s.worksheet_csv_url ? `<a class="btn btn-ghost btn-sm" href="${s.worksheet_csv_url}" download="${s.worksheet_csv_filename||'활동지.csv'}">📥 CSV</a>` : ''}
+        <button class="btn btn-ghost btn-sm" onclick="openDetail('${s.id}')">상세</button>
       </td>
     </tr>`;
   }).join('');
