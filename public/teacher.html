@@ -933,7 +933,9 @@ function filterWorksheetByClass(classId, el) {
 }
 
 function renderWorksheetTable(data) {
-  const tbody.innerHTML = data.map(s => {
+  const tbody = document.getElementById('worksheetTable');
+  if (!data.length) { tbody.innerHTML='<tr><td colspan="6" style="text-align:center;color:var(--text3);padding:40px;">제출된 활동지가 없습니다.</td></tr>'; return; }
+  tbody.innerHTML = data.map(s => {
     const cls = state.classes.find(c => c.id === s.class_id);
     const t = s.worksheet_submitted_at ? new Date(s.worksheet_submitted_at).toLocaleString('ko-KR', {month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'}) : '-';
     return `<tr>
