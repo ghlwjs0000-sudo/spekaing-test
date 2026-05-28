@@ -881,6 +881,10 @@ async function submitRecording() {
         setLoadingStep('오디오 업로드 중...');
         var ext2 = state.audioBlob.type.includes('webm') ? 'webm' : state.audioBlob.type.includes('mp4') ? 'mp4' : 'ogg';
         var uploadData2 = await uploadToSupabaseDirect(state.audioBlob, 'practice_' + Date.now() + '.' + ext2);
+        console.log('업로드 결과:', uploadData2);
+        if (!uploadData2.success) {
+            throw new Error('오디오 업로드 실패: ' + uploadData2.error);
+        }
         setLoadingStep('문장별 발화 분석 중');
         var res = await fetch('/api/score', {
             method: 'POST', headers: { 'Content-Type': 'application/json' },
