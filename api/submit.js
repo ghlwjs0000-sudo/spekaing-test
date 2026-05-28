@@ -48,9 +48,10 @@ module.exports = async (req, res) => {
       pronunciation, content, fluency, completeness,
       sentences, sentenceResults, attemptCount, isPassed,
       pptDataUrl, pptFilename, worksheetDataUrl, worksheetFilename,
-     pronunciationFeedback, contentFeedback, fluencyFeedback, overallFeedback, transcript,
+      pronunciationFeedback, contentFeedback, fluencyFeedback, overallFeedback, transcript,
       teacherApprovedSentences, isFinalSubmitted, pptUpdatedAt, worksheetUpdatedAt,
-      isFinalSpeakingSubmitted, finalSpeakingAudio, finalSpeakingMimeType, finalSpeakingResult, finalSpeakingAt
+      isFinalSpeakingSubmitted, finalSpeakingAudio, finalSpeakingMimeType, finalSpeakingResult, finalSpeakingAt,
+      worksheetSubmittedAt
     } = req.body;
 
     // 기존 제출 확인
