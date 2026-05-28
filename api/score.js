@@ -1,10 +1,3 @@
-module.exports.config = {
-  api: {
-    bodyParser: {
-      sizeLimit: '50mb',
-    },
-  },
-};
 const SUPABASE_URL = process.env.SUPABASE_URL;
 const SUPABASE_KEY = process.env.SUPABASE_SECRET_KEY;
 
@@ -36,7 +29,7 @@ async function supabasePatch(table, id, body) {
   return res.json();
 }
 
-module.exports = async (req, res) => {
+async function scoreHandler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
@@ -219,4 +212,14 @@ total = pronunciation+content+fluency+completeness exactly.`;
   } catch (err) {
     return res.status(500).json({ error: err.message });
   }
+}
+
+scoreHandler.config = {
+  api: {
+    bodyParser: {
+      sizeLimit: '50mb',
+    },
+  },
 };
+
+module.exports = scoreHandler;

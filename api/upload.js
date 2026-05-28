@@ -1,14 +1,7 @@
-module.exports.config = {
-  api: {
-    bodyParser: {
-      sizeLimit: '50mb',
-    },
-  },
-};
 const SUPABASE_URL = process.env.SUPABASE_URL;
 const SUPABASE_KEY = process.env.SUPABASE_SECRET_KEY;
 
-module.exports = async (req, res) => {
+async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
@@ -21,16 +14,12 @@ module.exports = async (req, res) => {
   }
 
   try {
-    // base64 → Buffer 변환
     const base64Data = fileBase64.includes(',') ? fileBase64.split(',')[1] : fileBase64;
     const buffer = Buffer.from(base64Data, 'base64');
 
-    // 파일 확장자 추출
-    const ext = filename.split('.').pop().toLowerCase().replace(/[^a-z0-9]/g, '');
-  const safeExt = ext || 'bin';
-  const path = `uploads/${fileType}_${Date.now()}.${safeExt}`;
+    const ext = filename.split('.').pop().toLowerCase().replace(/[^a-z0-9]/g, '') || 'bin';
+    const path = `uploads/${fileType}_${Date.now()}.${ext}`;
 
-    // Supabase Storage 업로드
     const uploadRes = await fetch(
       `${SUPABASE_URL}/storage/v1/object/submissions/${path}`,
       {
@@ -51,14 +40,13 @@ module.exports = async (req, res) => {
       return res.status(500).json({ error: `Storage 업로드 실패: ${e}` });
     }
 
-    // 공개 URL 생성
     const publicUrl = `${SUPABASE_URL}/storage/v1/object/public/submissions/${path}`;
     return res.status(200).json({ success: true, url: publicUrl, path });
 
   } catch (err) {
     return res.status(500).json({ error: err.message });
   }
-};
+}
 
 function getContentType(filename) {
   const ext = filename.split('.').pop().toLowerCase();
@@ -74,14 +62,19 @@ function getContentType(filename) {
     'jpg': 'image/jpeg', 'jpeg': 'image/jpeg',
     'png': 'image/png', 'gif': 'image/gif',
     'webp': 'image/webp',
-    'webm': 'audio/webm',
-    'ogg': 'audio/ogg',
-    'mp4': 'audio/mp4',
-    'mp3': 'audio/mpeg',
-    'm4a': 'audio/mp4',
     'doc': 'application/msword',
     'docx': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
     'hwp': 'application/x-hwp',
   };
   return types[ext] || 'application/octet-stream';
 }
+
+handler.config = {
+  api: {
+    bodyParser: {
+      sizeLimit: '50mb',
+    },
+  },
+};
+
+module.exports = handler;
