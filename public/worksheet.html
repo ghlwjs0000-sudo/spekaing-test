@@ -363,7 +363,8 @@ body {
   .hero { background: #1a1a1a; -webkit-print-color-adjust: exact; }
   .action-bar, .starter-panel, .prog-bar-wrap, .type-row { display: none !important; }
   .sec-card { break-inside: avoid; }
-  .ex-panel { display: block !important; }
+  .ex-panel { display: none !important; }
+  .ex-wrap { display: none !important; }
   .page-wrap { padding: 1rem; }
 }
 /* ── Bilingual input ── */
@@ -672,7 +673,7 @@ body {
   <!-- Action bar -->
   <div class="action-bar">
     <button class="btn" onclick="window.print()">🖨️ 인쇄하기 / Print</button>
-    <button class="btn" onclick="saveWorksheetOnly()" style="background:#f0fdf4;border-color:#27ae60;color:#1e8449;">💾 저장하기 / Save</button>
+    <button class="btn" onclick="saveWorksheetOnly()" style="background:#f0fdf4;border-color:#27ae60;color:#1e8449;">💾 저장하기 (제출 전 저장하기)</button>
     <button class="btn primary" onclick="submitToSpeakingTest()">✅ 활동지 제출 후 말하기 수행평가 시작하기 ↗</button>
 </div>
 
@@ -1227,6 +1228,23 @@ async function saveWorksheetOnly() {
     try {
         // DB에 저장 (스크립트 없어도 저장 가능)
         var script = document.getElementById('script-area').value.trim() || '(임시저장)';
+        // CSV 생성 후 업로드
+        var csvContent = generateWorksheetCSV();
+        var csvBase64 = btoa(unescape(encodeURIComponent(csvContent)));
+        var csvFilename = '활동지_' + studentNumber + '_' + new Date().toISOString().slice(0,10) + '.csv';
+        var uploadRes = await fetch('https://speakingtest-git-main-jin-you-jeong-s-projects.vercel.app/api/upload', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                fileBase64: csvBase64,
+                filename: csvFilename,
+                studentId: studentNumber,
+                fileType: 'worksheet_csv'
+            })
+        });
+        var uploadData = await uploadRes.json();
+        var csvUrl = uploadData.success ? uploadData.url : null;
+
         var res = await fetch('https://speakingtest-git-main-jin-you-jeong-s-projects.vercel.app/api/worksheet', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -1234,7 +1252,9 @@ async function saveWorksheetOnly() {
                 studentNumber: studentNumber,
                 script: script,
                 worksheetData: worksheetInputs,
-                bookType: bType
+                bookType: bType,
+                worksheetCsvUrl: csvUrl,
+                worksheetCsvFilename: csvFilename
             })
         });
         var data = await res.json();
