@@ -1531,24 +1531,45 @@ function startPolling() {
             var prev = data[0];
             var newApproved = prev.teacher_approved_sentences || [];
             var oldApproved = state.teacherApprovedSentences || [];
-            // 새로 승인된 문장이 있으면 반영
-            if (newApproved.length !== oldApproved.length ||
-                newApproved.some(function(i) { return !oldApproved.includes(i); })) {
+            
+            // 변경사항이 있으면 반영
+            var changed = newApproved.length !== oldApproved.length ||
+                newApproved.some(function(i) { return !oldApproved.includes(i); }) ||
+                oldApproved.some(function(i) { return !newApproved.includes(i); });
+
+            if (changed) {
                 state.teacherApprovedSentences = newApproved;
+                
+                // 새로 승인된 문장 처리
                 newApproved.forEach(function(i) {
-                    state.sentenceStatuses[i] = 'ok';
-                });
-                updateGoalUI();
-                // 문장 아이템 UI 업데이트
-                newApproved.forEach(function(i) {
-                    var item = document.getElementById('sentItem' + i);
-                    if (item && !item.classList.contains('ok')) {
-                        updateSentItem(i, 'ok', { issue: '' });
-                        // 교사 승인 표시
-                        var icon = item.querySelector('.sentence-icon');
-                        if (icon) icon.textContent = '✅ 교사 승인';
+                    var sr = (state.lastResult && state.lastResult.sentenceResults) ? (state.lastResult.sentenceResults[i] || {}) : {};
+                    if (sr.status !== 'ok') {
+                        state.sentenceStatuses[i] = 'ok';
+                        var item = document.getElementById('sentItem' + i);
+                        if (item) {
+                            updateSentItem(i, 'ok', { issue: '' });
+                            var icon = item.querySelector('.sentence-icon');
+                            if (icon) icon.textContent = '✅ 교사 승인';
+                        }
                     }
                 });
+
+                // 승인 취소된 문장 처리
+                oldApproved.forEach(function(i) {
+                    if (!newApproved.includes(i)) {
+                        var sr = (state.lastResult && state.lastResult.sentenceResults) ? (state.lastResult.sentenceResults[i] || {}) : {};
+                        var aiOk = sr.status === 'ok';
+                        if (!aiOk) {
+                            state.sentenceStatuses[i] = 'retry';
+                            var item = document.getElementById('sentItem' + i);
+                            if (item) {
+                                updateSentItem(i, 'retry', sr);
+                            }
+                        }
+                    }
+                });
+
+                updateGoalUI();
             }
         } catch (err) { console.error('폴링 오류:', err); }
     }, 10000); // 10초마다
