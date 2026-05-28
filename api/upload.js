@@ -18,7 +18,8 @@ async function handler(req, res) {
     const buffer = Buffer.from(base64Data, 'base64');
 
     const ext = filename.split('.').pop().toLowerCase().replace(/[^a-z0-9]/g, '') || 'bin';
-    const path = `uploads/${fileType}_${Date.now()}.${ext}`;
+    const safeFileType = (fileType || 'file').replace(/[^a-z0-9]/g, '');
+    const path = `uploads/${safeFileType}_${Date.now()}.${ext}`;
 
     const uploadRes = await fetch(
       `${SUPABASE_URL}/storage/v1/object/submissions/${path}`,
