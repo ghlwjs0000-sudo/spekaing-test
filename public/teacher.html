@@ -958,31 +958,74 @@ function openWorksheetDetail(id) {
   const s = worksheetData.find(x => x.id === id);
   if (!s) return;
   document.getElementById('worksheetModalTitle').textContent = (s.student_name||'') + ' · 《' + (s.book_title||'') + '》 활동지';
-  const data = s.worksheet_data || {};
   const t = s.worksheet_submitted_at ? new Date(s.worksheet_submitted_at).toLocaleString('ko-KR') : '-';
-  let html = `<div style="margin-bottom:12px;padding:10px;background:var(--blue-light);border-radius:8px;font-size:12px;">
-    <strong>제출 시각:</strong> ${t} · <strong>책 유형:</strong> ${s.worksheet_book_type === 'fiction' ? '소설·문학' : '비소설'}
+  const bookType = s.worksheet_book_type === 'fiction' ? '소설·문학' : s.worksheet_book_type === 'nonfiction' ? '비소설' : '-';
+  let html = `<div style="margin-bottom:12px;padding:10px;background:var(--blue-light);border-radius:8px;font-size:12px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">
+    <div><strong>제출 시각:</strong> ${t} · <strong>책 유형:</strong> ${bookType}</div>
+    ${s.worksheet_csv_url ? `<a href="${s.worksheet_csv_url}" download="${s.worksheet_csv_filename||'활동지.csv'}" class="btn btn-primary btn-sm">📥 엑셀(CSV) 다운로드</a>` : ''}
   </div>`;
-  html += '<div style="display:flex;flex-direction:column;gap:8px;">';
-  Object.entries(data).forEach(([key, value]) => {
-    if (value && value.trim()) {
-      html += `<div style="padding:8px 12px;background:var(--surface2);border-radius:6px;border:1px solid var(--border);">
-        <div style="font-size:11px;color:var(--text3);margin-bottom:3px;">${key}</div>
-        <div style="font-size:13px;color:var(--text);">${value}</div>
-      </div>`;
-    }
-  });
-  html += '</div>';
-  if (s.script) {
-    html += `<div style="margin-top:12px;"><div style="font-size:11px;font-weight:700;color:var(--text3);margin-bottom:6px;">📝 스크립트</div>
-    <div style="padding:12px;background:var(--blue-light);border:1.5px solid var(--blue-mid);border-radius:8px;font-size:13px;line-height:1.8;">${s.script}</div></div>`;
+
+  const data = s.worksheet_data || {};
+  const keys = Object.keys(data);
+  if (keys.length > 0) {
+    html += '<div style="display:flex;flex-direction:column;gap:8px;">';
+    keys.forEach(key => {
+      const value = data[key];
+      if (value && String(value).trim()) {
+        const cleanKey = key.replace(/_\d+$/, '');
+        html += `<div style="padding:8px 12px;background:var(--surface2);border-radius:6px;border:1px solid var(--border);">
+          <div style="font-size:11px;color:var(--text3);margin-bottom:3px;">${cleanKey}</div>
+          <div style="font-size:13px;color:var(--text);white-space:pre-wrap;">${value}</div>
+        </div>`;
+      }
+    });
+    html += '</div>';
+  } else if (s.worksheet_csv_url) {
+    html += `<div style="text-align:center;padding:20px;color:var(--text2);font-size:13px;">
+      📄 활동지 내용은 CSV 파일로 저장되어 있어요.<br>위의 다운로드 버튼을 눌러주세요!
+    </div>`;
+  } else if (s.script) {
+    html += `<div style="margin-top:12px;">
+      <div style="font-size:11px;font-weight:700;color:var(--text3);margin-bottom:6px;">📝 스크립트</div>
+      <div style="padding:12px;background:var(--blue-light);border:1.5px solid var(--blue-mid);border-radius:8px;font-size:13px;line-height:1.8;">${s.script}</div>
+    </div>`;
+  } else {
+    html += '<div style="color:var(--text3);font-size:13px;padding:10px;">활동지 내용이 없습니다.</div>';
   }
+
   document.getElementById('worksheetModalContent').innerHTML = html;
   document.getElementById('worksheetModal').style.display = 'flex';
 }
 
 function exportWorksheetCSV() {
   if (!worksheetData.length) { alert('데이터가 없습니다.'); return; }
+  // CSV URL이 있는 학생들 목록 생성
+  const withCsv = worksheetData.filter(s => s.worksheet_csv_url);
+  if (withCsv.length > 0) {
+    // 전체 목록 CSV 생성
+    const headers = ['이름', '학번', '반', '책 제목', '책 유형', '제출 시각', '스크립트', 'CSV 다운로드 URL'];
+    const rows = worksheetData.map(s => {
+      const cls = state.classes.find(c => c.id === s.class_id);
+      const t = s.worksheet_submitted_at ? new Date(s.worksheet_submitted_at).toLocaleString('ko-KR') : '-';
+      const bookType = s.worksheet_book_type === 'fiction' ? '소설·문학' : s.worksheet_book_type === 'nonfiction' ? '비소설' : '-';
+      return [
+        s.student_name || '',
+        s.student_number || '',
+        cls?.name || '',
+        s.book_title || '',
+        bookType,
+        t,
+        s.script || '',
+        s.worksheet_csv_url || ''
+      ];
+    });
+    const csv = [headers, ...rows].map(r => r.map(v => `"${String(v||'').replace(/"/g,'""')}"`).join(',')).join('\n');
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' }));
+    a.download = `활동지목록_${new Date().toLocaleDateString('ko-KR').replace(/\./g,'').replace(/ /g,'')}.csv`;
+    a.click();
+    return;
+  }
   const headers = ['이름', '학번', '반', '책 제목', '책 유형', '제출 시각', '스크립트'];
   const rows = worksheetData.map(s => {
     const cls = state.classes.find(c => c.id === s.class_id);
