@@ -1157,16 +1157,28 @@ async function loadWorksheetFromDB(studentNumber) {
                 '스크립트'
             ];
             setTimeout(function() {
-                var allInputs = document.querySelectorAll('input[type=text], textarea');
-                allInputs.forEach(function(el, i) {
-                    var label = fieldLabels[i] || ('항목' + (i+1));
-                    var value = sub.worksheet_data[label];
-                    if (value) {
-                        el.value = value;
-                        if (el.id === 'script-area') updateSent(el);
+            var allInputs = document.querySelectorAll('input[type=text], textarea');
+            var wdata = sub.worksheet_data;
+            allInputs.forEach(function(el, i) {
+                var label = fieldLabels[i] || ('항목' + (i+1));
+                // 정확한 키로 먼저 시도, 없으면 부분 일치로 찾기
+                var value = wdata[label];
+                if (value === undefined) {
+                    // 키 목록에서 부분 일치 검색
+                    var keys = Object.keys(wdata);
+                    for (var k = 0; k < keys.length; k++) {
+                        if (keys[k].indexOf(label) !== -1 || label.indexOf(keys[k]) !== -1) {
+                            value = wdata[keys[k]];
+                            break;
+                        }
                     }
-                });
-                updProg();
+                }
+                if (value !== undefined && value !== '') {
+                    el.value = value;
+                    if (el.id === 'script-area') updateSent(el);
+                }
+            });
+            updProg();
             }, 500);
         }
         return true;
