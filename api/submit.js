@@ -78,7 +78,7 @@ module.exports = async (req, res) => {
       sentences,
       sentence_results: sentenceResults,
       attempt_count: attemptCount,
-      is_passed: isPassed,
+      is_passed: isFinalSubmitted ? isPassed : (existingData.is_passed || false),
      ppt_url: pptDataUrl || null,
       ppt_filename: pptFilename || null,
       worksheet_url: worksheetDataUrl || existingData.worksheet_url || null,
