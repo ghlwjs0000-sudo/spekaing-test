@@ -911,7 +911,7 @@ async function loadWorksheets() {
     if (!isMaster && classIds.length > 0) url += '&classIds=' + classIds.join(',');
     const res = await fetch(url);
     const data = await res.json();
-    worksheetData = Array.isArray(data) ? data.filter(s => s.worksheet_submitted_at) : [];
+    worksheetData = Array.isArray(data) ? data.filter(s => s.worksheet_url || s.worksheet_submitted_at) : [];
     hideLoading();
     buildWorksheetClassTabs();
     renderWorksheetTable(worksheetData);
@@ -933,23 +933,19 @@ function filterWorksheetByClass(classId, el) {
 }
 
 function renderWorksheetTable(data) {
-  const tbody = document.getElementById('worksheetTable');
-  if (!data.length) {
-    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--text3);padding:40px;">제출된 활동지가 없습니다.</td></tr>';
-    return;
-  }
-  tbody.innerHTML = data.map(s => {
+  const tbody.innerHTML = data.map(s => {
     const cls = state.classes.find(c => c.id === s.class_id);
     const t = s.worksheet_submitted_at ? new Date(s.worksheet_submitted_at).toLocaleString('ko-KR', {month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'}) : '-';
-    const bookType = s.worksheet_book_type === 'fiction' ? '소설·문학' : s.worksheet_book_type === 'nonfiction' ? '비소설' : '-';
     return `<tr>
       <td style="font-weight:600;">${s.student_name||'-'}</td>
       <td style="font-family:'DM Mono',monospace;font-size:12px;color:var(--text2);">${s.student_number||'-'}</td>
       <td>${cls ? `<span class="badge badge-blue">${cls.name}</span>` : '-'}</td>
       <td>《${s.book_title||'-'}》</td>
-      <td><span class="badge badge-purple">${bookType}</span></td>
       <td style="color:var(--text3);font-size:12px;">${t}</td>
-      <td><button class="btn btn-ghost btn-sm" onclick="openWorksheetDetail('${s.id}')">상세보기</button></td>
+      <td style="display:flex;gap:6px;">
+        ${s.worksheet_url ? `<a class="btn btn-ghost btn-sm" href="${s.worksheet_url}" target="_blank">📄 활동지 보기</a>` : '<span style="color:var(--text3);font-size:12px;">미제출</span>'}
+        ${s.worksheet_csv_url ? `<a class="btn btn-ghost btn-sm" href="${s.worksheet_csv_url}" download="${s.worksheet_csv_filename||'활동지.csv'}">📥 CSV</a>` : ''}
+      </td>
     </tr>`;
   }).join('');
 }

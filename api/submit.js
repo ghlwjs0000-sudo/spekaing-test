@@ -82,6 +82,7 @@ module.exports = async (req, res) => {
       ppt_filename: pptFilename || null,
       worksheet_url: worksheetDataUrl || null,
       worksheet_filename: worksheetFilename || null,
+      worksheet_submitted_at: req.body.worksheetSubmittedAt || existingData.worksheet_submitted_at || null,
       ppt_updated_at: pptDataUrl ? (pptUpdatedAt || undefined) : undefined,
       worksheet_updated_at: worksheetDataUrl ? (worksheetUpdatedAt || undefined) : undefined,
      pronunciation_feedback: pronunciationFeedback || null,
