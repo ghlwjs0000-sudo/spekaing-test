@@ -889,7 +889,7 @@ async function submitRecording() {
                 submissionId: state.submissionId,
                 script: state.script,
                 audioUrl: uploadData2.success ? uploadData2.url : null,
-                audioBase64: uploadData2.success ? null : base64,
+                audioBase64: null,
                 mimeType: state.audioBlob.type
             })
         });
@@ -915,7 +915,7 @@ state.sentenceStatuses = (result.sentenceResults || []).map(function(sr) {
         renderResults();
         goToStep(3);
        // 녹음본 저장
-        state.lastAudioBase64 = base64;
+        state.lastAudioBase64 = uploadData2.success ? uploadData2.url : null;
         state.lastAudioMime = state.audioBlob.type;
         await saveSubmissionLight();
     } catch (err) {
