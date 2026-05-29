@@ -295,8 +295,8 @@ h2{font-size:20px;font-weight:700;color:var(--text);margin-bottom:4px;}
     <div class="table-wrap">
       <table>
         <thead><tr>
-          <th>이름</th><th>학번</th><th>반</th><th>책 제목</th><th>책 유형</th><th>제출 시각</th><th>상세</th>
-        </tr></thead>
+  <th>이름</th><th>학번</th><th>반</th><th>책 제목</th><th>상태</th><th>저장/제출 시각</th><th>관리</th>
+</tr></thead>
         <tbody id="worksheetTable"><tr><td colspan="7" style="text-align:center;color:var(--text3);padding:40px;">로딩 중...</td></tr></tbody>
       </table>
     </div>
@@ -910,7 +910,7 @@ async function loadWorksheets() {
     if (!isMaster && classIds.length > 0) url += '&classIds=' + classIds.join(',');
     const res = await fetch(url);
     const data = await res.json();
-    worksheetData = Array.isArray(data) ? data.filter(s => s.worksheet_url || s.worksheet_submitted_at) : [];
+    worksheetData = Array.isArray(data) ? data.filter(s => s.worksheet_url || s.worksheet_submitted_at || s.worksheet_data) : [];
     hideLoading();
     buildWorksheetClassTabs();
     renderWorksheetTable(worksheetData);
@@ -933,18 +933,29 @@ function filterWorksheetByClass(classId, el) {
 
 function renderWorksheetTable(data) {
   const tbody = document.getElementById('worksheetTable');
-  if (!data.length) { tbody.innerHTML='<tr><td colspan="6" style="text-align:center;color:var(--text3);padding:40px;">제출된 활동지가 없습니다.</td></tr>'; return; }
+  if (!data.length) {
+    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--text3);padding:40px;">제출된 활동지가 없습니다.</td></tr>';
+    return;
+  }
   tbody.innerHTML = data.map(s => {
     const cls = state.classes.find(c => c.id === s.class_id);
     const t = s.worksheet_submitted_at ? new Date(s.worksheet_submitted_at).toLocaleString('ko-KR', {year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'}) : '-';
+    const hasData = s.worksheet_data && Object.keys(s.worksheet_data).length > 0;
+    const hasPdf = !!s.worksheet_url;
+    let statusBadge = '';
+    if (hasPdf) statusBadge += `<span class="badge badge-green">📄 PDF제출</span> `;
+    if (hasData) statusBadge += `<span class="badge badge-blue">💾 내용저장</span>`;
+    if (!hasPdf && !hasData) statusBadge = `<span class="badge badge-gray">미제출</span>`;
     return `<tr>
       <td style="font-weight:600;">${s.student_name||'-'}</td>
       <td style="font-family:'DM Mono',monospace;font-size:12px;color:var(--text2);">${s.student_number||'-'}</td>
       <td>${cls ? `<span class="badge badge-blue">${cls.name}</span>` : '-'}</td>
       <td>《${s.book_title||'-'}》</td>
+      <td>${statusBadge}</td>
       <td style="color:var(--text3);font-size:12px;">${t}</td>
       <td style="display:flex;gap:6px;">
-        ${s.worksheet_url ? `<a class="btn btn-ghost btn-sm" href="${s.worksheet_url}" target="_blank">📄 활동지 보기</a>` : '<span style="color:var(--text3);font-size:12px;">미제출</span>'}
+        <button class="btn btn-ghost btn-sm" onclick="openWorksheetDetail('${s.id}')">상세보기</button>
+        ${hasPdf ? `<a class="btn btn-ghost btn-sm" href="${s.worksheet_url}" target="_blank">📄 PDF</a>` : ''}
         ${s.worksheet_csv_url ? `<a class="btn btn-ghost btn-sm" href="${s.worksheet_csv_url}" download="${s.worksheet_csv_filename||'활동지.csv'}">📥 CSV</a>` : ''}
       </td>
     </tr>`;
@@ -957,37 +968,63 @@ function openWorksheetDetail(id) {
   document.getElementById('worksheetModalTitle').textContent = (s.student_name||'') + ' · 《' + (s.book_title||'') + '》 활동지';
   const t = s.worksheet_submitted_at ? new Date(s.worksheet_submitted_at).toLocaleString('ko-KR') : '-';
   const bookType = s.worksheet_book_type === 'fiction' ? '소설·문학' : s.worksheet_book_type === 'nonfiction' ? '비소설' : '-';
+
   let html = `<div style="margin-bottom:12px;padding:10px;background:var(--blue-light);border-radius:8px;font-size:12px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">
-    <div><strong>제출 시각:</strong> ${t} · <strong>책 유형:</strong> ${bookType}</div>
-    ${s.worksheet_csv_url ? `<a href="${s.worksheet_csv_url}" download="${s.worksheet_csv_filename||'활동지.csv'}" class="btn btn-primary btn-sm">📥 엑셀(CSV) 다운로드</a>` : ''}
+    <div><strong>저장/제출 시각:</strong> ${t} &nbsp;·&nbsp; <strong>책 유형:</strong> ${bookType}</div>
+    <div style="display:flex;gap:6px;">
+      ${s.worksheet_url ? `<a href="${s.worksheet_url}" target="_blank" class="btn btn-ghost btn-sm">📄 PDF 보기</a>` : ''}
+      ${s.worksheet_csv_url ? `<a href="${s.worksheet_csv_url}" download="${s.worksheet_csv_filename||'활동지.csv'}" class="btn btn-primary btn-sm">📥 CSV 다운로드</a>` : ''}
+    </div>
   </div>`;
 
   const data = s.worksheet_data || {};
   const keys = Object.keys(data);
+
   if (keys.length > 0) {
-    html += '<div style="display:flex;flex-direction:column;gap:8px;">';
-    keys.forEach(key => {
-      const value = data[key];
-      if (value && String(value).trim()) {
-        const cleanKey = key.replace(/_\d+$/, '');
-        html += `<div style="padding:8px 12px;background:var(--surface2);border-radius:6px;border:1px solid var(--border);">
-          <div style="font-size:11px;color:var(--text3);margin-bottom:3px;">${cleanKey}</div>
-          <div style="font-size:13px;color:var(--text);white-space:pre-wrap;">${value}</div>
+    // 섹션별로 그룹핑
+    const sections = {
+      '기본 정보': ['학번', '이름', '책 제목', '저자', '날짜'],
+      '① Who & Why': ['발표 대상', '발표 목적', '청중 적합 이유(한국어)', '청중 적합 이유(English)'],
+      '② Opening Hook': ['Hook 방식', 'Hook 아이디어(한국어)', 'Hook 문장(English)'],
+      '③ Story Map': ['Setting(한국어)', 'Setting(English)', '주인공(한국어)', '주인공(English)', '갈등(한국어)', '갈등(English)', '핵심 사건(한국어)', '핵심 사건(English)', '결말(한국어)', '결말(English)', '주요 내용(한국어)', '주요 내용(English)', '핵심 주장(한국어)', '핵심 주장(English)', '저자 배경(한국어)', '저자 배경(English)'],
+      '④ My Favourite Part': ['인상 깊은 구절', '중요한 이유(한국어)', '중요한 이유(English)', '언어 분석(한국어)', '언어 분석(English)', '내 말로 바꾸기(한국어)', '내 말로 바꾸기(English)', '바꾼 이유(한국어)', '바꾼 이유(English)'],
+      '⑤ My Take': ['책 메시지(한국어)', '책 메시지(English)', '동의 여부(한국어)', '동의 여부(English)', '현실 연결(한국어)', '현실 연결(English)'],
+      '⑥ 스크립트': ['스크립트'],
+    };
+
+    // 섹션별로 표시
+    Object.entries(sections).forEach(([secName, secKeys]) => {
+      const secData = secKeys.filter(k => data[k] && String(data[k]).trim());
+      if (!secData.length) return;
+      html += `<div style="margin-bottom:10px;">
+        <div style="font-size:11px;font-weight:700;color:var(--blue);margin-bottom:5px;padding:4px 8px;background:var(--blue-light);border-radius:4px;">${secName}</div>
+        <div style="display:flex;flex-direction:column;gap:4px;">`;
+      secData.forEach(k => {
+        html += `<div style="padding:7px 10px;background:var(--surface2);border-radius:5px;border:1px solid var(--border);">
+          <div style="font-size:10px;color:var(--text3);margin-bottom:2px;">${k}</div>
+          <div style="font-size:12px;color:var(--text);white-space:pre-wrap;">${data[k]}</div>
         </div>`;
-      }
+      });
+      html += `</div></div>`;
     });
-    html += '</div>';
-  } else if (s.worksheet_csv_url) {
-    html += `<div style="text-align:center;padding:20px;color:var(--text2);font-size:13px;">
-      📄 활동지 내용은 CSV 파일로 저장되어 있어요.<br>위의 다운로드 버튼을 눌러주세요!
-    </div>`;
-  } else if (s.script) {
-    html += `<div style="margin-top:12px;">
-      <div style="font-size:11px;font-weight:700;color:var(--text3);margin-bottom:6px;">📝 스크립트</div>
-      <div style="padding:12px;background:var(--blue-light);border:1.5px solid var(--blue-mid);border-radius:8px;font-size:13px;line-height:1.8;">${s.script}</div>
-    </div>`;
+
+    // 섹션에 없는 나머지 키도 표시
+    const allSectionKeys = Object.values(sections).flat();
+    const otherKeys = keys.filter(k => !allSectionKeys.includes(k) && data[k] && String(data[k]).trim());
+    if (otherKeys.length) {
+      html += `<div style="margin-bottom:10px;">
+        <div style="font-size:11px;font-weight:700;color:var(--text2);margin-bottom:5px;padding:4px 8px;background:var(--surface2);border-radius:4px;">기타</div>
+        <div style="display:flex;flex-direction:column;gap:4px;">`;
+      otherKeys.forEach(k => {
+        html += `<div style="padding:7px 10px;background:var(--surface2);border-radius:5px;border:1px solid var(--border);">
+          <div style="font-size:10px;color:var(--text3);margin-bottom:2px;">${k}</div>
+          <div style="font-size:12px;color:var(--text);white-space:pre-wrap;">${data[k]}</div>
+        </div>`;
+      });
+      html += `</div></div>`;
+    }
   } else {
-    html += '<div style="color:var(--text3);font-size:13px;padding:10px;">활동지 내용이 없습니다.</div>';
+    html += `<div style="color:var(--text3);font-size:13px;padding:10px;text-align:center;">활동지 작성 내용이 없습니다. PDF만 제출된 상태예요.</div>`;
   }
 
   document.getElementById('worksheetModalContent').innerHTML = html;
