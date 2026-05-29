@@ -85,6 +85,18 @@ module.exports = async (req, res) => {
         teacher_approved_sentences: []
       });
     }
+    // 저장 이력 기록
+    await sb('POST', 'worksheet_history', {
+      student_id: student.id,
+      student_name: student.name,
+      student_number: student.student_number,
+      class_id: student.class_id,
+      submission_id: existingId || null,
+      worksheet_data: worksheetData || null,
+      book_type: bookType || null,
+      script: script || null,
+      saved_at: new Date().toISOString()
+    }).catch(() => {});
     return res.status(200).json({ success: true, studentName: student.name });
   } catch(err) {
     return res.status(500).json({ error: err.message });

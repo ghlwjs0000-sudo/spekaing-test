@@ -1027,10 +1027,78 @@ function openWorksheetDetail(id) {
     html += `<div style="color:var(--text3);font-size:13px;padding:10px;text-align:center;">활동지 작성 내용이 없습니다. PDF만 제출된 상태예요.</div>`;
   }
 
+  // 저장 이력 불러오기
+  html += `<div style="margin-top:12px;">
+    <div style="font-size:11px;font-weight:700;color:var(--text);margin-bottom:6px;">📋 저장 이력</div>
+    <div id="worksheetHistory" style="font-size:12px;color:var(--text3);">로딩 중...</div>
+  </div>`;
+
   document.getElementById('worksheetModalContent').innerHTML = html;
   document.getElementById('worksheetModal').style.display = 'flex';
-}
 
+  // 이력 API 호출
+  fetch('/api/teacher?action=worksheetHistory&studentId=' + s.student_id)
+    .then(r => r.json())
+    .then(history => {
+      const el = document.getElementById('worksheetHistory');
+      if (!el) return;
+      if (!Array.isArray(history) || !history.length) {
+        el.innerHTML = '<div style="color:var(--text3);padding:8px;">저장 이력이 없습니다.</div>';
+        return;
+      }
+      el.innerHTML = history.map((h, i) => {
+        const t = new Date(h.saved_at).toLocaleString('ko-KR');
+        const data = h.worksheet_data || {};
+        const keys = Object.keys(data).filter(k => data[k] && String(data[k]).trim());
+        const preview = keys.slice(0, 3).map(k => `<span style="font-size:10px;color:var(--text2);">${k}: ${String(data[k]).substring(0,30)}${String(data[k]).length>30?'...':''}</span>`).join('<br>');
+        return `<div style="border:1px solid var(--border);border-radius:6px;padding:8px 10px;margin-bottom:6px;background:${i===0?'var(--green-bg)':'var(--surface2)'};">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
+            <div style="font-size:11px;font-weight:700;color:${i===0?'var(--green)':'var(--text)'};">${i===0?'🟢 최신 저장':'📌 이전 저장 #'+(history.length-i)}</div>
+            <div style="font-size:10px;color:var(--text3);">${t}</div>
+          </div>
+          <div style="line-height:1.6;">${preview || '<span style="color:var(--text3);font-size:10px;">내용 없음</span>'}</div>
+          <button onclick="showHistoryDetail(${i})" style="margin-top:5px;font-size:10px;padding:2px 8px;border-radius:4px;border:1px solid var(--border);background:var(--white);cursor:pointer;">전체 내용 보기</button>
+        </div>`;
+      }).join('');
+      // 이력 데이터를 전역에 저장
+      window._worksheetHistory = history;
+    }).catch(() => {
+      const el = document.getElementById('worksheetHistory');
+      if (el) el.innerHTML = '<div style="color:var(--red);">이력 로딩 실패</div>';
+    });
+}
+function showHistoryDetail(idx) {
+  const history = window._worksheetHistory;
+  if (!history || !history[idx]) return;
+  const h = history[idx];
+  const t = new Date(h.saved_at).toLocaleString('ko-KR');
+  const data = h.worksheet_data || {};
+  let html = `<div style="font-size:11px;font-weight:700;margin-bottom:8px;">저장 시각: ${t}</div>`;
+  const sections = {
+    '기본 정보': ['학번','이름','책 제목','저자','날짜'],
+    '① Who & Why': ['발표 대상','발표 목적','청중 적합 이유(한국어)','청중 적합 이유(English)'],
+    '② Hook': ['Hook 방식','Hook 아이디어(한국어)','Hook 문장(English)'],
+    '③ Story Map': ['Setting(한국어)','Setting(English)','주인공(한국어)','주인공(English)','갈등(한국어)','갈등(English)','핵심 사건(한국어)','핵심 사건(English)','결말(한국어)','결말(English)'],
+    '④ Favourite Part': ['인상 깊은 구절','중요한 이유(한국어)','중요한 이유(English)','언어 분석(한국어)','언어 분석(English)','내 말로 바꾸기(한국어)','내 말로 바꾸기(English)','바꾼 이유(한국어)','바꾼 이유(English)'],
+    '⑤ My Take': ['책 메시지(한국어)','책 메시지(English)','동의 여부(한국어)','동의 여부(English)','현실 연결(한국어)','현실 연결(English)'],
+    '⑥ 스크립트': ['스크립트'],
+  };
+  Object.entries(sections).forEach(([secName, secKeys]) => {
+    const filled = secKeys.filter(k => data[k] && String(data[k]).trim());
+    if (!filled.length) return;
+    html += `<div style="margin-bottom:8px;"><div style="font-size:10px;font-weight:700;color:var(--blue);padding:3px 6px;background:var(--blue-light);border-radius:3px;margin-bottom:4px;">${secName}</div>`;
+    filled.forEach(k => {
+      html += `<div style="padding:5px 8px;background:var(--surface2);border-radius:4px;border:1px solid var(--border);margin-bottom:3px;">
+        <div style="font-size:9px;color:var(--text3);">${k}</div>
+        <div style="font-size:11px;color:var(--text);white-space:pre-wrap;">${data[k]}</div>
+      </div>`;
+    });
+    html += '</div>';
+  });
+  const win = window.open('', '_blank', 'width=600,height=700,scrollbars=yes');
+  win.document.write(`<html><head><title>활동지 이력</title><style>body{font-family:'Malgun Gothic',sans-serif;padding:20px;font-size:12px;}</style></head><body>${html}</body></html>`);
+  win.document.close();
+}
 function exportWorksheetCSV() {
   if (!worksheetData.length) { alert('데이터가 없습니다.'); return; }
   // CSV URL이 있는 학생들 목록 생성
