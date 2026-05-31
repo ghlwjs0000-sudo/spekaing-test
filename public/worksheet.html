@@ -817,12 +817,6 @@ function buildF(){
       .replace('{KO}','<textarea class="'+cls+' bi-ta" data-label="'+(koLabel||koPlaceholder)+'" placeholder="'+koPlaceholder+'"></textarea>')
       .replace('{EN}','<textarea class="'+cls+' bi-ta" data-label="'+(enLabel||enPlaceholder)+'" placeholder="'+enPlaceholder+'"></textarea>');
   }
-  function biTA(koPlaceholder, enPlaceholder, cls) {
-    cls = cls||'sm';
-    return bi
-      .replace('{KO}','<textarea class="'+cls+' bi-ta" placeholder="'+koPlaceholder+'"></textarea>')
-      .replace('{EN}','<textarea class="'+cls+' bi-ta" placeholder="'+enPlaceholder+'"></textarea>');
-  }
   return '<div class="sec-hdr">...</div>'
   +'<div class="sec-body">'
   +'<div class="g2">'
@@ -1380,59 +1374,29 @@ async function loadByStudentNumber(studentNumber) {
             var wdata = sub.worksheet_data;
             if (!wdata) return;
 
-            // 1. data-label 있는 필드 복원
-            document.querySelectorAll('[data-label]').forEach(function(el) {
-                var label = el.getAttribute('data-label');
-                if (wdata[label] !== undefined && wdata[label] !== '') {
+            // 키 이름으로 직접 매핑해서 복원
+            function fill(selector, label) {
+                var el = document.querySelector(selector);
+                if (el && wdata[label] !== undefined && wdata[label] !== '') {
                     el.value = wdata[label];
                     if (el.id === 'script-area') updateSent(el);
                 }
-            });
+            }
 
-            // 2. 섹션3 복원
-            var sec3Keys = bType === 'fiction'
-                ? ['Setting(한국어)','Setting(English)','주인공(한국어)','주인공(English)',
-                   '갈등(한국어)','갈등(English)','핵심 사건(한국어)','핵심 사건(English)',
-                   '결말(한국어)','결말(English)']
-                : ['주요 내용(한국어)','주요 내용(English)',
-                   '핵심 주장(한국어)','핵심 주장(English)',
-                   '핵심 아이디어(한국어)','핵심 아이디어(English)',
-                   '저자 배경(한국어)','저자 배경(English)',
-                   '저자 신뢰성(한국어)','저자 신뢰성(English)',
-                   '저자-책 연결(한국어)','저자-책 연결(English)'];
+            // 메타 필드
+            fill('[data-label="학번"]', '학번');
+            fill('[data-label="이름"]', '이름');
+            fill('[data-label="책 제목"]', '책 제목');
+            fill('[data-label="저자"]', '저자');
+            fill('[data-label="날짜"]', '날짜');
 
-            Array.from(document.querySelectorAll('#sec3 input[type=text], #sec3 textarea')).forEach(function(el, i) {
-                var label = sec3Keys[i];
-                if (label && wdata[label] !== undefined && wdata[label] !== '') {
-                    el.value = wdata[label];
-                }
-            });
+            // 섹션1
+            fill('[data-label="발표 대상"]', '발표 대상');
+            fill('[data-label="발표 목적"]', '발표 목적');
+            fill('[data-label="청중 적합 이유(한국어)"]', '청중 적합 이유(한국어)');
+            fill('[data-label="청중 적합 이유(English)"]', '청중 적합 이유(English)');
 
-            // 3. 섹션4 복원
-            var s4Labels = ['인상 깊은 구절',
-                '중요한 이유(한국어)','중요한 이유(English)',
-                '언어 분석(한국어)','언어 분석(English)',
-                '내 말로 바꾸기(한국어)','내 말로 바꾸기(English)',
-                '바꾼 이유(한국어)','바꾼 이유(English)'];
-            Array.from(document.querySelectorAll('.s4 input[type=text], .s4 textarea')).forEach(function(el, i) {
-                var label = s4Labels[i];
-                if (label && wdata[label] !== undefined && wdata[label] !== '') {
-                    el.value = wdata[label];
-                }
-            });
-
-            // 4. 섹션5 복원
-            var s5Labels = ['책 메시지(한국어)','책 메시지(English)',
-                '동의 여부(한국어)','동의 여부(English)',
-                '현실 연결(한국어)','현실 연결(English)'];
-            Array.from(document.querySelectorAll('.s5 input[type=text], .s5 textarea')).forEach(function(el, i) {
-                var label = s5Labels[i];
-                if (label && wdata[label] !== undefined && wdata[label] !== '') {
-                    el.value = wdata[label];
-                }
-            });
-
-            // 5. Hook 방식 복원
+            // 섹션2 - Hook
             if (wdata['Hook 방식']) {
                 var hookLbl = document.getElementById('hook-lbl');
                 if (hookLbl) hookLbl.textContent = wdata['Hook 방식'];
@@ -1442,8 +1406,53 @@ async function loadByStudentNumber(studentNumber) {
                     }
                 });
             }
+            fill('[data-label="Hook 아이디어(한국어)"]', 'Hook 아이디어(한국어)');
+            fill('[data-label="Hook 문장(English)"]', 'Hook 문장(English)');
 
-            // 6. 스크립트 복원
+            // 섹션3 - fiction/nonfiction 분기
+            var sec3Inputs = Array.from(document.querySelectorAll('#sec3 input[type=text], #sec3 textarea'));
+            if (bType === 'fiction') {
+                var f3 = ['Setting(한국어)','Setting(English)',
+                          '주인공(한국어)','주인공(English)',
+                          '갈등(한국어)','갈등(English)',
+                          '핵심 사건(한국어)','핵심 사건(English)',
+                          '결말(한국어)','결말(English)'];
+                sec3Inputs.forEach(function(el, i) {
+                    if (f3[i] && wdata[f3[i]] !== undefined && wdata[f3[i]] !== '') el.value = wdata[f3[i]];
+                });
+            } else {
+                var n3 = ['주요 내용(한국어)','주요 내용(English)',
+                          '핵심 주장(한국어)','핵심 주장(English)',
+                          '핵심 아이디어(한국어)','핵심 아이디어(English)',
+                          '저자 배경(한국어)','저자 배경(English)',
+                          '저자 신뢰성(한국어)','저자 신뢰성(English)',
+                          '저자-책 연결(한국어)','저자-책 연결(English)'];
+                sec3Inputs.forEach(function(el, i) {
+                    if (n3[i] && wdata[n3[i]] !== undefined && wdata[n3[i]] !== '') el.value = wdata[n3[i]];
+                });
+            }
+
+            // 섹션4
+            var s4 = Array.from(document.querySelectorAll('.s4 input[type=text], .s4 textarea'));
+            var s4Keys = ['인상 깊은 구절',
+                '중요한 이유(한국어)','중요한 이유(English)',
+                '언어 분석(한국어)','언어 분석(English)',
+                '내 말로 바꾸기(한국어)','내 말로 바꾸기(English)',
+                '바꾼 이유(한국어)','바꾼 이유(English)'];
+            s4.forEach(function(el, i) {
+                if (s4Keys[i] && wdata[s4Keys[i]] !== undefined && wdata[s4Keys[i]] !== '') el.value = wdata[s4Keys[i]];
+            });
+
+            // 섹션5
+            var s5 = Array.from(document.querySelectorAll('.s5 input[type=text], .s5 textarea'));
+            var s5Keys = ['책 메시지(한국어)','책 메시지(English)',
+                '동의 여부(한국어)','동의 여부(English)',
+                '현실 연결(한국어)','현실 연결(English)'];
+            s5.forEach(function(el, i) {
+                if (s5Keys[i] && wdata[s5Keys[i]] !== undefined && wdata[s5Keys[i]] !== '') el.value = wdata[s5Keys[i]];
+            });
+
+            // 스크립트
             var scriptArea = document.getElementById('script-area');
             if (scriptArea && wdata['스크립트']) {
                 scriptArea.value = wdata['스크립트'];
