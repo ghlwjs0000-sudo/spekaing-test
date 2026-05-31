@@ -1103,8 +1103,10 @@ async function saveWorksheetOnly() {
     }
     // 활동지 데이터 수집 — data-label 기반
     // Hook 방식 저장
-    var hookLblEl = document.getElementById('hook-lbl');
-    if (hookLblEl) worksheetInputs['Hook 방식'] = hookLblEl.textContent.trim();
+    try {
+        var hookLblEl = document.getElementById('hook-lbl');
+        if (hookLblEl) worksheetInputs['Hook 방식'] = hookLblEl.textContent.trim();
+    } catch(e) {}
 
     // 언어 분석 선택 저장
     var selectedLangs = [];
