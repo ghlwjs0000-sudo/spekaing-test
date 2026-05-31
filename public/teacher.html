@@ -1099,30 +1099,106 @@ function showHistoryDetail(idx) {
   const h = history[idx];
   const t = new Date(h.saved_at).toLocaleString('ko-KR');
   const data = h.worksheet_data || {};
-  let html = `<div style="font-size:11px;font-weight:700;margin-bottom:8px;">저장 시각: ${t}</div>`;
-  const sections = {
-    '기본 정보': ['학번','이름','책 제목','저자','날짜'],
-    '① Who & Why': ['발표 대상','발표 목적','청중 적합 이유(한국어)','청중 적합 이유(English)'],
-    '② Hook': ['Hook 방식','Hook 아이디어(한국어)','Hook 문장(English)'],
-    '③ Story Map': ['Setting(한국어)','Setting(English)','주인공(한국어)','주인공(English)','갈등(한국어)','갈등(English)','핵심 사건(한국어)','핵심 사건(English)','결말(한국어)','결말(English)'],
-    '④ Favourite Part': ['인상 깊은 구절','중요한 이유(한국어)','중요한 이유(English)','언어 분석(한국어)','언어 분석(English)','내 말로 바꾸기(한국어)','내 말로 바꾸기(English)','바꾼 이유(한국어)','바꾼 이유(English)'],
-    '⑤ My Take': ['책 메시지(한국어)','책 메시지(English)','동의 여부(한국어)','동의 여부(English)','현실 연결(한국어)','현실 연결(English)'],
-    '⑥ 스크립트': ['스크립트'],
-  };
-  Object.entries(sections).forEach(([secName, secKeys]) => {
-    const filled = secKeys.filter(k => data[k] && String(data[k]).trim());
-    if (!filled.length) return;
-    html += `<div style="margin-bottom:8px;"><div style="font-size:10px;font-weight:700;color:var(--blue);padding:3px 6px;background:var(--blue-light);border-radius:3px;margin-bottom:4px;">${secName}</div>`;
-    filled.forEach(k => {
-      html += `<div style="padding:5px 8px;background:var(--surface2);border-radius:4px;border:1px solid var(--border);margin-bottom:3px;">
-        <div style="font-size:9px;color:var(--text3);">${k}</div>
-        <div style="font-size:11px;color:var(--text);white-space:pre-wrap;">${data[k]}</div>
-      </div>`;
+
+  // 이전 버전과 비교 (idx+1이 이전 버전)
+  const prevData = (idx + 1 < history.length) ? (history[idx+1].worksheet_data || {}) : null;
+
+  const sections = [
+    { name: '📌 기본 정보', keys: ['학번','이름','책 제목','저자','날짜'] },
+    { name: '① Who & Why', keys: ['발표 대상','발표 목적','청중 적합 이유(한국어)','청중 적합 이유(English)'] },
+    { name: '② Opening Hook', keys: ['Hook 방식','Hook 아이디어(한국어)','Hook 문장(English)'] },
+    { name: '③ Story Map', keys: ['Setting(한국어)','Setting(English)','주인공(한국어)','주인공(English)','갈등(한국어)','갈등(English)','핵심 사건(한국어)','핵심 사건(English)','결말(한국어)','결말(English)','주요 내용(한국어)','주요 내용(English)','핵심 주장(한국어)','핵심 주장(English)','저자 배경(한국어)','저자 배경(English)'] },
+    { name: '④ Favourite Part', keys: ['인상 깊은 구절','중요한 이유(한국어)','중요한 이유(English)','언어 분석(한국어)','언어 분석(English)','내 말로 바꾸기(한국어)','내 말로 바꾸기(English)','바꾼 이유(한국어)','바꾼 이유(English)'] },
+    { name: '⑤ My Take', keys: ['책 메시지(한국어)','책 메시지(English)','동의 여부(한국어)','동의 여부(English)','현실 연결(한국어)','현실 연결(English)'] },
+    { name: '⑥ 스크립트', keys: ['스크립트'] },
+  ];
+
+  let html = `
+    <style>
+      body { font-family: 'Malgun Gothic', sans-serif; padding: 20px; font-size: 12px; color: #1a1a2e; }
+      h2 { font-size: 16px; font-weight: 800; margin-bottom: 4px; color: #1a5276; }
+      .meta { font-size: 11px; color: #888; margin-bottom: 16px; }
+      .sec-title { font-size: 12px; font-weight: 700; color: #2980b9; padding: 4px 10px; background: #eaf2ff; border-radius: 4px; margin: 12px 0 6px; border-left: 3px solid #2980b9; }
+      .field { padding: 7px 10px; border-radius: 5px; border: 1px solid #dee2e6; margin-bottom: 4px; background: #f8f9fa; }
+      .field-label { font-size: 10px; color: #888; margin-bottom: 3px; font-weight: 600; }
+      .field-value { font-size: 12px; color: #1a1a2e; white-space: pre-wrap; line-height: 1.6; }
+      .changed { background: #fff3cd; border-color: #ffc107; }
+      .changed .field-label::after { content: ' ✏️ 수정됨'; color: #d35400; }
+      .deleted { background: #fdedec; border-color: #e74c3c; }
+      .deleted .field-label::after { content: ' (삭제됨)'; color: #c0392b; }
+      .deleted .field-value { color: #c0392b; text-decoration: line-through; }
+      .added { background: #e8f5e9; border-color: #27ae60; }
+      .added .field-label::after { content: ' ✨ 새로 작성'; color: #1e8449; }
+      .compare-box { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 4px; }
+      .compare-old { padding: 6px 10px; border-radius: 4px; background: #fdedec; border: 1px solid #f5b7b1; }
+      .compare-new { padding: 6px 10px; border-radius: 4px; background: #e8f5e9; border: 1px solid #a9dfbf; }
+      .compare-label { font-size: 9px; font-weight: 700; margin-bottom: 3px; }
+      .compare-label.old { color: #c0392b; }
+      .compare-label.new { color: #1e8449; }
+      .compare-value { font-size: 11px; white-space: pre-wrap; line-height: 1.5; }
+    </style>
+    <h2>${idx === 0 ? '🟢 최신 저장 내용' : '📌 저장 #' + (history.length - idx) + ' 내용'}</h2>
+    <div class="meta">저장 시각: ${t}${prevData ? ' · 이전 버전과 비교 표시' : ' · 첫 번째 저장'}</div>
+  `;
+
+  sections.forEach(sec => {
+    const filledKeys = sec.keys.filter(k => {
+      const currVal = data[k] && String(data[k]).trim();
+      const prevVal = prevData && prevData[k] && String(prevData[k]).trim();
+      return currVal || prevVal;
     });
-    html += '</div>';
+    if (!filledKeys.length) return;
+
+    html += `<div class="sec-title">${sec.name}</div>`;
+
+    filledKeys.forEach(k => {
+      const currVal = data[k] ? String(data[k]).trim() : '';
+      const prevVal = prevData ? (prevData[k] ? String(prevData[k]).trim() : '') : null;
+
+      if (prevVal === null) {
+        // 첫 저장 — 그냥 표시
+        if (!currVal) return;
+        html += `<div class="field">
+          <div class="field-label">${k}</div>
+          <div class="field-value">${currVal}</div>
+        </div>`;
+      } else if (!currVal && prevVal) {
+        // 삭제됨
+        html += `<div class="field deleted">
+          <div class="field-label">${k}</div>
+          <div class="field-value">${prevVal}</div>
+        </div>`;
+      } else if (currVal && !prevVal) {
+        // 새로 추가됨
+        html += `<div class="field added">
+          <div class="field-label">${k}</div>
+          <div class="field-value">${currVal}</div>
+        </div>`;
+      } else if (currVal !== prevVal) {
+        // 수정됨 — 이전/현재 비교
+        html += `<div class="field-label" style="font-size:10px;color:#888;font-weight:600;margin-bottom:4px;">${k} ✏️ 수정됨</div>
+        <div class="compare-box">
+          <div class="compare-old">
+            <div class="compare-label old">▶ 이전 내용</div>
+            <div class="compare-value">${prevVal}</div>
+          </div>
+          <div class="compare-new">
+            <div class="compare-label new">▶ 현재 내용</div>
+            <div class="compare-value">${currVal}</div>
+          </div>
+        </div>`;
+      } else {
+        // 변경 없음
+        html += `<div class="field">
+          <div class="field-label">${k}</div>
+          <div class="field-value">${currVal}</div>
+        </div>`;
+      }
+    });
   });
-  const win = window.open('', '_blank', 'width=600,height=700,scrollbars=yes');
-  win.document.write(`<html><head><title>활동지 이력</title><style>body{font-family:'Malgun Gothic',sans-serif;padding:20px;font-size:12px;}</style></head><body>${html}</body></html>`);
+
+  const win = window.open('', '_blank', 'width=700,height:800,scrollbars=yes');
+  win.document.write(`<html><head><title>활동지 저장 이력 #${history.length - idx}</title></head><body>${html}</body></html>`);
   win.document.close();
 }
 function exportWorksheetCSV() {
