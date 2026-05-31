@@ -1012,6 +1012,29 @@ function updateSent(el){
   var warn=document.getElementById('short-warn');
   if(short.length>0){warn.style.display='block';warn.textContent='⚠️ 15단어 미만인 문장이 '+short.length+'개 있어요. 각 문장을 더 자세하고 길게 보완해봐요!';}
   else{warn.style.display='none';}
+  var listEl=document.getElementById('short-sent-list');
+  var bodyEl=document.getElementById('short-sent-body');
+  var countEl=document.getElementById('short-sent-count');
+  if(short.length>0){
+    listEl.style.display='block';
+    countEl.textContent='('+short.length+'개)';
+    bodyEl.innerHTML=short.map(function(s,i){
+      var words=s.trim().split(/\s+/).filter(function(w){return w.length>0;});
+      return '<div style="margin-bottom:10px;padding:8px 10px;background:var(--bg2);border-radius:var(--r);border-left:3px solid var(--amber);">'
+        +'<div style="font-size:11px;color:var(--amber);font-weight:600;margin-bottom:4px;">'
+        +'문장 '+(i+1)+' · '+words.length+'단어 (15단어까지 '+(15-words.length)+'개 부족)'
+        +'</div>'
+        +'<div style="font-size:13px;color:var(--ink);line-height:1.6;">'+s+'</div>'
+        +'<div style="font-size:11px;color:var(--ink3);margin-top:6px;">'
+        +words.map(function(w){
+          return '<span style="display:inline-block;background:var(--white);border:1px solid var(--border2);border-radius:4px;padding:1px 6px;margin:2px;font-size:11px;">'+w+'</span>';
+        }).join('')
+        +'</div>'
+        +'</div>';
+    }).join('');
+  } else {
+    listEl.style.display='none';
+  }
   updProg();
 }
 function updProg(){
