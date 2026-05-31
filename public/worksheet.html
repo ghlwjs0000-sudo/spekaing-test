@@ -1260,6 +1260,7 @@ async function submitToSpeakingTest() {
     }
 }
 async function loadByStudentNumber(studentNumber) {
+    console.log('loadByStudentNumber 호출:', studentNumber);
     if (!studentNumber || studentNumber.trim().length < 3) return;
     try {
         var res = await fetch('https://speakingtest-git-main-jin-you-jeong-s-projects.vercel.app/api/worksheet?studentNumber=' + studentNumber.trim());
