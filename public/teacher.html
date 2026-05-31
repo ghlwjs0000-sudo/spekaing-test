@@ -976,7 +976,7 @@ function openWorksheetDetail(id) {
   let html = `<div style="margin-bottom:12px;padding:10px;background:var(--blue-light);border-radius:8px;font-size:12px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">
     <div><strong>저장/제출 시각:</strong> ${t} &nbsp;·&nbsp; <strong>책 유형:</strong> ${bookType}</div>
     <div style="display:flex;gap:6px;flex-wrap:wrap;">
-      <a href="https://speakingtest-git-main-jin-you-jeong-s-projects.vercel.app/worksheet.html" target="_blank" class="btn btn-ghost btn-sm">🌐 활동지 사이트 열기</a>
+      <a href="https://speakingtest-git-main-jin-you-jeong-s-projects.vercel.app/worksheet.html?studentNumber=${s.student_number}" target="_blank" class="btn btn-ghost btn-sm">🌐 ${s.student_name} 활동지 보기</a>
       ${s.worksheet_url ? `<a href="${s.worksheet_url}" target="_blank" class="btn btn-ghost btn-sm">📄 PDF 보기</a>` : ''}
       ${s.worksheet_csv_url ? `<a href="${s.worksheet_csv_url}" download="${s.worksheet_csv_filename||'활동지.csv'}" class="btn btn-primary btn-sm">📥 CSV 다운로드</a>` : ''}
     </div>
