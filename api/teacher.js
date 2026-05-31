@@ -184,7 +184,10 @@ module.exports = async (req, res) => {
       if (!current.length) return res.status(404).json({ error: '제출 없음' });
       const sub = current[0];
       let approved_list = sub.teacher_approved_sentences || [];
-      if (approved) {
+      const { approveAll, approvedList: newList } = req.body;
+      if (approveAll) {
+        approved_list = newList || [];
+      } else if (approved) {
         if (!approved_list.includes(sentenceIndex)) approved_list.push(sentenceIndex);
       } else {
         approved_list = approved_list.filter(i => i !== sentenceIndex);
@@ -220,15 +223,19 @@ module.exports = async (req, res) => {
         is_passed: allPassed,
         updated_at: new Date().toISOString()
       }, `?id=eq.${id}`);
-      return res.status(200).json({ success: true, approvedList: approved_list, allPassed, allApproved: approved_list.length === sents.length });
+      return res.status(200).json({ success: true, approvedList: approved_list, allPassed });
     }
+
+    if (action === 'worksheetHistory') {
+      const { studentId } = req.query;
+      const data = await sb('GET', 'worksheet_history', null,
+        `?student_id=eq.${studentId}&order=saved_at.desc&limit=20`);
+      return res.status(200).json(Array.isArray(data) ? data : []);
+    }
+
     return res.status(400).json({ error: '알 수 없는 action' });
   } catch (err) {
-    if (action === 'worksheetHistory') {
-    const { studentId } = req.query;
-    const data = await supabaseReq('GET', 'worksheet_history', null,
-      `?student_id=eq.${studentId}&order=saved_at.desc&limit=20`);
-    return res.status(200).json(Array.isArray(data) ? data : []);
+    return res.status(500).json({ error: err.message });
   }
 
   return res.status(500).json({ error: err.message });
