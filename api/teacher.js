@@ -218,10 +218,9 @@ module.exports = async (req, res) => {
       await sb('PATCH', 'submissions', {
         teacher_approved_sentences: approved_list,
         is_passed: allPassed,
-        final_speaking_result: updatedResult,
         updated_at: new Date().toISOString()
       }, `?id=eq.${id}`);
-      return res.status(200).json({ success: true, approvedList: approved_list, allPassed, newTotal, newGrade });
+      return res.status(200).json({ success: true, approvedList: approved_list, allPassed, allApproved: approved_list.length === sents.length });
     }
 if (action === 'approveSentence') {
       const { id, sentenceIndex, approved, approveAll, approvedList: newList } = req.body;

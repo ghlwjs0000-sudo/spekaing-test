@@ -975,7 +975,8 @@ function openWorksheetDetail(id) {
 
   let html = `<div style="margin-bottom:12px;padding:10px;background:var(--blue-light);border-radius:8px;font-size:12px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">
     <div><strong>저장/제출 시각:</strong> ${t} &nbsp;·&nbsp; <strong>책 유형:</strong> ${bookType}</div>
-    <div style="display:flex;gap:6px;">
+    <div style="display:flex;gap:6px;flex-wrap:wrap;">
+      <a href="https://speakingtest-git-main-jin-you-jeong-s-projects.vercel.app/worksheet.html" target="_blank" class="btn btn-ghost btn-sm">🌐 활동지 사이트 열기</a>
       ${s.worksheet_url ? `<a href="${s.worksheet_url}" target="_blank" class="btn btn-ghost btn-sm">📄 PDF 보기</a>` : ''}
       ${s.worksheet_csv_url ? `<a href="${s.worksheet_csv_url}" download="${s.worksheet_csv_filename||'활동지.csv'}" class="btn btn-primary btn-sm">📥 CSV 다운로드</a>` : ''}
     </div>
@@ -1071,20 +1072,70 @@ function openWorksheetDetail(id) {
         el.innerHTML = '<div style="color:var(--text3);padding:8px;">저장 이력이 없습니다.</div>';
         return;
       }
+      window._worksheetHistory = history;
       el.innerHTML = history.map((h, i) => {
-        const t = new Date(h.saved_at).toLocaleString('ko-KR');
+        const ht = new Date(h.saved_at).toLocaleString('ko-KR');
         const hdata = h.worksheet_data || {};
-        const hkeys = Object.keys(hdata).filter(k => hdata[k] && String(hdata[k]).trim());
-        const preview = hkeys.slice(0,3).map(k =>
-          `<div style="font-size:10px;color:var(--text2);">${k}: ${String(hdata[k]).substring(0,40)}${String(hdata[k]).length>40?'...':''}</div>`
-        ).join('');
-        return `<div style="border:1px solid var(--border);border-radius:6px;padding:8px 10px;margin-bottom:6px;background:${i===0?'var(--green-bg)':'var(--surface2)'};">
-          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
-            <div style="font-size:11px;font-weight:700;color:${i===0?'var(--green)':'var(--text)'};">${i===0?'🟢 최신 저장':'📌 저장 #'+(history.length-i)}</div>
-            <div style="font-size:10px;color:var(--text3);">${t}</div>
+        const prevData = i + 1 < history.length ? (history[i+1].worksheet_data || {}) : null;
+        const allKeys = [...new Set([...Object.keys(hdata), ...(prevData ? Object.keys(prevData) : [])])];
+
+        let diffHtml = '';
+        allKeys.forEach(k => {
+          const curr = hdata[k] ? String(hdata[k]).trim() : '';
+          const prev = prevData ? (prevData[k] ? String(prevData[k]).trim() : '') : null;
+          if (!curr && !prev) return;
+
+          if (prev === null) {
+            // 첫 저장
+            if (!curr) return;
+            diffHtml += `<div style="padding:5px 8px;background:var(--surface2);border-radius:4px;border:1px solid var(--border);margin-bottom:3px;">
+              <div style="font-size:9px;color:var(--text3);font-weight:600;">${k}</div>
+              <div style="font-size:11px;color:var(--text);white-space:pre-wrap;">${curr.substring(0,80)}${curr.length>80?'...':''}</div>
+            </div>`;
+          } else if (!curr && prev) {
+            // 삭제됨
+            diffHtml += `<div style="padding:5px 8px;background:var(--red-bg);border-radius:4px;border:1px solid var(--red-border);margin-bottom:3px;">
+              <div style="font-size:9px;color:var(--red);font-weight:600;">${k} (삭제됨)</div>
+              <div style="font-size:11px;color:var(--red);text-decoration:line-through;white-space:pre-wrap;">${prev.substring(0,80)}${prev.length>80?'...':''}</div>
+            </div>`;
+          } else if (curr && !prev) {
+            // 새로 추가
+            diffHtml += `<div style="padding:5px 8px;background:var(--green-bg);border-radius:4px;border:1px solid var(--green-border);margin-bottom:3px;">
+              <div style="font-size:9px;color:var(--green);font-weight:600;">${k} ✨ 새로 작성</div>
+              <div style="font-size:11px;color:var(--green);white-space:pre-wrap;">${curr.substring(0,80)}${curr.length>80?'...':''}</div>
+            </div>`;
+          } else if (curr !== prev) {
+            // 수정됨
+            diffHtml += `<div style="margin-bottom:3px;">
+              <div style="font-size:9px;color:var(--yellow);font-weight:600;margin-bottom:2px;">${k} ✏️ 수정됨</div>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;">
+                <div style="padding:4px 6px;background:var(--red-bg);border:1px solid var(--red-border);border-radius:3px;">
+                  <div style="font-size:8px;color:var(--red);font-weight:700;">이전</div>
+                  <div style="font-size:10px;color:var(--red);white-space:pre-wrap;">${prev.substring(0,60)}${prev.length>60?'...':''}</div>
+                </div>
+                <div style="padding:4px 6px;background:var(--green-bg);border:1px solid var(--green-border);border-radius:3px;">
+                  <div style="font-size:8px;color:var(--green);font-weight:700;">현재</div>
+                  <div style="font-size:10px;color:var(--green);white-space:pre-wrap;">${curr.substring(0,60)}${curr.length>60?'...':''}</div>
+                </div>
+              </div>
+            </div>`;
+          } else {
+            // 변경 없음 — 최신 저장만 표시
+            if (i === 0) {
+              diffHtml += `<div style="padding:5px 8px;background:var(--surface2);border-radius:4px;border:1px solid var(--border);margin-bottom:3px;">
+                <div style="font-size:9px;color:var(--text3);font-weight:600;">${k}</div>
+                <div style="font-size:11px;color:var(--text);white-space:pre-wrap;">${curr.substring(0,80)}${curr.length>80?'...':''}</div>
+              </div>`;
+            }
+          }
+        });
+
+        return `<div style="border:1.5px solid ${i===0?'var(--green-border)':'var(--border)'};border-radius:6px;margin-bottom:8px;overflow:hidden;">
+          <div style="padding:7px 10px;background:${i===0?'var(--green-bg)':'var(--surface2)'};display:flex;align-items:center;justify-content:space-between;">
+            <div style="font-size:11px;font-weight:700;color:${i===0?'var(--green)':'var(--text)'};">${i===0?'🟢 최신 저장':'📌 저장 '+(history.length-i)+'번째'}</div>
+            <div style="font-size:10px;color:var(--text3);">🕐 ${ht}</div>
           </div>
-          <div style="line-height:1.6;">${preview||'<span style="color:var(--text3);">내용 없음</span>'}</div>
-          <button onclick="showHistoryDetail(${i})" style="margin-top:5px;font-size:10px;padding:2px 8px;border-radius:4px;border:1px solid var(--border);background:var(--white);cursor:pointer;font-family:inherit;">📄 전체 내용 보기</button>
+          <div style="padding:8px 10px;">${diffHtml || '<div style="color:var(--text3);font-size:11px;">내용 없음</div>'}</div>
         </div>`;
       }).join('');
       window._worksheetHistory = history;
@@ -1271,14 +1322,22 @@ async function approveAllSentences() {
     });
     if (!toApprove.length) { hideLoading(); alert('승인할 문장이 없습니다.'); return; }
     const newApproved = [...new Set([...approvedList, ...toApprove])];
-    await fetch('/api/teacher?action=approveSentence', {
+    const res = await fetch('/api/teacher?action=approveSentence', {
       method: 'PATCH', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ id: s.id, approveAll: true, approvedList: newApproved })
     });
+    const data = await res.json();
     hideLoading();
+    // state 업데이트
+    const idx2 = state.submissions.findIndex(x => x.id === s.id);
+    if (idx2 !== -1) {
+      state.submissions[idx2].teacher_approved_sentences = data.approvedList;
+      state.submissions[idx2].is_passed = data.allPassed;
+      state.currentDetail = state.submissions[idx2];
+    }
     await loadSubmissions();
     openDetail(s.id);
-    alert('✅ 전체 승인 완료!');
+    alert('✅ 전체 승인 완료! 학생 화면에 10초 내 반영됩니다.');
   } catch(err) { hideLoading(); alert('오류: ' + err.message); }
 }
 
