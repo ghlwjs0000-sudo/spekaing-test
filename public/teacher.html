@@ -982,77 +982,6 @@ function openWorksheetDetail(id) {
     </div>
   </div>`;
 
-  const data = s.worksheet_data || {};
-  const keys = Object.keys(data);
-
-  if (keys.length > 0) {
-    // 섹션별 그룹핑 — 실제 저장된 키 기준
-    const sections = [
-      { name: '📌 기본 정보', keys: ['학번','이름','책 제목','저자','날짜'] },
-      { name: '① Who & Why / 누구에게, 왜?', keys: ['발표 대상','발표 목적','청중 적합 이유(한국어)','청중 적합 이유(English)'] },
-      { name: '② Opening Hook / 시선 잡기', keys: ['Hook 방식','Hook 아이디어(한국어)','Hook 문장(English)'] },
-      { name: '③ Story Map (Fiction)', keys: ['Setting(한국어)','Setting(English)','주인공(한국어)','주인공(English)','갈등(한국어)','갈등(English)','핵심 사건(한국어)','핵심 사건(English)','결말(한국어)','결말(English)'] },
-      { name: '③ Book & Author (Non-fiction)', keys: ['주요 내용(한국어)','주요 내용(English)','핵심 주장(한국어)','핵심 주장(English)','저자 배경(한국어)','저자 배경(English)'] },
-      { name: '④ My Favourite Part / 인상 깊은 구절', keys: ['인상 깊은 구절','중요한 이유(한국어)','중요한 이유(English)','언어 분석(한국어)','언어 분석(English)','내 말로 바꾸기(한국어)','내 말로 바꾸기(English)','바꾼 이유(한국어)','바꾼 이유(English)'] },
-      { name: '⑤ My Take / 나의 생각', keys: ['책 메시지(한국어)','책 메시지(English)','동의 여부(한국어)','동의 여부(English)','현실 연결(한국어)','현실 연결(English)'] },
-      { name: '⑥ 발표 스크립트', keys: ['스크립트'] },
-    ];
-
-    sections.forEach(sec => {
-      // 정확한 키 + 부분 일치 키 모두 찾기
-      const filledKeys = [];
-      sec.keys.forEach(sk => {
-        // 정확히 일치
-        if (data[sk] && String(data[sk]).trim()) {
-          filledKeys.push({ label: sk, value: data[sk] });
-          return;
-        }
-        // 부분 일치 (키 이름이 약간 다를 경우 대비)
-        const matched = keys.find(k => k.includes(sk) || sk.includes(k));
-        if (matched && data[matched] && String(data[matched]).trim()) {
-          filledKeys.push({ label: matched, value: data[matched] });
-        }
-      });
-
-      if (!filledKeys.length) return;
-
-      html += `<div style="margin-bottom:10px;">
-        <div style="font-size:11px;font-weight:700;color:var(--blue);margin-bottom:5px;padding:5px 10px;background:var(--blue-light);border-radius:5px;border-left:3px solid var(--blue);">${sec.name}</div>
-        <div style="display:flex;flex-direction:column;gap:4px;">`;
-
-      filledKeys.forEach(({ label, value }) => {
-        const isScript = label === '스크립트';
-        html += `<div style="padding:7px 10px;background:var(--surface2);border-radius:5px;border:1px solid var(--border);">
-          <div style="font-size:10px;color:var(--text3);margin-bottom:3px;font-weight:600;">${label}</div>
-          <div style="font-size:12px;color:var(--text);white-space:pre-wrap;line-height:1.6;${isScript?'max-height:200px;overflow-y:auto;':''}">${value}</div>
-        </div>`;
-      });
-
-      html += `</div></div>`;
-    });
-
-    // 섹션에 없는 나머지 키 표시
-    const allSectionKeys = sections.flatMap(s => s.keys);
-    const otherKeys = keys.filter(k => {
-      if (!data[k] || !String(data[k]).trim()) return false;
-      return !allSectionKeys.some(sk => sk === k || k.includes(sk) || sk.includes(k));
-    });
-    if (otherKeys.length) {
-      html += `<div style="margin-bottom:10px;">
-        <div style="font-size:11px;font-weight:700;color:var(--text2);margin-bottom:5px;padding:5px 10px;background:var(--surface2);border-radius:5px;">기타 항목</div>
-        <div style="display:flex;flex-direction:column;gap:4px;">`;
-      otherKeys.forEach(k => {
-        html += `<div style="padding:7px 10px;background:var(--surface2);border-radius:5px;border:1px solid var(--border);">
-          <div style="font-size:10px;color:var(--text3);margin-bottom:3px;font-weight:600;">${k}</div>
-          <div style="font-size:12px;color:var(--text);white-space:pre-wrap;">${data[k]}</div>
-        </div>`;
-      });
-      html += `</div></div>`;
-    }
-  } else {
-    html += `<div style="color:var(--text3);font-size:13px;padding:20px;text-align:center;">활동지 작성 내용이 없습니다.</div>`;
-  }
-
   // 저장 이력
   html += `<div style="margin-top:12px;">
     <div style="font-size:11px;font-weight:700;color:var(--text);margin-bottom:6px;">📋 저장 이력</div>
@@ -1077,6 +1006,7 @@ function openWorksheetDetail(id) {
         const ht = new Date(h.saved_at).toLocaleString('ko-KR');
         const hdata = h.worksheet_data || {};
         const prevData = i + 1 < history.length ? (history[i+1].worksheet_data || {}) : null;
+        const hookKeys = ['Hook 방식', '어떤 방식으로 시작할까요?', '선택한 방식'];
         const allKeys = [...new Set([...Object.keys(hdata), ...(prevData ? Object.keys(prevData) : [])])];
 
         let diffHtml = '';
@@ -1084,6 +1014,14 @@ function openWorksheetDetail(id) {
           const curr = hdata[k] ? String(hdata[k]).trim() : '';
           const prev = prevData ? (prevData[k] ? String(prevData[k]).trim() : '') : null;
           if (!curr && !prev) return;
+          // Hook 방식 관련 빈칸은 표시
+          if (!curr && hookKeys.some(hk => k.includes(hk))) {
+            diffHtml += `<div style="padding:5px 8px;background:var(--surface2);border-radius:4px;border:1px solid var(--border);margin-bottom:3px;">
+              <div style="font-size:9px;color:var(--text3);font-weight:600;">${k}</div>
+              <div style="font-size:11px;color:var(--text3);font-style:italic;">(미작성)</div>
+            </div>`;
+            return;
+          }
 
           if (prev === null) {
             // 첫 저장

@@ -1243,7 +1243,7 @@ async function saveWorksheetOnly() {
     ];
     document.querySelectorAll('input[type=text], textarea').forEach(function(el, i) {
         var label = fieldLabels[i] || ('항목' + (i+1));
-        worksheetInputs[label] = el.value || '';
+        worksheetInputs[label] = el.value || ''; // 빈값도 저장
     });
     try {
         // DB에 저장 (스크립트 없어도 저장 가능)
