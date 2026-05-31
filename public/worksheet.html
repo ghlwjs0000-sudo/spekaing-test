@@ -1048,92 +1048,7 @@ if (savedStudentNum) {
     if (metaId && !metaId.value) metaId.value = savedStudentNum;
 }
 setTimeout(loadWorksheetFromLocal, 500);
-async function loadByStudentNumber(studentNumber) {
-    if (!studentNumber || studentNumber.trim().length < 3) return;
-    try {
-        var res = await fetch('https://speakingtest-git-main-jin-you-jeong-s-projects.vercel.app/api/worksheet?studentNumber=' + studentNumber.trim());
-        var data = await res.json();
-        if (!data.found || !data.data) return;
-        var sub = data.data;
-        if (!sub.worksheet_data) return;
-        if (sub.worksheet_book_type) {
-            bType = sub.worksheet_book_type;
-            document.querySelectorAll('.type-btn').forEach(function(b) { b.classList.remove('active'); });
-            var btns = document.querySelectorAll('.type-btn');
-            if (bType === 'nonfiction' && btns[1]) btns[1].classList.add('active');
-            else if (btns[0]) btns[0].classList.add('active');
-            renderSec3(); renderGuide(); renderExamples();
-        }
-        var fieldLabels = [
-            '학번', '이름', '책 제목', '저자', '날짜',
-            '발표 대상', '발표 목적', '청중 적합 이유(한국어)', '청중 적합 이유(English)',
-            'Hook 방식', 'Hook 아이디어(한국어)', 'Hook 문장(English)',
-            'Setting(한국어)', 'Setting(English)', '주인공(한국어)', '주인공(English)',
-            '갈등(한국어)', '갈등(English)', '핵심 사건(한국어)', '핵심 사건(English)',
-            '결말(한국어)', '결말(English)',
-            '인상 깊은 구절', '중요한 이유(한국어)', '중요한 이유(English)',
-            '언어 분석(한국어)', '언어 분석(English)',
-            '내 말로 바꾸기(한국어)', '내 말로 바꾸기(English)',
-            '바꾼 이유(한국어)', '바꾼 이유(English)',
-            '책 메시지(한국어)', '책 메시지(English)',
-            '동의 여부(한국어)', '동의 여부(English)',
-            '현실 연결(한국어)', '현실 연결(English)',
-            '스크립트'
-        ];
-       setTimeout(function() {
-            var wdata = sub.worksheet_data;
-            if (!wdata) return;
 
-            // data-label 기반 복원
-            document.querySelectorAll('[data-label]').forEach(function(el) {
-                var label = el.getAttribute('data-label');
-                if (wdata[label] !== undefined && wdata[label] !== '') {
-                    el.value = wdata[label];
-                    if (el.id === 'script-area') updateSent(el);
-                }
-            });
-
-            // data-label 없는 필드는 키 이름으로 직접 매핑
-            var keyMap = {
-                'Setting(한국어)': null, 'Setting(English)': null,
-                '주인공(한국어)': null, '주인공(English)': null,
-                '갈등(한국어)': null, '갈등(English)': null,
-                '핵심 사건(한국어)': null, '핵심 사건(English)': null,
-                '결말(한국어)': null, '결말(English)': null,
-                '주요 내용(한국어)': null, '주요 내용(English)': null,
-                '핵심 주장(한국어)': null, '핵심 주장(English)': null,
-                '핵심 아이디어(한국어)': null, '핵심 아이디어(English)': null,
-                '저자 배경(한국어)': null, '저자 배경(English)': null,
-                '저자 신뢰성(한국어)': null, '저자 신뢰성(English)': null,
-                '저자-책 연결(한국어)': null, '저자-책 연결(English)': null,
-            };
-
-            // 섹션3 input/textarea를 순서대로 keyMap 키에 매핑
-            var sec3Keys = bType === 'fiction'
-                ? ['Setting(한국어)','Setting(English)','주인공(한국어)','주인공(English)','갈등(한국어)','갈등(English)','핵심 사건(한국어)','핵심 사건(English)','결말(한국어)','결말(English)']
-                : ['주요 내용(한국어)','주요 내용(English)','핵심 주장(한국어)','핵심 주장(English)','핵심 아이디어(한국어)','핵심 아이디어(English)','저자 배경(한국어)','저자 배경(English)','저자 신뢰성(한국어)','저자 신뢰성(English)','저자-책 연결(한국어)','저자-책 연결(English)'];
-
-            var sec3Inputs = document.querySelectorAll('#sec3 input[type=text]:not([data-label]), #sec3 textarea:not([data-label])');
-            sec3Inputs.forEach(function(el, i) {
-                var label = sec3Keys[i];
-                if (label && wdata[label] !== undefined && wdata[label] !== '') {
-                    el.value = wdata[label];
-                }
-            });
-
-            updProg();
-            if (sub.worksheet_submitted_at) {
-                var t = new Date(sub.worksheet_submitted_at).toLocaleString('ko-KR');
-                alert('✅ 이전에 작성한 활동지를 불러왔어요! (저장 시각: ' + t + ')');
-            }
-        }, 500);
-            if (sub.worksheet_submitted_at) {
-                var t = new Date(sub.worksheet_submitted_at).toLocaleString('ko-KR');
-                alert('✅ 이전에 작성한 활동지를 불러왔어요! (제출 시각: ' + t + ')');
-            }
-        }, 500);
-    } catch(e) { console.error('불러오기 오류:', e); }
-}
 // URL 파라미터로 학번 자동 입력
 (function() {
     var params = new URLSearchParams(window.location.search);
@@ -1186,95 +1101,7 @@ function generateWorksheetCSV() {
     return '\uFEFF' + csv;
 }
 
-async function loadByStudentNumber(studentNumber) {
-    if (!studentNumber || studentNumber.trim().length < 3) return;
-    try {
-        var res = await fetch('https://speakingtest-git-main-jin-you-jeong-s-projects.vercel.app/api/worksheet?studentNumber=' + studentNumber.trim());
-        var data = await res.json();
-        if (!data.found || !data.data) return;
-        var sub = data.data;
-        if (!sub.worksheet_data) return;
 
-        // 책 유형 설정
-        if (sub.worksheet_book_type) {
-            bType = sub.worksheet_book_type;
-            document.querySelectorAll('.type-btn').forEach(function(b) { b.classList.remove('active'); });
-            var btns = document.querySelectorAll('.type-btn');
-            if (bType === 'nonfiction' && btns[1]) btns[1].classList.add('active');
-            else if (btns[0]) btns[0].classList.add('active');
-            renderSec3(); renderGuide(); renderExamples();
-        }
-
-        var wdata = sub.worksheet_data;
-
-        setTimeout(function() {
-            // 1. data-label 있는 모든 필드 복원
-            document.querySelectorAll('[data-label]').forEach(function(el) {
-                var label = el.getAttribute('data-label');
-                if (wdata[label] !== undefined && wdata[label] !== '') {
-                    el.value = wdata[label];
-                    if (el.id === 'script-area') updateSent(el);
-                }
-            });
-
-            // 2. 섹션3 — data-label 없는 필드를 순서대로 복원
-            var sec3Keys = bType === 'fiction'
-                ? ['Setting(한국어)','Setting(English)','주인공(한국어)','주인공(English)',
-                   '갈등(한국어)','갈등(English)','핵심 사건(한국어)','핵심 사건(English)',
-                   '결말(한국어)','결말(English)']
-                : ['주요 내용(한국어)','주요 내용(English)',
-                   '핵심 주장(한국어)','핵심 주장(English)',
-                   '핵심 아이디어(한국어)','핵심 아이디어(English)',
-                   '저자 배경(한국어)','저자 배경(English)',
-                   '저자 신뢰성(한국어)','저자 신뢰성(English)',
-                   '저자-책 연결(한국어)','저자-책 연결(English)'];
-
-            var sec3Inputs = Array.from(document.querySelectorAll('#sec3 input[type=text], #sec3 textarea'));
-            sec3Inputs.forEach(function(el, i) {
-                var label = sec3Keys[i];
-                if (!label) return;
-                if (wdata[label] !== undefined && wdata[label] !== '') {
-                    el.value = wdata[label];
-                }
-            });
-
-            // 3. 섹션 4 textarea 복원 (data-label 없는 것들)
-            var s4Labels = ['인상 깊은 구절','중요한 이유(한국어)','중요한 이유(English)',
-                            '언어 분석(한국어)','언어 분석(English)',
-                            '내 말로 바꾸기(한국어)','내 말로 바꾸기(English)',
-                            '바꾼 이유(한국어)','바꾼 이유(English)'];
-            var s4Inputs = Array.from(document.querySelectorAll('.s4 input[type=text], .s4 textarea'));
-            s4Inputs.forEach(function(el, i) {
-                var label = s4Labels[i];
-                if (!label) return;
-                if (wdata[label] !== undefined && wdata[label] !== '') {
-                    el.value = wdata[label];
-                }
-            });
-
-            // 4. Hook 방식 복원
-            var hookType = wdata['Hook 방식'];
-            if (hookType) {
-                document.getElementById('hook-lbl').textContent = hookType;
-                document.querySelectorAll('.hook-pill').forEach(function(p) {
-                    if (p.textContent.trim().indexOf(hookType.split('/')[0].trim()) !== -1) {
-                        p.classList.add('active');
-                    }
-                });
-            }
-
-            updProg();
-
-            if (sub.worksheet_submitted_at) {
-                var t = new Date(sub.worksheet_submitted_at).toLocaleString('ko-KR');
-                alert('✅ 이전에 작성한 활동지를 불러왔어요! (저장 시각: ' + t + ')');
-            }
-        }, 600);
-
-    } catch(e) {
-        console.error('불러오기 오류:', e);
-    }
-}
 async function saveWorksheetOnly() {
     var studentNumber = document.getElementById('meta-id') ? document.getElementById('meta-id').value.trim() : '';
     if (!studentNumber) {
@@ -1432,7 +1259,90 @@ async function submitToSpeakingTest() {
         alert('오류: ' + err.message);
     }
 }
+async function loadByStudentNumber(studentNumber) {
+    if (!studentNumber || studentNumber.trim().length < 3) return;
+    try {
+        var res = await fetch('https://speakingtest-git-main-jin-you-jeong-s-projects.vercel.app/api/worksheet?studentNumber=' + studentNumber.trim());
+        var data = await res.json();
+        if (!data.found || !data.data) return;
+        var sub = data.data;
+        if (!sub.worksheet_data) return;
 
+        if (sub.worksheet_book_type) {
+            bType = sub.worksheet_book_type;
+            document.querySelectorAll('.type-btn').forEach(function(b) { b.classList.remove('active'); });
+            var btns = document.querySelectorAll('.type-btn');
+            if (bType === 'nonfiction' && btns[1]) btns[1].classList.add('active');
+            else if (btns[0]) btns[0].classList.add('active');
+            renderSec3(); renderGuide(); renderExamples();
+        }
+
+        var wdata = sub.worksheet_data;
+
+        setTimeout(function() {
+            // data-label 있는 필드 복원
+            document.querySelectorAll('[data-label]').forEach(function(el) {
+                var label = el.getAttribute('data-label');
+                if (wdata[label] !== undefined && wdata[label] !== '') {
+                    el.value = wdata[label];
+                    if (el.id === 'script-area') updateSent(el);
+                }
+            });
+
+            // 섹션3 순서 기반 복원
+            var sec3Keys = bType === 'fiction'
+                ? ['Setting(한국어)','Setting(English)','주인공(한국어)','주인공(English)',
+                   '갈등(한국어)','갈등(English)','핵심 사건(한국어)','핵심 사건(English)',
+                   '결말(한국어)','결말(English)']
+                : ['주요 내용(한국어)','주요 내용(English)',
+                   '핵심 주장(한국어)','핵심 주장(English)',
+                   '핵심 아이디어(한국어)','핵심 아이디어(English)',
+                   '저자 배경(한국어)','저자 배경(English)',
+                   '저자 신뢰성(한국어)','저자 신뢰성(English)',
+                   '저자-책 연결(한국어)','저자-책 연결(English)'];
+
+            Array.from(document.querySelectorAll('#sec3 input[type=text], #sec3 textarea')).forEach(function(el, i) {
+                var label = sec3Keys[i];
+                if (label && wdata[label] !== undefined && wdata[label] !== '') {
+                    el.value = wdata[label];
+                }
+            });
+
+            // 섹션4 순서 기반 복원
+            var s4Labels = ['인상 깊은 구절',
+                '중요한 이유(한국어)','중요한 이유(English)',
+                '언어 분석(한국어)','언어 분석(English)',
+                '내 말로 바꾸기(한국어)','내 말로 바꾸기(English)',
+                '바꾼 이유(한국어)','바꾼 이유(English)'];
+            Array.from(document.querySelectorAll('.s4 input[type=text], .s4 textarea')).forEach(function(el, i) {
+                var label = s4Labels[i];
+                if (label && wdata[label] !== undefined && wdata[label] !== '') {
+                    el.value = wdata[label];
+                }
+            });
+
+            // Hook 방식 복원
+            if (wdata['Hook 방식']) {
+                document.getElementById('hook-lbl').textContent = wdata['Hook 방식'];
+                document.querySelectorAll('.hook-pill').forEach(function(p) {
+                    if (p.textContent.indexOf(wdata['Hook 방식'].split('/')[0].trim()) !== -1) {
+                        p.classList.add('active');
+                    }
+                });
+            }
+
+            updProg();
+
+            if (sub.worksheet_submitted_at) {
+                var t = new Date(sub.worksheet_submitted_at).toLocaleString('ko-KR');
+                alert('✅ 이전에 작성한 활동지를 불러왔어요! (저장 시각: ' + t + ')');
+            }
+        }, 600);
+
+    } catch(e) {
+        console.error('불러오기 오류:', e);
+    }
+}
 </script>
 <div style="max-width:820px;margin:0 auto;padding:0 1.5rem 3rem;text-align:center;">
     <button onclick="submitToSpeakingTest()" style="background:#2d7a3a;color:#fff;border:none;border-radius:12px;padding:16px 40px;font-size:16px;font-weight:600;cursor:pointer;font-family:var(--sans);box-shadow:0 4px 12px rgba(45,122,58,0.3);">
