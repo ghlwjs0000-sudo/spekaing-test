@@ -1101,7 +1101,6 @@ async function saveWorksheetOnly() {
         alert('학번을 먼저 입력해주세요!');
         return;
     }
-    // 활동지 데이터 수집 — data-label 기반
     var worksheetInputs = {};
     document.querySelectorAll('[data-label]').forEach(function(el) {
         var label = el.getAttribute('data-label');
@@ -1115,68 +1114,6 @@ async function saveWorksheetOnly() {
         if (div) selectedLangs.push(div.textContent.trim());
     });
     if (selectedLangs.length > 0) worksheetInputs['언어 분석 선택'] = selectedLangs.join(', ');
-
-    // 언어 분석 선택 저장
-    var selectedLangs = [];
-    document.querySelectorAll('.lang-opt.on').forEach(function(el) {
-        var div = el.querySelector('div');
-        if (div) selectedLangs.push(div.textContent.trim());
-    });
-    if (selectedLangs.length > 0) worksheetInputs['언어 분석 선택'] = selectedLangs.join(', ');
-    var worksheetInputs = {};
-    document.querySelectorAll('[data-label]').forEach(function(el) {
-        var label = el.getAttribute('data-label');
-        worksheetInputs[label] = el.value || '';
-    });
-    var hookLblEl = document.getElementById('hook-lbl');
-    if (hookLblEl) worksheetInputs['Hook 방식'] = hookLblEl.textContent.trim();
-    var sec3LabelsF = ['Setting(한국어)','Setting(English)','주인공(한국어)','주인공(English)',
-        '갈등(한국어)','갈등(English)','핵심 사건(한국어)','핵심 사건(English)',
-        '결말(한국어)','결말(English)'];
-    var sec3LabelsN = ['주요 내용(한국어)','주요 내용(English)',
-        '핵심 주장(한국어)','핵심 주장(English)',
-        '핵심 아이디어(한국어)','핵심 아이디어(English)',
-        '저자 배경(한국어)','저자 배경(English)',
-        '저자 신뢰성(한국어)','저자 신뢰성(English)',
-        '저자-책 연결(한국어)','저자-책 연결(English)'];
-    var sec4Labels = ['인상 깊은 구절',
-        '중요한 이유(한국어)','중요한 이유(English)',
-        '언어 분석(한국어)','언어 분석(English)',
-        '내 말로 바꾸기(한국어)','내 말로 바꾸기(English)',
-        '바꾼 이유(한국어)','바꾼 이유(English)'];
-    var sec5Labels = ['책 메시지(한국어)','책 메시지(English)',
-        '동의 여부(한국어)','동의 여부(English)',
-        '현실 연결(한국어)','현실 연결(English)'];
-
-    // 메타 + 섹션1,2 (data-label 있는 것들)
-    document.querySelectorAll('[data-label]').forEach(function(el) {
-        var label = el.getAttribute('data-label');
-        if (label !== 'Hook 방식') worksheetInputs[label] = el.value || '';
-    });
-
-    // Hook 방식 (pill 선택값)
-    worksheetInputs['Hook 방식'] = document.getElementById('hook-lbl') ?
-        document.getElementById('hook-lbl').textContent.trim() : '';
-
-    // 섹션3
-    var sec3Keys = bType === 'fiction' ? sec3LabelsF : sec3LabelsN;
-    Array.from(document.querySelectorAll('#sec3 input[type=text], #sec3 textarea')).forEach(function(el, i) {
-        if (sec3Keys[i]) worksheetInputs[sec3Keys[i]] = el.value || '';
-    });
-
-    // 섹션4
-    Array.from(document.querySelectorAll('.s4 input[type=text], .s4 textarea')).forEach(function(el, i) {
-        if (sec4Labels[i]) worksheetInputs[sec4Labels[i]] = el.value || '';
-    });
-
-    // 섹션5
-    Array.from(document.querySelectorAll('.s5 input[type=text], .s5 textarea')).forEach(function(el, i) {
-        if (sec5Labels[i]) worksheetInputs[sec5Labels[i]] = el.value || '';
-    });
-
-    // 스크립트
-    worksheetInputs['스크립트'] = document.getElementById('script-area') ?
-        document.getElementById('script-area').value || '' : '';
     try {
         // DB에 저장 (스크립트 없어도 저장 가능)
         var script = document.getElementById('script-area').value.trim() || '(임시저장)';
@@ -1237,19 +1174,18 @@ async function submitToSpeakingTest() {
     if (!studentNumber) { alert('학번을 입력해주세요!'); return; }
     try {
         var worksheetInputs = {};
-    document.querySelectorAll('[data-label]').forEach(function(el) {
-        var label = el.getAttribute('data-label');
-        worksheetInputs[label] = el.value || '';
-    });
-    var hookLblEl = document.getElementById('hook-lbl');
-    if (hookLblEl) worksheetInputs['Hook 방식'] = hookLblEl.textContent.trim();
-    var selectedLangs = [];
-    document.querySelectorAll('.lang-opt.on').forEach(function(el) {
-        var div = el.querySelector('div');
-        if (div) selectedLangs.push(div.textContent.trim());
-    });
-    if (selectedLangs.length > 0) worksheetInputs['언어 분석 선택'] = selectedLangs.join(', ');
-    try {
+        document.querySelectorAll('[data-label]').forEach(function(el) {
+            var label = el.getAttribute('data-label');
+            worksheetInputs[label] = el.value || '';
+        });
+        var hookLblEl = document.getElementById('hook-lbl');
+        if (hookLblEl) worksheetInputs['Hook 방식'] = hookLblEl.textContent.trim();
+        var selectedLangs = [];
+        document.querySelectorAll('.lang-opt.on').forEach(function(el) {
+            var div = el.querySelector('div');
+            if (div) selectedLangs.push(div.textContent.trim());
+        });
+        if (selectedLangs.length > 0) worksheetInputs['언어 분석 선택'] = selectedLangs.join(', ');
 
         // CSV 생성 후 업로드
         var csvContent = generateWorksheetCSV();
