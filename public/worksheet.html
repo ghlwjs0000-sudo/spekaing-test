@@ -1102,9 +1102,19 @@ async function saveWorksheetOnly() {
         return;
     }
     // 활동지 데이터 수집 — data-label 기반
-    // Hook 방식 저장
+    var worksheetInputs = {};
+    document.querySelectorAll('[data-label]').forEach(function(el) {
+        var label = el.getAttribute('data-label');
+        worksheetInputs[label] = el.value || '';
+    });
     var hookLblEl = document.getElementById('hook-lbl');
     if (hookLblEl) worksheetInputs['Hook 방식'] = hookLblEl.textContent.trim();
+    var selectedLangs = [];
+    document.querySelectorAll('.lang-opt.on').forEach(function(el) {
+        var div = el.querySelector('div');
+        if (div) selectedLangs.push(div.textContent.trim());
+    });
+    if (selectedLangs.length > 0) worksheetInputs['언어 분석 선택'] = selectedLangs.join(', ');
 
     // 언어 분석 선택 저장
     var selectedLangs = [];
