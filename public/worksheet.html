@@ -446,8 +446,8 @@ body {
         <div class="field-lbl"><span class="field-lbl-en">Why is this book a good fit for that audience? / 왜 이 책이 그 사람들에게 잘 맞나요?</span><span class="field-check" id="chk-s1-fit">✓</span></div>
         <div class="field-hint">💡 청중의 나이, 관심사, 고민과 연결해서 설명해봐요. 영어로 2~3문장 정도면 충분해요!</div>
         <div class="bilingual-wrap">
-          <div class="bi-row"><span class="bi-badge bi-ko">한국어</span><textarea class="sm bi-ta" data-chk="chk-s1-fit" placeholder="이 책이 그 사람들에게 어울리는 이유는..."></textarea></div>
-          <div class="bi-row"><span class="bi-badge bi-en">English</span><textarea class="sm bi-ta" data-chk="chk-s1-fit" placeholder="This book is good for them because..."></textarea></div>
+          <div class="bi-row"><span class="bi-badge bi-ko">한국어</span><textarea class="sm bi-ta" data-label="청중 적합 이유(한국어)" data-chk="chk-s1-fit" placeholder="이 책이 그 사람들에게 어울리는 이유는..."></textarea></div>
+<div class="bi-row"><span class="bi-badge bi-en">English</span><textarea class="sm bi-ta" data-label="청중 적합 이유(English)" data-chk="chk-s1-fit" placeholder="This book is good for them because..."></textarea></div>
         </div>
       </div>
       <div id="ex1"></div>
@@ -476,8 +476,8 @@ body {
         <div class="field-lbl"><span class="field-lbl-en">선택한 방식: <span id="hook-lbl" style="color:var(--blue);font-style:italic;font-weight:400">아직 선택 안 함 / not selected</span></span><span class="field-check" id="chk-s2">✓</span></div>
         <div class="field-hint">💡 발표를 듣는 친구들이 "오, 뭔데?" 하고 귀를 기울이게 만드는 한 문장을 써봐요!</div>
         <div class="bilingual-wrap">
-          <div class="bi-row"><span class="bi-badge bi-ko">한국어 아이디어</span><textarea class="sm bi-ta" data-chk="chk-s2" placeholder="어떤 내용으로 시작할지 한국어로 먼저 떠올려봐요..."></textarea></div>
-          <div class="bi-row"><span class="bi-badge bi-en">English Hook</span><textarea class="sm bi-ta" id="hook-text" data-chk="chk-s2" placeholder='"Have you ever felt like you had to hide who you really are?"&#10;(이런 느낌으로 써봐요!)'></textarea></div>
+          <div class="bi-row"><span class="bi-badge bi-ko">한국어 아이디어</span><textarea class="sm bi-ta" data-label="Hook 아이디어(한국어)" data-chk="chk-s2" placeholder="어떤 내용으로 시작할지 한국어로 먼저 떠올려봐요..."></textarea></div>
+<div class="bi-row"><span class="bi-badge bi-en">English Hook</span><textarea class="sm bi-ta" data-label="Hook 문장(English)" id="hook-text" data-chk="chk-s2" placeholder='"Have you ever felt like you had to hide who you really are?"&#10;(이런 느낌으로 써봐요!)'></textarea></div>
         </div>
       </div>
       <div id="ex2"></div>
@@ -500,14 +500,14 @@ body {
       <div class="field">
         <div class="field-lbl"><span class="field-lbl-en">책에서 가장 인상 깊었던 문장 (1~2개) / A sentence or two that stayed with you</span></div>
         <div class="field-hint">💡 책에서 직접 가져온 문장이어야 해요. 따옴표(" ")를 꼭 붙여요!</div>
-        <textarea class="sm" placeholder='"Copy the exact words from the book here." (책 속 문장을 그대로 옮겨 써요)'></textarea>
+        <textarea class="sm" data-label="인상 깊은 구절" placeholder='"Copy the exact words from the book here." (책 속 문장을 그대로 옮겨 써요)'></textarea>
       </div>
       <div class="field">
         <div class="field-lbl"><span class="field-lbl-en">왜 이 부분이 중요한가요? / Why does this part matter?</span><span class="field-check" id="chk-s4-why">✓</span></div>
         <div class="field-hint">💡 이 문장이 책의 주제나 인물과 어떻게 연결되는지 영어로 설명해봐요. "This shows that..." 로 시작해도 좋아요!</div>
         <div class="bilingual-wrap">
-          <div class="bi-row"><span class="bi-badge bi-ko">한국어</span><textarea class="sm bi-ta" data-chk="chk-s4-why" placeholder="이 부분이 중요한 이유는..."></textarea></div>
-          <div class="bi-row"><span class="bi-badge bi-en">English</span><textarea class="sm bi-ta" data-chk="chk-s4-why" placeholder="This part is important because... / This shows that..."></textarea></div>
+          <div class="bi-row"><span class="bi-badge bi-ko">한국어</span><textarea class="sm bi-ta" data-label="중요한 이유(한국어)" data-chk="chk-s4-why" placeholder="이 부분이 중요한 이유는..."></textarea></div>
+<div class="bi-row"><span class="bi-badge bi-en">English</span><textarea class="sm bi-ta" data-label="중요한 이유(English)" data-chk="chk-s4-why" placeholder="This part is important because... / This shows that..."></textarea></div>
         </div>
       </div>
       <div class="field">
@@ -524,8 +524,8 @@ body {
         <div class="field-lbl"><span class="field-lbl-en">선택한 특징에 대해 설명해봐요 / Now explain what you noticed</span><span class="field-check" id="chk-s4-analysis">✓</span></div>
         <div class="field-hint">💡 골라낸 특징이 왜 인상적인지, 어떤 효과를 주는지 영어로 써봐요. 짧아도 괜찮아요!</div>
         <div class="bilingual-wrap">
-          <div class="bi-row"><span class="bi-badge bi-ko">한국어</span><textarea class="bi-ta" data-chk="chk-s4-analysis" placeholder="이 단어/문장은... 같은 느낌을 줘요. 왜냐하면..."></textarea></div>
-          <div class="bi-row"><span class="bi-badge bi-en">English</span><textarea class="bi-ta" data-chk="chk-s4-analysis" placeholder="The word '___' makes me think of... / I notice that... / This creates a feeling of..."></textarea></div>
+          <div class="bi-row"><span class="bi-badge bi-ko">한국어</span><textarea class="bi-ta" data-label="언어 분석(한국어)" data-chk="chk-s4-analysis" placeholder="이 단어/문장은... 같은 느낌을 줘요. 왜냐하면..."></textarea></div>
+<div class="bi-row"><span class="bi-badge bi-en">English</span><textarea class="bi-ta" data-label="언어 분석(English)" data-chk="chk-s4-analysis" placeholder="The word '___' makes me think of... / I notice that... / This creates a feeling of..."></textarea></div>
         </div>
       </div>
       <div class="field">
@@ -534,11 +534,11 @@ body {
         <div class="bilingual-wrap">
           <div class="bi-row">
             <span class="bi-badge bi-ko">한국어</span>
-            <textarea class="sm bi-ta" id="s4-para-ko" placeholder="쉽게 말하자면... / 한국말로 바꾸면..."></textarea>
+            <textarea class="sm bi-ta" data-label="내 말로 바꾸기(한국어)" id="s4-para-ko" placeholder="쉽게 말하자면... / 한국말로 바꾸면..."></textarea>
           </div>
           <div class="bi-row">
             <span class="bi-badge bi-en">English</span>
-            <textarea class="sm bi-ta" id="s4-para-en" placeholder="In other words, this sentence is saying that..."></textarea>
+            <textarea class="sm bi-ta" data-label="내 말로 바꾸기(English)" id="s4-para-en" placeholder="In other words, this sentence is saying that..."></textarea>
           </div>
         </div>
       </div>
@@ -548,11 +548,11 @@ body {
         <div class="bilingual-wrap">
           <div class="bi-row">
             <span class="bi-badge bi-ko">한국어</span>
-            <textarea class="sm bi-ta" placeholder="원래 문장에서 ___를 ___로 바꿨어요. 왜냐하면..."></textarea>
+            <textarea class="sm bi-ta" data-label="바꾼 이유(한국어)" placeholder="원래 문장에서 ___를 ___로 바꿨어요. 왜냐하면..."></textarea>
           </div>
           <div class="bi-row">
             <span class="bi-badge bi-en">English</span>
-            <textarea class="sm bi-ta" placeholder="I changed '___' to '___' because... / I chose the word '___' because..."></textarea>
+            <textarea class="sm bi-ta" data-label="바꾼 이유(English)" placeholder="I changed '___' to '___' because... / I chose the word '___' because..."></textarea>
           </div>
         </div>
       </div>
@@ -574,24 +574,24 @@ body {
         <div class="field-lbl"><span class="field-lbl-en">이 책이 전하려는 메시지가 뭔가요? / What is the book trying to say?</span><span class="field-check" id="chk-s5-msg">✓</span></div>
         <div class="field-hint">💡 작가가 독자에게 가장 전하고 싶었던 생각이 뭔지 써봐요. "The main message is that..." 로 시작하면 쉬워요!</div>
         <div class="bilingual-wrap">
-          <div class="bi-row"><span class="bi-badge bi-ko">한국어</span><textarea class="sm bi-ta" data-chk="chk-s5-msg" placeholder="이 책이 말하고 싶은 건..."></textarea></div>
-          <div class="bi-row"><span class="bi-badge bi-en">English</span><textarea class="sm bi-ta" data-chk="chk-s5-msg" placeholder="The main message of this book is that..."></textarea></div>
+          <div class="bi-row"><span class="bi-badge bi-ko">한국어</span><textarea class="sm bi-ta" data-label="책 메시지(한국어)" data-chk="chk-s5-msg" placeholder="이 책이 말하고 싶은 건..."></textarea></div>
+<div class="bi-row"><span class="bi-badge bi-en">English</span><textarea class="sm bi-ta" data-label="책 메시지(English)" data-chk="chk-s5-msg" placeholder="The main message of this book is that..."></textarea></div>
         </div>
       </div>
       <div class="field">
         <div class="field-lbl"><span class="field-lbl-en">그 메시지에 동의하나요, 아닌가요? 왜요? / Do you agree? Why or why not?</span><span class="field-check" id="chk-s5-agree">✓</span></div>
         <div class="field-hint">💡 정답은 없어요! 솔직한 내 생각을 써봐요. "I agree because..." 또는 "I disagree because..." 로 시작해봐요</div>
         <div class="bilingual-wrap">
-          <div class="bi-row"><span class="bi-badge bi-ko">한국어</span><textarea class="sm bi-ta" data-chk="chk-s5-agree" placeholder="나는 (동의해 / 동의 안 해). 왜냐하면..."></textarea></div>
-          <div class="bi-row"><span class="bi-badge bi-en">English</span><textarea class="sm bi-ta" data-chk="chk-s5-agree" placeholder="I agree / disagree because..."></textarea></div>
+          <div class="bi-row"><span class="bi-badge bi-ko">한국어</span><textarea class="sm bi-ta" data-label="동의 여부(한국어)" data-chk="chk-s5-agree" placeholder="나는 (동의해 / 동의 안 해). 왜냐하면..."></textarea></div>
+<div class="bi-row"><span class="bi-badge bi-en">English</span><textarea class="sm bi-ta" data-label="동의 여부(English)" data-chk="chk-s5-agree" placeholder="I agree / disagree because..."></textarea></div>
         </div>
       </div>
       <div class="field">
         <div class="field-lbl"><span class="field-lbl-en">이 책의 내용이 현실 세계와 어떻게 연결되나요? / How does this connect to real life?</span><span class="field-check" id="chk-s5-real">✓</span></div>
         <div class="field-hint">💡 뉴스에서 본 것, 학교생활, 가족, 사회 문제 등 뭐든 연결해봐요. "This reminds me of..." 로 시작해도 좋아요!</div>
         <div class="bilingual-wrap">
-          <div class="bi-row"><span class="bi-badge bi-ko">한국어</span><textarea class="sm bi-ta" data-chk="chk-s5-real" placeholder="이 책을 읽으면서 생각난 건..."></textarea></div>
-          <div class="bi-row"><span class="bi-badge bi-en">English</span><textarea class="sm bi-ta" data-chk="chk-s5-real" placeholder="This connects to real life because... / This reminds me of..."></textarea></div>
+          <div class="bi-row"><span class="bi-badge bi-ko">한국어</span><textarea class="sm bi-ta" data-label="현실 연결(한국어)" data-chk="chk-s5-real" placeholder="이 책을 읽으면서 생각난 건..."></textarea></div>
+<div class="bi-row"><span class="bi-badge bi-en">English</span><textarea class="sm bi-ta" data-label="현실 연결(English)" data-chk="chk-s5-real" placeholder="This connects to real life because... / This reminds me of..."></textarea></div>
         </div>
       </div>
       <div id="ex5"></div>
@@ -801,45 +801,6 @@ var EX3_F='<div class="ex-wrap"><div class="ex-btn" onclick="toggleEx(this)"><sp
 
 var EX3_N='<div class="ex-wrap"><div class="ex-btn" onclick="toggleEx(this)"><span class="ex-btn-icon">📖</span><span class="ex-btn-label">예시 보기 / See example</span><span class="ex-btn-book">Educated — Tara Westover</span><span class="ex-btn-arrow">▾</span></div><div class="ex-panel"><div class="ex-row"><div class="ex-q">Main topic</div><div class="ex-a">How one woman\'s pursuit of education became an act of survival and self-liberation from an isolated, abusive family environment.</div><div class="ex-a-ko">한 여성의 교육 추구가 고립되고 학대적인 가족 환경으로부터의 생존과 자기 해방의 행위가 된 과정.</div><div class="ex-note">비소설의 주제는 사실적이고 구체적으로 서술해요. 막연하게 "교육에 관한 책"보다 구체적인 맥락을 담았어요.</div></div><div class="ex-row"><div class="ex-q">Central argument</div><div class="ex-a">Westover argues that education is not just a collection of facts, but the process through which a person learns to think independently, question inherited beliefs, and ultimately define their own identity.</div><div class="ex-a-ko">웨스트오버는 교육이 단순히 사실의 집합이 아니라, 독립적으로 생각하고, 물려받은 믿음에 의문을 품고, 궁극적으로 자신만의 정체성을 정의하는 방법을 배우는 과정이라고 주장해요.</div><div class="ex-note">저자의 핵심 주장을 "저자는 ~라고 주장한다"는 형식으로 명확히 제시했어요.</div></div><div class="ex-row"><div class="ex-q">Key idea that stood out</div><div class="ex-a">The most striking idea is that the same person who was never allowed to attend school eventually gained the intellectual tools to recognize and name the trauma she had experienced, which shows how education can reshape a person\'s entire understanding of their own life.</div><div class="ex-a-ko">가장 인상적인 생각은 학교에 전혀 다니지 못했던 사람이 결국 자신이 경험한 트라우마를 인식하고 이름 붙일 지적 도구를 얻게 되었다는 것이에요. 이것은 교육이 어떻게 한 사람의 삶 전체에 대한 이해를 재형성할 수 있는지 보여줘요.</div><div class="ex-note">단순한 내용 요약이 아니라, 책을 읽으며 가장 인상 깊었던 아이디어가 왜 중요한지를 설명했어요.</div></div><div class="ex-row"><div class="ex-q">Author\'s background</div><div class="ex-a">Tara Westover is an American author born in 1986 in rural Idaho. She grew up in a strict survivalist family, was never formally schooled, and taught herself enough to pass the ACT exam and enter Brigham Young University, later earning a PhD from Cambridge University.</div><div class="ex-a-ko">타라 웨스트오버는 1986년 아이다호 시골에서 태어난 미국 작가예요. 엄격한 생존주의 가족 안에서 자라 정식 교육을 받은 적 없이 스스로 공부해 ACT 시험에 합격하고 브리검 영 대학교에 입학했으며, 이후 케임브리지 대학교에서 박사 학위를 취득했어요.</div><div class="ex-note">저자의 국적, 경력, 배경을 사실 중심으로 간결하게 소개했어요.</div></div><div class="ex-row"><div class="ex-q">Why is this author credible?</div><div class="ex-a">Westover is not writing from secondhand research — this memoir is based entirely on her own lived experience. Her academic achievements at Cambridge and her firsthand account of surviving and escaping a deeply isolating upbringing give her a unique and undeniable authority on the subject of self-education and resilience.</div><div class="ex-a-ko">웨스트오버는 간접 연구를 바탕으로 쓰는 것이 아니에요. 이 회고록은 전적으로 그녀 자신의 삶의 경험에 기반해 있어요. 케임브리지에서의 학문적 성취와 깊이 고립된 성장 환경에서 살아남고 탈출한 직접적인 경험은 자기 교육과 회복력이라는 주제에 대해 그녀에게 독보적인 권위를 부여해요.</div><div class="ex-note">비소설에서 저자 신뢰성은 매우 중요한 요소예요. 직접 경험, 학문적 자격, 또는 전문 연구 중 어떤 것이 신뢰성의 근거인지 구체적으로 밝혀요.</div></div><div class="ex-row"><div class="ex-q">How does the author\'s background connect to the book?</div><div class="ex-a">Because Westover personally lived through the events she describes, the book carries an emotional authenticity that no amount of outside research could replicate. Her journey from complete isolation to earning a PhD is itself the central argument of the book — that education has the power to transform a life.</div><div class="ex-a-ko">웨스트오버가 직접 묘사하는 사건들을 경험했기 때문에, 이 책은 어떤 외부 연구로도 재현할 수 없는 감정적 진정성을 담고 있어요. 완전한 고립에서 박사 학위 취득까지의 그녀의 여정 자체가 책의 핵심 주장이에요. 즉, 교육은 삶을 변화시킬 힘을 가지고 있다는 것이죠.</div><div class="ex-note">저자의 배경과 책의 메시지를 한 단락 안에서 자연스럽게 연결했어요.</div></div></div></div>';
 
-function buildF(){
-  var bi = '<div class="bilingual-wrap">'
-    +'<div class="bi-row"><span class="bi-badge bi-ko">한국어</span>{KO}</div>'
-    +'<div class="bi-row"><span class="bi-badge bi-en">English</span>{EN}</div>'
-    +'</div>';
-  function biInput(koPlaceholder, enPlaceholder, koLabel, enLabel) {
-    return bi
-      .replace('{KO}','<input type="text" class="bi-ta" data-label="'+(koLabel||koPlaceholder)+'" placeholder="'+koPlaceholder+'">')
-      .replace('{EN}','<input type="text" class="bi-ta" data-label="'+(enLabel||enPlaceholder)+'" placeholder="'+enPlaceholder+'">');
-  }
-  function biTA(koPlaceholder, enPlaceholder, cls, koLabel, enLabel) {
-    cls = cls||'sm';
-    return bi
-      .replace('{KO}','<textarea class="'+cls+' bi-ta" data-label="'+(koLabel||koPlaceholder)+'" placeholder="'+koPlaceholder+'"></textarea>')
-      .replace('{EN}','<textarea class="'+cls+' bi-ta" data-label="'+(enLabel||enPlaceholder)+'" placeholder="'+enPlaceholder+'"></textarea>');
-  }
-  return '<div class="sec-hdr">...</div>'
-  +'<div class="sec-body">'
-  +'<div class="g2">'
-  +'<div class="field"><div class="field-lbl"><span class="field-lbl-en">어디서, 언제 일어나는 이야기인가요? / Setting</span></div>'
-  + biInput('예: 미래 사회, 어느 작은 마을...','e.g., A futuristic community, the year 2050...','Setting(한국어)','Setting(English)')
-  +'</div>'
-  +'<div class="field"><div class="field-lbl"><span class="field-lbl-en">주인공은 누구인가요? / Main character(s)</span></div>'
-  + biInput('예: 조나스, 12살 소년...','e.g., Jonas, a 12-year-old boy...','주인공(한국어)','주인공(English)')
-  +'</div></div>'
-  +'<div class="field"><div class="field-lbl"><span class="field-lbl-en">이야기의 가장 큰 문제나 갈등은 뭔가요? / Conflict</span></div>'
-  + biInput('예: 주인공이 사회 규칙에 의문을 품기 시작해요...','e.g., The main character begins to question the rules...','갈등(한국어)','갈등(English)')
-  +'</div>'
-  +'<div class="field"><div class="field-lbl"><span class="field-lbl-en">이야기에서 가장 중요한 사건은 뭔가요? / Key event</span></div>'
-  +'<div class="field-hint">💡 "First... However... As a result..." 같은 연결어를 사용하면 더 자연스러워요!</div>'
-  + biTA('먼저... 하지만... 결과적으로...','First, ... However, ... As a result, ...','sm','핵심 사건(한국어)','핵심 사건(English)')
-  +'</div>'
-  +'<div class="field"><div class="field-lbl"><span class="field-lbl-en">결말은 어떻게 되나요? / Ending</span></div>'
-  +'<div class="field-hint">💡 스포일러가 걱정되면 느낌만 알려줘도 좋아요!</div>'
-  + biTA('결말은... / 이야기는 ...로 끝나요','In the end... / The ending feels...','sm','결말(한국어)','결말(English)')
-  +'</div>'
-  + EX3_F +'</div>';
-}
-
 function buildN(){
   var bi = '<div class="bilingual-wrap">'
     +'<div class="bi-row"><span class="bi-badge bi-ko">한국어</span>{KO}</div>'
@@ -848,15 +809,16 @@ function buildN(){
   function biTA(koP, enP, cls, koLabel, enLabel) {
     cls = cls||'sm';
     return bi
-      .replace('{KO}','<textarea class="'+cls+' bi-ta" data-label="'+(koLabel||koP)+'" placeholder="'+koP+'"></textarea>')
-      .replace('{EN}','<textarea class="'+cls+' bi-ta" data-label="'+(enLabel||enP)+'" placeholder="'+enP+'"></textarea>');
+      .replace('{KO}','<textarea class="'+cls+' bi-ta" data-label="'+koLabel+'" placeholder="'+koP+'"></textarea>')
+      .replace('{EN}','<textarea class="'+cls+' bi-ta" data-label="'+enLabel+'" placeholder="'+enP+'"></textarea>');
   }
   function biInput(koP, enP, koLabel, enLabel) {
     return bi
-      .replace('{KO}','<input type="text" class="bi-ta" data-label="'+(koLabel||koP)+'" placeholder="'+koP+'">')
-      .replace('{EN}','<input type="text" class="bi-ta" data-label="'+(enLabel||enP)+'" placeholder="'+enP+'">');
+      .replace('{KO}','<input type="text" class="bi-ta" data-label="'+koLabel+'" placeholder="'+koP+'">')
+      .replace('{EN}','<input type="text" class="bi-ta" data-label="'+enLabel+'" placeholder="'+enP+'">');
   }
   return '<div class="sec-hdr"><div class="sec-left"><div class="sec-num">3</div><div class="sec-titles"><h2>Book &amp; Author / 책과 저자 소개</h2><div class="ko">책의 핵심 내용과 저자 정리하기</div></div></div><span class="setech-tag">논리적 담화 구성</span></div>'
+  +'<div class="sec-body">'
   +'<div class="field"><div class="field-lbl"><span class="field-lbl-en">이 책은 주로 어떤 내용을 다루나요? / Main topic</span></div>'
   + biInput('예: 교육의 힘 / 기후 변화의 원인...','e.g., The power of education / Causes of climate change...','주요 내용(한국어)','주요 내용(English)')
   +'</div>'
