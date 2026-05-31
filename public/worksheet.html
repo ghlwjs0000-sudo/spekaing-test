@@ -1340,8 +1340,11 @@ async function loadByStudentNumber(studentNumber) {
         var wdata = sub.worksheet_data;
 
         setTimeout(function() {
-            var wdata = sub.worksheet_data;
-            if (!wdata) return;
+            console.log('Hook 아이디어(한국어):', wdata['Hook 아이디어(한국어)']);
+            console.log('Hook 문장(English):', wdata['Hook 문장(English)']);
+            document.querySelectorAll('[data-label]').forEach(function(el) {
+                console.log('data-label:', el.getAttribute('data-label'), '| value:', wdata[el.getAttribute('data-label')]);
+            });
 
             // data-label로 정확하게 매핑
             document.querySelectorAll('[data-label]').forEach(function(el) {
