@@ -1102,6 +1102,16 @@ async function saveWorksheetOnly() {
         return;
     }
     // 활동지 데이터 수집 — data-label 기반
+    // Hook 방식 저장
+    var hookLblEl = document.getElementById('hook-lbl');
+    if (hookLblEl) worksheetInputs['Hook 방식'] = hookLblEl.textContent.trim();
+
+    // 언어 분석 선택 저장
+    var selectedLangs = [];
+    document.querySelectorAll('.lang-opt.on').forEach(function(el) {
+        selectedLangs.push(el.querySelector('div').textContent.trim());
+    });
+    worksheetInputs['언어 분석 선택'] = selectedLangs.join(', ');
     var worksheetInputs = {};
     document.querySelectorAll('[data-label]').forEach(function(el) {
         var label = el.getAttribute('data-label');
@@ -1345,7 +1355,28 @@ async function loadByStudentNumber(studentNumber) {
             document.querySelectorAll('[data-label]').forEach(function(el) {
                 console.log('data-label:', el.getAttribute('data-label'), '| value:', wdata[el.getAttribute('data-label')]);
             });
+// Hook 방식 복원
+            if (wdata['Hook 방식'] && wdata['Hook 방식'] !== '아직 선택 안 함 / not selected') {
+                var hookLbl = document.getElementById('hook-lbl');
+                if (hookLbl) hookLbl.textContent = wdata['Hook 방식'];
+                document.querySelectorAll('.hook-pill').forEach(function(p) {
+                    p.classList.remove('active');
+                    if (wdata['Hook 방식'].indexOf(p.textContent.trim().split(' ')[0]) !== -1) {
+                        p.classList.add('active');
+                    }
+                });
+            }
 
+            // 언어 분석 선택 복원
+            if (wdata['언어 분석 선택']) {
+                var selected = wdata['언어 분석 선택'].split(', ');
+                document.querySelectorAll('.lang-opt').forEach(function(el) {
+                    var text = el.querySelector('div') ? el.querySelector('div').textContent.trim() : '';
+                    if (selected.indexOf(text) !== -1) {
+                        el.classList.add('on');
+                    }
+                });
+            }
             // data-label로 정확하게 매핑
             document.querySelectorAll('[data-label]').forEach(function(el) {
                 var label = el.getAttribute('data-label');
