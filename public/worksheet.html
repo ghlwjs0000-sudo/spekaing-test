@@ -1377,6 +1377,8 @@ async function loadByStudentNumber(studentNumber) {
         var wdata = sub.worksheet_data;
 
         setTimeout(function() {
+            console.log('wdata:', JSON.stringify(wdata).substring(0, 200));
+            console.log('data-label 필드 수:', document.querySelectorAll('[data-label]').length);
             // data-label 있는 필드 복원
             document.querySelectorAll('[data-label]').forEach(function(el) {
                 var label = el.getAttribute('data-label');
