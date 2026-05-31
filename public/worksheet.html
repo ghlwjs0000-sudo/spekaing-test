@@ -1101,29 +1101,14 @@ async function saveWorksheetOnly() {
         alert('학번을 먼저 입력해주세요!');
         return;
     }
-    // 활동지 데이터 수집
+    // 활동지 데이터 수집 — data-label 기반
     var worksheetInputs = {};
-    var fieldLabels = [
-        '학번', '이름', '책 제목', '저자', '날짜',
-        '발표 대상', '발표 목적', '청중 적합 이유(한국어)', '청중 적합 이유(English)',
-        'Hook 방식', 'Hook 아이디어(한국어)', 'Hook 문장(English)',
-        'Setting(한국어)', 'Setting(English)', '주인공(한국어)', '주인공(English)',
-        '갈등(한국어)', '갈등(English)', '핵심 사건(한국어)', '핵심 사건(English)',
-        '결말(한국어)', '결말(English)',
-        '인상 깊은 구절', '중요한 이유(한국어)', '중요한 이유(English)',
-        '언어 분석(한국어)', '언어 분석(English)',
-        '내 말로 바꾸기(한국어)', '내 말로 바꾸기(English)',
-        '바꾼 이유(한국어)', '바꾼 이유(English)',
-        '책 메시지(한국어)', '책 메시지(English)',
-        '동의 여부(한국어)', '동의 여부(English)',
-        '현실 연결(한국어)', '현실 연결(English)',
-        '스크립트'
-    ];
-   var allLabels = [
-        '학번','이름','책 제목','저자','날짜',
-        '발표 대상','발표 목적','청중 적합 이유(한국어)','청중 적합 이유(English)',
-        'Hook 방식','Hook 아이디어(한국어)','Hook 문장(English)'
-    ];
+    document.querySelectorAll('[data-label]').forEach(function(el) {
+        var label = el.getAttribute('data-label');
+        worksheetInputs[label] = el.value || '';
+    });
+    var hookLblEl = document.getElementById('hook-lbl');
+    if (hookLblEl) worksheetInputs['Hook 방식'] = hookLblEl.textContent.trim();
     var sec3LabelsF = ['Setting(한국어)','Setting(English)','주인공(한국어)','주인공(English)',
         '갈등(한국어)','갈등(English)','핵심 사건(한국어)','핵심 사건(English)',
         '결말(한국어)','결말(English)'];
@@ -1230,29 +1215,14 @@ async function submitToSpeakingTest() {
     var studentNumber = document.getElementById('meta-id') ? document.getElementById('meta-id').value.trim() : '';
     if (!studentNumber) { alert('학번을 입력해주세요!'); return; }
     try {
-        // 활동지 데이터 수집
-        var worksheetInputs = {};
-        var fieldLabels = [
-            '학번', '이름', '책 제목', '저자', '날짜',
-            '발표 대상', '발표 목적', '청중 적합 이유(한국어)', '청중 적합 이유(English)',
-            'Hook 방식', 'Hook 아이디어(한국어)', 'Hook 문장(English)',
-            'Setting(한국어)', 'Setting(English)', '주인공(한국어)', '주인공(English)',
-            '갈등(한국어)', '갈등(English)', '핵심 사건(한국어)', '핵심 사건(English)',
-            '결말(한국어)', '결말(English)',
-            '인상 깊은 구절', '중요한 이유(한국어)', '중요한 이유(English)',
-            '언어 분석(한국어)', '언어 분석(English)',
-            '내 말로 바꾸기(한국어)', '내 말로 바꾸기(English)',
-            '바꾼 이유(한국어)', '바꾼 이유(English)',
-            '책 메시지(한국어)', '책 메시지(English)',
-            '동의 여부(한국어)', '동의 여부(English)',
-            '현실 연결(한국어)', '현실 연결(English)',
-            '스크립트'
-        ];
-        var allLabels = [
-        '학번','이름','책 제목','저자','날짜',
-        '발표 대상','발표 목적','청중 적합 이유(한국어)','청중 적합 이유(English)',
-        'Hook 방식','Hook 아이디어(한국어)','Hook 문장(English)'
-    ];
+        // 활동지 데이터 수집 — data-label 기반
+    var worksheetInputs = {};
+    document.querySelectorAll('[data-label]').forEach(function(el) {
+        var label = el.getAttribute('data-label');
+        worksheetInputs[label] = el.value || '';
+    });
+    var hookLblEl = document.getElementById('hook-lbl');
+    if (hookLblEl) worksheetInputs['Hook 방식'] = hookLblEl.textContent.trim();
     var sec3LabelsF = ['Setting(한국어)','Setting(English)','주인공(한국어)','주인공(English)',
         '갈등(한국어)','갈등(English)','핵심 사건(한국어)','핵심 사건(English)',
         '결말(한국어)','결말(English)'];
