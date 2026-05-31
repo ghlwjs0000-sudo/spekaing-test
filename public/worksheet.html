@@ -1377,9 +1377,10 @@ async function loadByStudentNumber(studentNumber) {
         var wdata = sub.worksheet_data;
 
         setTimeout(function() {
-            console.log('wdata:', JSON.stringify(wdata).substring(0, 200));
-            console.log('data-label 필드 수:', document.querySelectorAll('[data-label]').length);
-            // data-label 있는 필드 복원
+            var wdata = sub.worksheet_data;
+            if (!wdata) return;
+
+            // 1. data-label 있는 필드 복원
             document.querySelectorAll('[data-label]').forEach(function(el) {
                 var label = el.getAttribute('data-label');
                 if (wdata[label] !== undefined && wdata[label] !== '') {
@@ -1388,7 +1389,7 @@ async function loadByStudentNumber(studentNumber) {
                 }
             });
 
-            // 섹션3 순서 기반 복원
+            // 2. 섹션3 복원
             var sec3Keys = bType === 'fiction'
                 ? ['Setting(한국어)','Setting(English)','주인공(한국어)','주인공(English)',
                    '갈등(한국어)','갈등(English)','핵심 사건(한국어)','핵심 사건(English)',
@@ -1407,7 +1408,7 @@ async function loadByStudentNumber(studentNumber) {
                 }
             });
 
-            // 섹션4 순서 기반 복원
+            // 3. 섹션4 복원
             var s4Labels = ['인상 깊은 구절',
                 '중요한 이유(한국어)','중요한 이유(English)',
                 '언어 분석(한국어)','언어 분석(English)',
@@ -1420,14 +1421,33 @@ async function loadByStudentNumber(studentNumber) {
                 }
             });
 
-            // Hook 방식 복원
+            // 4. 섹션5 복원
+            var s5Labels = ['책 메시지(한국어)','책 메시지(English)',
+                '동의 여부(한국어)','동의 여부(English)',
+                '현실 연결(한국어)','현실 연결(English)'];
+            Array.from(document.querySelectorAll('.s5 input[type=text], .s5 textarea')).forEach(function(el, i) {
+                var label = s5Labels[i];
+                if (label && wdata[label] !== undefined && wdata[label] !== '') {
+                    el.value = wdata[label];
+                }
+            });
+
+            // 5. Hook 방식 복원
             if (wdata['Hook 방식']) {
-                document.getElementById('hook-lbl').textContent = wdata['Hook 방식'];
+                var hookLbl = document.getElementById('hook-lbl');
+                if (hookLbl) hookLbl.textContent = wdata['Hook 방식'];
                 document.querySelectorAll('.hook-pill').forEach(function(p) {
                     if (p.textContent.indexOf(wdata['Hook 방식'].split('/')[0].trim()) !== -1) {
                         p.classList.add('active');
                     }
                 });
+            }
+
+            // 6. 스크립트 복원
+            var scriptArea = document.getElementById('script-area');
+            if (scriptArea && wdata['스크립트']) {
+                scriptArea.value = wdata['스크립트'];
+                updateSent(scriptArea);
             }
 
             updProg();
