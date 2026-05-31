@@ -1090,19 +1090,19 @@ function openWorksheetDetail(id) {
             if (!curr) return;
             diffHtml += `<div style="padding:5px 8px;background:var(--surface2);border-radius:4px;border:1px solid var(--border);margin-bottom:3px;">
               <div style="font-size:9px;color:var(--text3);font-weight:600;">${k}</div>
-              <div style="font-size:11px;color:var(--text);white-space:pre-wrap;">${curr.substring(0,80)}${curr.length>80?'...':''}</div>
+              <div style="font-size:11px;color:var(--text);white-space:pre-wrap;">${curr}</div>
             </div>`;
           } else if (!curr && prev) {
             // 삭제됨
             diffHtml += `<div style="padding:5px 8px;background:var(--red-bg);border-radius:4px;border:1px solid var(--red-border);margin-bottom:3px;">
               <div style="font-size:9px;color:var(--red);font-weight:600;">${k} (삭제됨)</div>
-              <div style="font-size:11px;color:var(--red);text-decoration:line-through;white-space:pre-wrap;">${prev.substring(0,80)}${prev.length>80?'...':''}</div>
+              <div style="font-size:11px;color:var(--red);text-decoration:line-through;white-space:pre-wrap;">${prev}</div>
             </div>`;
           } else if (curr && !prev) {
             // 새로 추가
             diffHtml += `<div style="padding:5px 8px;background:var(--green-bg);border-radius:4px;border:1px solid var(--green-border);margin-bottom:3px;">
               <div style="font-size:9px;color:var(--green);font-weight:600;">${k} ✨ 새로 작성</div>
-              <div style="font-size:11px;color:var(--green);white-space:pre-wrap;">${curr.substring(0,80)}${curr.length>80?'...':''}</div>
+              <div style="font-size:11px;color:var(--green);white-space:pre-wrap;">${curr}</div>
             </div>`;
           } else if (curr !== prev) {
             // 수정됨
@@ -1111,11 +1111,11 @@ function openWorksheetDetail(id) {
               <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;">
                 <div style="padding:4px 6px;background:var(--red-bg);border:1px solid var(--red-border);border-radius:3px;">
                   <div style="font-size:8px;color:var(--red);font-weight:700;">이전</div>
-                  <div style="font-size:10px;color:var(--red);white-space:pre-wrap;">${prev.substring(0,60)}${prev.length>60?'...':''}</div>
+                  <div style="font-size:10px;color:var(--red);white-space:pre-wrap;">${prev}</div>
                 </div>
                 <div style="padding:4px 6px;background:var(--green-bg);border:1px solid var(--green-border);border-radius:3px;">
                   <div style="font-size:8px;color:var(--green);font-weight:700;">현재</div>
-                  <div style="font-size:10px;color:var(--green);white-space:pre-wrap;">${curr.substring(0,60)}${curr.length>60?'...':''}</div>
+                  <div style="font-size:10px;color:var(--green);white-space:pre-wrap;">${curr}</div>
                 </div>
               </div>
             </div>`;
@@ -1124,7 +1124,7 @@ function openWorksheetDetail(id) {
             if (i === 0) {
               diffHtml += `<div style="padding:5px 8px;background:var(--surface2);border-radius:4px;border:1px solid var(--border);margin-bottom:3px;">
                 <div style="font-size:9px;color:var(--text3);font-weight:600;">${k}</div>
-                <div style="font-size:11px;color:var(--text);white-space:pre-wrap;">${curr.substring(0,80)}${curr.length>80?'...':''}</div>
+                <div style="font-size:11px;color:var(--text);white-space:pre-wrap;">${curr}</div>
               </div>`;
             }
           }
