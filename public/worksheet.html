@@ -806,10 +806,16 @@ function buildF(){
     +'<div class="bi-row"><span class="bi-badge bi-ko">한국어</span>{KO}</div>'
     +'<div class="bi-row"><span class="bi-badge bi-en">English</span>{EN}</div>'
     +'</div>';
-  function biInput(koPlaceholder, enPlaceholder) {
+  function biInput(koPlaceholder, enPlaceholder, koLabel, enLabel) {
     return bi
-      .replace('{KO}','<input type="text" class="bi-ta" placeholder="'+koPlaceholder+'">')
-      .replace('{EN}','<input type="text" class="bi-ta" placeholder="'+enPlaceholder+'">');
+      .replace('{KO}','<input type="text" class="bi-ta" data-label="'+(koLabel||koPlaceholder)+'" placeholder="'+koPlaceholder+'">')
+      .replace('{EN}','<input type="text" class="bi-ta" data-label="'+(enLabel||enPlaceholder)+'" placeholder="'+enPlaceholder+'">');
+  }
+  function biTA(koPlaceholder, enPlaceholder, cls, koLabel, enLabel) {
+    cls = cls||'sm';
+    return bi
+      .replace('{KO}','<textarea class="'+cls+' bi-ta" data-label="'+(koLabel||koPlaceholder)+'" placeholder="'+koPlaceholder+'"></textarea>')
+      .replace('{EN}','<textarea class="'+cls+' bi-ta" data-label="'+(enLabel||enPlaceholder)+'" placeholder="'+enPlaceholder+'"></textarea>');
   }
   function biTA(koPlaceholder, enPlaceholder, cls) {
     cls = cls||'sm';
@@ -817,25 +823,25 @@ function buildF(){
       .replace('{KO}','<textarea class="'+cls+' bi-ta" placeholder="'+koPlaceholder+'"></textarea>')
       .replace('{EN}','<textarea class="'+cls+' bi-ta" placeholder="'+enPlaceholder+'"></textarea>');
   }
-  return '<div class="sec-hdr"><div class="sec-left"><div class="sec-num">3</div><div class="sec-titles"><h2>Story Map / 이야기 지도</h2><div class="ko">책의 핵심 내용 정리하기</div></div></div><span class="setech-tag">논리적 담화 구성</span></div>'
+  return '<div class="sec-hdr">...</div>'
   +'<div class="sec-body">'
   +'<div class="g2">'
   +'<div class="field"><div class="field-lbl"><span class="field-lbl-en">어디서, 언제 일어나는 이야기인가요? / Setting</span></div>'
-  + biInput('예: 미래 사회, 어느 작은 마을...','e.g., A futuristic community, the year 2050...')
+  + biInput('예: 미래 사회, 어느 작은 마을...','e.g., A futuristic community, the year 2050...','Setting(한국어)','Setting(English)')
   +'</div>'
   +'<div class="field"><div class="field-lbl"><span class="field-lbl-en">주인공은 누구인가요? / Main character(s)</span></div>'
-  + biInput('예: 조나스, 12살 소년...','e.g., Jonas, a 12-year-old boy...')
+  + biInput('예: 조나스, 12살 소년...','e.g., Jonas, a 12-year-old boy...','주인공(한국어)','주인공(English)')
   +'</div></div>'
   +'<div class="field"><div class="field-lbl"><span class="field-lbl-en">이야기의 가장 큰 문제나 갈등은 뭔가요? / Conflict</span></div>'
-  + biInput('예: 주인공이 사회 규칙에 의문을 품기 시작해요...','e.g., The main character begins to question the rules...')
+  + biInput('예: 주인공이 사회 규칙에 의문을 품기 시작해요...','e.g., The main character begins to question the rules...','갈등(한국어)','갈등(English)')
   +'</div>'
-  +'<div class="field"><div class="field-lbl"><span class="field-lbl-en">이야기에서 가장 중요한 사건은 뭔가요? (1~2문장) / Key event</span></div>'
+  +'<div class="field"><div class="field-lbl"><span class="field-lbl-en">이야기에서 가장 중요한 사건은 뭔가요? / Key event</span></div>'
   +'<div class="field-hint">💡 "First... However... As a result..." 같은 연결어를 사용하면 더 자연스러워요!</div>'
-  + biTA('먼저... 하지만... 결과적으로...','First, ... However, ... As a result, ...')
+  + biTA('먼저... 하지만... 결과적으로...','First, ... However, ... As a result, ...','sm','핵심 사건(한국어)','핵심 사건(English)')
   +'</div>'
   +'<div class="field"><div class="field-lbl"><span class="field-lbl-en">결말은 어떻게 되나요? / Ending</span></div>'
   +'<div class="field-hint">💡 스포일러가 걱정되면 느낌만 알려줘도 좋아요!</div>'
-  + biTA('결말은... / 이야기는 ...로 끝나요','In the end... / The ending feels...')
+  + biTA('결말은... / 이야기는 ...로 끝나요','In the end... / The ending feels...','sm','결말(한국어)','결말(English)')
   +'</div>'
   + EX3_F +'</div>';
 }
@@ -845,44 +851,43 @@ function buildN(){
     +'<div class="bi-row"><span class="bi-badge bi-ko">한국어</span>{KO}</div>'
     +'<div class="bi-row"><span class="bi-badge bi-en">English</span>{EN}</div>'
     +'</div>';
-  function biTA(koP, enP, cls) {
+  function biTA(koP, enP, cls, koLabel, enLabel) {
     cls = cls||'sm';
     return bi
-      .replace('{KO}','<textarea class="'+cls+' bi-ta" placeholder="'+koP+'"></textarea>')
-      .replace('{EN}','<textarea class="'+cls+' bi-ta" placeholder="'+enP+'"></textarea>');
+      .replace('{KO}','<textarea class="'+cls+' bi-ta" data-label="'+(koLabel||koP)+'" placeholder="'+koP+'"></textarea>')
+      .replace('{EN}','<textarea class="'+cls+' bi-ta" data-label="'+(enLabel||enP)+'" placeholder="'+enP+'"></textarea>');
   }
-  function biInput(koP, enP) {
+  function biInput(koP, enP, koLabel, enLabel) {
     return bi
-      .replace('{KO}','<input type="text" class="bi-ta" placeholder="'+koP+'">')
-      .replace('{EN}','<input type="text" class="bi-ta" placeholder="'+enP+'">');
+      .replace('{KO}','<input type="text" class="bi-ta" data-label="'+(koLabel||koP)+'" placeholder="'+koP+'">')
+      .replace('{EN}','<input type="text" class="bi-ta" data-label="'+(enLabel||enP)+'" placeholder="'+enP+'">');
   }
   return '<div class="sec-hdr"><div class="sec-left"><div class="sec-num">3</div><div class="sec-titles"><h2>Book &amp; Author / 책과 저자 소개</h2><div class="ko">책의 핵심 내용과 저자 정리하기</div></div></div><span class="setech-tag">논리적 담화 구성</span></div>'
-  +'<div class="sec-body">'
   +'<div class="field"><div class="field-lbl"><span class="field-lbl-en">이 책은 주로 어떤 내용을 다루나요? / Main topic</span></div>'
-  + biInput('예: 교육의 힘 / 기후 변화의 원인...','e.g., The power of education / Causes of climate change...')
+  + biInput('예: 교육의 힘 / 기후 변화의 원인...','e.g., The power of education / Causes of climate change...','주요 내용(한국어)','주요 내용(English)')
   +'</div>'
   +'<div class="field"><div class="field-lbl"><span class="field-lbl-en">저자가 이 책을 통해 가장 하고 싶은 말은 무엇인가요? / Central argument</span></div>'
   +'<div class="field-hint">💡 "The author argues that..." 로 시작해봐요!</div>'
-  + biTA('저자가 말하고 싶은 건...','The author argues that...')
+  + biTA('저자가 말하고 싶은 건...','The author argues that...','sm','핵심 주장(한국어)','핵심 주장(English)')
   +'</div>'
   +'<div class="field"><div class="field-lbl"><span class="field-lbl-en">책에서 가장 흥미로웠던 아이디어나 챕터는 무엇인가요? / Key idea</span></div>'
   +'<div class="field-hint">💡 읽으면서 "오, 이거 진짜 신기하다!" 했던 내용을 써봐요!</div>'
-  + biTA('가장 흥미로웠던 내용은...','One idea that really stood out to me was...')
+  + biTA('가장 흥미로웠던 내용은...','One idea that really stood out to me was...','sm','핵심 아이디어(한국어)','핵심 아이디어(English)')
   +'</div>'
   +'<hr style="border:none;border-top:1px solid var(--border);margin:14px 0;">'
   +'<div style="font-size:12px;font-weight:600;color:var(--ink2);margin-bottom:6px;">👤 저자는 어떤 사람인가요? / About the Author</div>'
   +'<div style="font-size:11px;color:var(--ink3);margin-bottom:10px;">비소설에서 저자의 배경이 중요한 이유: 누가 쓴 책인지 알면 그 책을 얼마나 믿을 수 있는지 판단할 수 있어요!</div>'
   +'<div class="g2">'
   +'<div class="field"><div class="field-lbl"><span class="field-lbl-en">저자의 국적, 직업, 전문 분야는? / Author\'s background</span></div>'
-  + biTA('예: 미국 작가로 태어나서...','e.g., She is an American writer who grew up in...')
+  + biTA('예: 미국 작가로 태어나서...','e.g., She is an American writer who grew up in...','sm','저자 배경(한국어)','저자 배경(English)')
   +'</div>'
   +'<div class="field"><div class="field-lbl"><span class="field-lbl-en">왜 이 저자의 말을 믿을 수 있나요? / Why trust this author?</span></div>'
   +'<div class="field-hint">💡 직접 경험, 연구, 학위, 경력 등을 써봐요</div>'
-  + biTA('신뢰할 수 있는 이유는...','We can trust this author because...')
+  + biTA('신뢰할 수 있는 이유는...','We can trust this author because...','sm','저자 신뢰성(한국어)','저자 신뢰성(English)')
   +'</div></div>'
   +'<div class="field"><div class="field-lbl"><span class="field-lbl-en">저자의 배경이 이 책의 내용과 어떻게 연결되나요? / Connection to the book</span></div>'
   +'<div class="field-hint">💡 저자가 이 주제에 대해 잘 아는 이유를 써봐요!</div>'
-  + biTA('저자의 배경과 책이 연결되는 이유는...','The author\'s experience connects to the book because...')
+  + biTA('저자의 배경과 책이 연결되는 이유는...','The author\'s experience connects to the book because...','sm','저자-책 연결(한국어)','저자-책 연결(English)')
   +'</div>'
   + EX3_N +'</div>';
 }
@@ -1076,26 +1081,16 @@ async function loadByStudentNumber(studentNumber) {
             '스크립트'
         ];
        setTimeout(function() {
-            var allInputs = document.querySelectorAll('input[type=text], textarea');
             var wdata = sub.worksheet_data;
-            allInputs.forEach(function(el, i) {
-                var label = fieldLabels[i] || ('항목' + (i+1));
+            // data-label 기반으로 복원
+            document.querySelectorAll('input[type=text][data-label], textarea[data-label]').forEach(function(el) {
+                var label = el.getAttribute('data-label');
                 var value = wdata[label];
                 if (value !== undefined && value !== '') {
                     el.value = value;
                     if (el.id === 'script-area') updateSent(el);
                 }
             });
-            // id 기반으로도 추가 매핑
-            var metaId = document.getElementById('meta-id');
-            if (metaId && wdata['학번']) metaId.value = wdata['학번'];
-            var metaDate = document.getElementById('meta-date');
-            if (metaDate && wdata['날짜']) metaDate.value = wdata['날짜'];
-            var scriptArea = document.getElementById('script-area');
-            if (scriptArea && wdata['스크립트']) {
-                scriptArea.value = wdata['스크립트'];
-                updateSent(scriptArea);
-            }
             updProg();
             if (sub.worksheet_submitted_at) {
                 var t = new Date(sub.worksheet_submitted_at).toLocaleString('ko-KR');
@@ -1241,9 +1236,9 @@ async function saveWorksheetOnly() {
         '현실 연결(한국어)', '현실 연결(English)',
         '스크립트'
     ];
-    document.querySelectorAll('input[type=text], textarea').forEach(function(el, i) {
-        var label = fieldLabels[i] || ('항목' + (i+1));
-        worksheetInputs[label] = el.value || ''; // 빈값도 저장
+   document.querySelectorAll('input[type=text][data-label], textarea[data-label]').forEach(function(el) {
+        var label = el.getAttribute('data-label');
+        worksheetInputs[label] = el.value || '';
     });
     try {
         // DB에 저장 (스크립트 없어도 저장 가능)
