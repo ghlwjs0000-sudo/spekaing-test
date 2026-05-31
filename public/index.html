@@ -706,7 +706,7 @@ async function saveSubmissionLight() {
             attemptCount: state.attemptCount,
             isPassed: false,
             isFinalSubmitted: false,
-            teacherApprovedSentences: state.teacherApprovedSentences || [],
+            teacherApprovedSentences: [],
             pronunciationFeedback: r.pronunciationFeedback || '',
             contentFeedback: r.contentFeedback || '',
             fluencyFeedback: r.fluencyFeedback || '',
@@ -875,6 +875,7 @@ async function submitRecording() {
     if (!state.audioBlob) { alert('먼저 녹음해주세요.'); return; }
     if (state.recordSeconds < 60) { alert('최소 1분 이상 말해야 해요. (현재: ' + state.recordSeconds + '초)'); return; }
     state.attemptCount++;
+    state.teacherApprovedSentences = []; // 재도전 시 교사 승인 초기화
     updateAttemptUI();
     showLoading('AI 분석 중...', '음성을 텍스트로 변환 중');
     try {

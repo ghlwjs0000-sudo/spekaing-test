@@ -223,7 +223,38 @@ module.exports = async (req, res) => {
       }, `?id=eq.${id}`);
       return res.status(200).json({ success: true, approvedList: approved_list, allPassed, newTotal, newGrade });
     }
+if (action === 'approveSentence') {
+      const { id, sentenceIndex, approved, approveAll, approvedList: newList } = req.body;
+      const current = await sb('GET', 'submissions', null, `?id=eq.${id}&select=teacher_approved_sentences,sentences,sentence_results`);
+      const curr = Array.isArray(current) && current[0] ? current[0] : {};
+      let approved_list = curr.teacher_approved_sentences || [];
 
+      if (approveAll) {
+        // 전체 승인/취소
+        approved_list = newList || [];
+      } else {
+        // 개별 승인/취소
+        if (approved) {
+          if (!approved_list.includes(sentenceIndex)) approved_list.push(sentenceIndex);
+        } else {
+          approved_list = approved_list.filter(i => i !== sentenceIndex);
+        }
+      }
+
+      const sents = curr.sentences || [];
+      const srs = curr.sentence_results || [];
+      const allPassed = sents.length > 0 && sents.every((_, i) => {
+        const sr = srs[i] || {};
+        return sr.status === 'ok' || approved_list.includes(i);
+      });
+
+      await sb('PATCH', 'submissions', {
+        teacher_approved_sentences: approved_list,
+        is_passed: allPassed,
+        updated_at: new Date().toISOString()
+      }, `?id=eq.${id}`);
+      return res.status(200).json({ success: true, approvedList: approved_list, allPassed });
+    }
     return res.status(400).json({ error: '알 수 없는 action' });
   } catch (err) {
     if (action === 'worksheetHistory') {
