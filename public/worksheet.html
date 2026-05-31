@@ -1082,16 +1082,51 @@ async function loadByStudentNumber(studentNumber) {
         ];
        setTimeout(function() {
             var wdata = sub.worksheet_data;
-            // data-label 기반으로 복원
-            document.querySelectorAll('input[type=text][data-label], textarea[data-label]').forEach(function(el) {
+            if (!wdata) return;
+
+            // data-label 기반 복원
+            document.querySelectorAll('[data-label]').forEach(function(el) {
                 var label = el.getAttribute('data-label');
-                var value = wdata[label];
-                if (value !== undefined && value !== '') {
-                    el.value = value;
+                if (wdata[label] !== undefined && wdata[label] !== '') {
+                    el.value = wdata[label];
                     if (el.id === 'script-area') updateSent(el);
                 }
             });
+
+            // data-label 없는 필드는 키 이름으로 직접 매핑
+            var keyMap = {
+                'Setting(한국어)': null, 'Setting(English)': null,
+                '주인공(한국어)': null, '주인공(English)': null,
+                '갈등(한국어)': null, '갈등(English)': null,
+                '핵심 사건(한국어)': null, '핵심 사건(English)': null,
+                '결말(한국어)': null, '결말(English)': null,
+                '주요 내용(한국어)': null, '주요 내용(English)': null,
+                '핵심 주장(한국어)': null, '핵심 주장(English)': null,
+                '핵심 아이디어(한국어)': null, '핵심 아이디어(English)': null,
+                '저자 배경(한국어)': null, '저자 배경(English)': null,
+                '저자 신뢰성(한국어)': null, '저자 신뢰성(English)': null,
+                '저자-책 연결(한국어)': null, '저자-책 연결(English)': null,
+            };
+
+            // 섹션3 input/textarea를 순서대로 keyMap 키에 매핑
+            var sec3Keys = bType === 'fiction'
+                ? ['Setting(한국어)','Setting(English)','주인공(한국어)','주인공(English)','갈등(한국어)','갈등(English)','핵심 사건(한국어)','핵심 사건(English)','결말(한국어)','결말(English)']
+                : ['주요 내용(한국어)','주요 내용(English)','핵심 주장(한국어)','핵심 주장(English)','핵심 아이디어(한국어)','핵심 아이디어(English)','저자 배경(한국어)','저자 배경(English)','저자 신뢰성(한국어)','저자 신뢰성(English)','저자-책 연결(한국어)','저자-책 연결(English)'];
+
+            var sec3Inputs = document.querySelectorAll('#sec3 input[type=text]:not([data-label]), #sec3 textarea:not([data-label])');
+            sec3Inputs.forEach(function(el, i) {
+                var label = sec3Keys[i];
+                if (label && wdata[label] !== undefined && wdata[label] !== '') {
+                    el.value = wdata[label];
+                }
+            });
+
             updProg();
+            if (sub.worksheet_submitted_at) {
+                var t = new Date(sub.worksheet_submitted_at).toLocaleString('ko-KR');
+                alert('✅ 이전에 작성한 활동지를 불러왔어요! (저장 시각: ' + t + ')');
+            }
+        }, 500);
             if (sub.worksheet_submitted_at) {
                 var t = new Date(sub.worksheet_submitted_at).toLocaleString('ko-KR');
                 alert('✅ 이전에 작성한 활동지를 불러왔어요! (제출 시각: ' + t + ')');
