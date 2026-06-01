@@ -796,7 +796,13 @@ async function toggleRecording() { state.isRecording ? stopRecording() : await s
 
 async function startRecording() {
     try {
-        var stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        var stream = await navigator.mediaDevices.getUserMedia({
+    audio: {
+        echoCancellation: true,
+        noiseSuppression: true,
+        autoGainControl: true
+    }
+});
         state.mediaRecorder = new MediaRecorder(stream, { mimeType: getMime() });
         state.audioChunks = [];
         state.mediaRecorder.ondataavailable = function(e) { if (e.data.size > 0) state.audioChunks.push(e.data); };
@@ -1044,7 +1050,13 @@ function closeModal() {
 async function toggleModalRecording() { state.modalIsRecording ? stopModalRecording() : await startModalRecording(); }
 async function startModalRecording() {
     try {
-        var stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        var stream = await navigator.mediaDevices.getUserMedia({
+    audio: {
+        echoCancellation: true,
+        noiseSuppression: true,
+        autoGainControl: true
+    }
+});
         state.modalMediaRecorder = new MediaRecorder(stream, { mimeType: getMime() });
         state.modalAudioChunks = [];
         state.modalMediaRecorder.ondataavailable = function(e) { if (e.data.size > 0) state.modalAudioChunks.push(e.data); };
@@ -1344,7 +1356,13 @@ async function toggleFinalRecording() {
 
 async function startFinalRecording() {
     try {
-        var stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        var stream = await navigator.mediaDevices.getUserMedia({
+    audio: {
+        echoCancellation: true,
+        noiseSuppression: true,
+        autoGainControl: true
+    }
+});
         state.finalMediaRecorder = new MediaRecorder(stream, { mimeType: getMime() });
         state.finalAudioChunks = [];
         state.finalMediaRecorder.ondataavailable = function(e) {
