@@ -390,6 +390,7 @@ h2{font-size:20px;font-weight:700;color:var(--text);margin-bottom:4px;}
     </div>
     <div id="finalScoreSaved" style="display:none;font-size:12px;color:var(--green);margin-top:8px;">✅ 저장되었습니다.</div>
   </div>
+  <div id="finalRescoreArea"></div>
   <div class="card">
     <div class="card-title">문장별 결과 및 승인</div>
     <div id="finalModalSentences"></div>
@@ -1620,6 +1621,11 @@ function openFinalDetail(id) {
   } else {
     rescoreBtn.onclick = function() { rescoreFinal(s.id); };
   }
+  document.getElementById('finalRescoreArea').innerHTML =
+    '<div style="margin-bottom:14px;padding:10px;background:var(--blue-light);border-radius:8px;display:flex;align-items:center;gap:10px;">' +
+    '<button class="btn btn-primary btn-sm" onclick="rescoreFinal(\'' + s.id + '\')">🔄 AI 재채점</button>' +
+    '<span style="font-size:12px;color:var(--text2);">개선된 Whisper 설정으로 다시 채점합니다.</span>' +
+    '</div>';
   document.getElementById('finalScoreInput').value = currentTotal;
   document.getElementById('finalScoreNote').value = s.final_score_note || '';
   document.getElementById('finalScoreSaved').style.display = 'none';
