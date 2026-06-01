@@ -1314,17 +1314,6 @@ async function loadByStudentNumber(studentNumber) {
             document.querySelectorAll('[data-label]').forEach(function(el) {
                 console.log('data-label:', el.getAttribute('data-label'), '| value:', wdata[el.getAttribute('data-label')]);
             });
-// Hook 방식 복원
-            if (wdata['Hook 방식'] && wdata['Hook 방식'] !== '아직 선택 안 함 / not selected') {
-                var hookLbl = document.getElementById('hook-lbl');
-                if (hookLbl) hookLbl.textContent = wdata['Hook 방식'];
-                document.querySelectorAll('.hook-pill').forEach(function(p) {
-                    p.classList.remove('active');
-                    if (wdata['Hook 방식'].indexOf(p.textContent.trim().split(' ')[0]) !== -1) {
-                        p.classList.add('active');
-                    }
-                });
-            }
 
             // 언어 분석 선택 복원
             if (wdata['언어 분석 선택']) {
@@ -1367,7 +1356,7 @@ async function loadByStudentNumber(studentNumber) {
                 var t = new Date(sub.worksheet_submitted_at).toLocaleString('ko-KR');
                 alert('✅ 이전에 작성한 활동지를 불러왔어요! (저장 시각: ' + t + ')');
             }
-        }, 600);
+        }, 1000);
 
     } catch(e) {
         console.error('불러오기 오류:', e);
