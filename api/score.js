@@ -58,6 +58,8 @@ async function scoreHandler(req, res) {
 
     formData.append('model', 'whisper-1');
     formData.append('language', 'en');
+    formData.append('temperature', '0');
+    formData.append('prompt', 'This is a Korean high school student speaking English clearly.');
 
     const whisperRes = await fetch('https://api.openai.com/v1/audio/transcriptions', {
       method: 'POST',
