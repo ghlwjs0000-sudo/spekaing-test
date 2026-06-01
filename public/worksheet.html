@@ -1336,6 +1336,10 @@ async function loadByStudentNumber(studentNumber) {
                     }
                 });
             }
+            // script 컬럼 값을 스크립트 칸에 우선 적용
+            if (sub.script && sub.script !== '(임시저장)') {
+                wdata['스크립트'] = sub.script;
+            }
             // data-label로 정확하게 매핑
             document.querySelectorAll('[data-label]').forEach(function(el) {
                 var label = el.getAttribute('data-label');
