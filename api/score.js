@@ -167,18 +167,33 @@ Respond ONLY in JSON (no markdown):
 }
 total = pronunciation+content+fluency+completeness exactly.`;
 
-    const gptRes = await fetch('https://api.openai.com/v1/chat/completions', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${process.env.OPENAI_API_KEY}` },
-      body: JSON.stringify({
-        model: 'gpt-4o', max_tokens: 2000,
-        response_format: { type: 'json_object' },
-        messages: [{ role: 'user', content: prompt }]
-      })
-    });
+    let gptRes;
+    let gptRetries = 0;
+    while (gptRetries < 5) {
+      gptRes = await fetch('https://api.openai.com/v1/chat/completions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${process.env.OPENAI_API_KEY}` },
+        body: JSON.stringify({
+          model: 'gpt-4o', max_tokens: 2000,
+          response_format: { type: 'json_object' },
+          messages: [{ role: 'user', content: prompt }]
+        })
+      });
+      if (gptRes.ok) break;
+      const e = await gptRes.json().catch(() => ({}));
+      if (gptRes.status === 429) {
+        // Rate limit: 잠깐 기다렸다가 재시도
+        const retryAfter = gptRes.headers.get('retry-after');
+        const waitMs = retryAfter ? parseInt(retryAfter) * 1000 : (gptRetries + 1) * 5000;
+        await new Promise(r => setTimeout(r, waitMs));
+        gptRetries++;
+        continue;
+      }
+      return res.status(500).json({ error: e.error?.message || `GPT 오류` });
+    }
     if (!gptRes.ok) {
       const e = await gptRes.json().catch(() => ({}));
-      return res.status(500).json({ error: e.error?.message || `GPT 오류` });
+      return res.status(500).json({ error: `Rate limit 초과로 채점에 실패했습니다. 잠시 후 다시 시도해주세요. (${e.error?.message || ''})` });
     }
     const gptData = await gptRes.json();
     let rawContent = gptData.choices[0].message.content;
