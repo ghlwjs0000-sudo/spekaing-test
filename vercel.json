@@ -3,6 +3,7 @@
     { "source": "/api/(.*)", "destination": "/api/$1" },
     { "source": "/teacher.html", "destination": "/public/teacher.html" },
     { "source": "/worksheet.html", "destination": "/public/worksheet.html" },
+    { "source": "/review.html", "destination": "/public/review.html" },
     { "source": "/(.*)", "destination": "/public/index.html" }
   ],
   "functions": {
