@@ -1,0 +1,761 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>말하기 수행평가 열람 · Book Speech Review</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,300&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --ink: #18181a;
+  --ink2: #46464f;
+  --ink3: #8a8a96;
+  --ink4: #b8b8c4;
+  --bg: #fafaf8;
+  --bg2: #f2f1ed;
+  --bg3: #e8e7e1;
+  --white: #ffffff;
+  --border: rgba(0,0,0,0.09);
+  --border2: rgba(0,0,0,0.16);
+  --green: #2d7a3a;
+  --green-lt: #e8f5eb;
+  --green-md: #6ab87a;
+  --amber: #8a5a0a;
+  --amber-lt: #fdf0d8;
+  --coral: #a23423;
+  --coral-lt: #fceae6;
+  --blue: #1a5fa8;
+  --blue-lt: #e4eef9;
+  --r: 10px;
+  --r-lg: 14px;
+  --r-xl: 20px;
+  --serif: 'DM Serif Display', Georgia, serif;
+  --sans: 'DM Sans', -apple-system, 'Noto Sans KR', sans-serif;
+}
+
+html, body {
+  height: 100%;
+  font-family: var(--sans);
+  background: var(--bg2);
+  color: var(--ink);
+}
+
+#app { display: flex; height: 100vh; overflow: hidden; }
+
+/* ───── Sidebar ───── */
+.sidebar {
+  width: 280px;
+  flex-shrink: 0;
+  background: var(--ink);
+  color: var(--white);
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+}
+.sb-head {
+  padding: 28px 22px 20px;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+.sb-badge {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.5);
+  margin-bottom: 8px;
+}
+.sb-title {
+  font-family: var(--serif);
+  font-size: 24px;
+  font-weight: 400;
+  line-height: 1.2;
+}
+.sb-title em { font-style: italic; color: rgba(255,255,255,0.55); }
+
+.sb-search-wrap { padding: 16px 18px; border-bottom: 1px solid rgba(255,255,255,0.1); }
+.sb-search {
+  width: 100%;
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.14);
+  border-radius: var(--r);
+  padding: 9px 12px;
+  color: var(--white);
+  font-family: var(--sans);
+  font-size: 13px;
+  outline: none;
+  transition: background .15s, border-color .15s;
+}
+.sb-search::placeholder { color: rgba(255,255,255,0.4); }
+.sb-search:focus { background: rgba(255,255,255,0.13); border-color: rgba(255,255,255,0.3); }
+
+.sb-classes { padding: 10px 0; flex: 1; }
+.sb-class-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 11px 22px;
+  background: none;
+  border: none;
+  color: rgba(255,255,255,0.72);
+  font-family: var(--sans);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  text-align: left;
+  transition: background .12s, color .12s;
+  border-left: 3px solid transparent;
+}
+.sb-class-btn:hover { background: rgba(255,255,255,0.06); color: var(--white); }
+.sb-class-btn.active {
+  background: rgba(255,255,255,0.1);
+  color: var(--white);
+  border-left-color: var(--green-md);
+  font-weight: 600;
+}
+.sb-class-count {
+  font-size: 11px;
+  color: rgba(255,255,255,0.4);
+  font-weight: 400;
+  font-variant-numeric: tabular-nums;
+}
+.sb-class-btn.active .sb-class-count { color: rgba(255,255,255,0.6); }
+
+.sb-foot {
+  padding: 14px 22px 20px;
+  font-size: 11px;
+  color: rgba(255,255,255,0.32);
+  line-height: 1.6;
+  border-top: 1px solid rgba(255,255,255,0.1);
+}
+
+/* ───── Roster panel ───── */
+.roster {
+  width: 320px;
+  flex-shrink: 0;
+  background: var(--white);
+  border-right: 0.5px solid var(--border2);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.roster-head {
+  padding: 20px 20px 14px;
+  border-bottom: 0.5px solid var(--border);
+}
+.roster-head h2 {
+  font-family: var(--serif);
+  font-size: 20px;
+  font-weight: 400;
+  color: var(--ink);
+  margin-bottom: 3px;
+}
+.roster-sub { font-size: 12px; color: var(--ink3); }
+.roster-stats {
+  display: flex;
+  gap: 6px;
+  margin-top: 12px;
+  flex-wrap: wrap;
+}
+.stat-pill {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 20px;
+  background: var(--bg2);
+  color: var(--ink3);
+}
+.stat-pill.pass { background: var(--green-lt); color: var(--green); }
+.stat-pill.fail { background: var(--coral-lt); color: var(--coral); }
+
+.roster-list { flex: 1; overflow-y: auto; padding: 8px; }
+.roster-empty {
+  padding: 40px 20px;
+  text-align: center;
+  color: var(--ink3);
+  font-size: 13px;
+  line-height: 1.7;
+}
+
+.student-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 11px 12px;
+  border-radius: var(--r);
+  cursor: pointer;
+  transition: background .12s;
+  margin-bottom: 2px;
+}
+.student-card:hover { background: var(--bg2); }
+.student-card.active { background: var(--green-lt); }
+.student-num-badge {
+  width: 34px; height: 34px;
+  border-radius: 50%;
+  background: var(--bg3);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; font-weight: 700; color: var(--ink3);
+  flex-shrink: 0;
+  font-variant-numeric: tabular-nums;
+}
+.student-card.active .student-num-badge { background: var(--green); color: var(--white); }
+.student-info { flex: 1; min-width: 0; }
+.student-name-row { display: flex; align-items: baseline; gap: 7px; }
+.student-name { font-size: 14px; font-weight: 600; color: var(--ink); }
+.student-number { font-size: 11px; color: var(--ink4); font-variant-numeric: tabular-nums; }
+.student-book {
+  font-size: 12px; color: var(--ink3); margin-top: 2px;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.student-flags { display: flex; gap: 4px; flex-shrink: 0; }
+.flag {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+}
+.flag.has-audio { background: var(--green-md); }
+.flag.has-worksheet { background: var(--blue); }
+.flag.missing { background: var(--bg3); }
+
+/* ───── Detail panel ───── */
+.detail {
+  flex: 1;
+  overflow-y: auto;
+  background: var(--bg2);
+}
+.detail-inner { max-width: 880px; margin: 0 auto; padding: 36px 40px 80px; }
+
+.empty-state {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 10px;
+  color: var(--ink3);
+  text-align: center;
+  padding: 40px;
+}
+.empty-state .es-icon { font-size: 40px; opacity: 0.5; margin-bottom: 6px; }
+.empty-state h3 { font-family: var(--serif); font-weight: 400; font-size: 22px; color: var(--ink2); }
+.empty-state p { font-size: 13px; max-width: 320px; line-height: 1.6; }
+
+/* student header */
+.dh-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 20px; margin-bottom: 6px; }
+.dh-eyebrow { font-size: 11px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink3); margin-bottom: 6px; }
+.dh-name { font-family: var(--serif); font-size: 36px; font-weight: 400; color: var(--ink); line-height: 1.1; }
+.dh-meta { font-size: 13px; color: var(--ink3); margin-top: 6px; }
+.dh-status {
+  flex-shrink: 0;
+  display: flex; flex-direction: column; align-items: flex-end; gap: 6px;
+}
+.status-badge {
+  font-size: 12px; font-weight: 700; padding: 6px 14px; border-radius: 20px;
+}
+.status-badge.pass { background: var(--green-lt); color: var(--green); }
+.status-badge.fail { background: var(--coral-lt); color: var(--coral); }
+.status-sub { font-size: 11px; color: var(--ink4); }
+
+.book-card {
+  background: var(--white);
+  border: 0.5px solid var(--border2);
+  border-radius: var(--r-xl);
+  padding: 20px 24px;
+  margin: 22px 0;
+  display: flex;
+  gap: 18px;
+  align-items: center;
+}
+.book-icon { font-size: 30px; flex-shrink: 0; }
+.book-title { font-family: var(--serif); font-size: 19px; color: var(--ink); line-height: 1.3; }
+.book-author { font-size: 13px; color: var(--ink3); margin-top: 2px; }
+.book-type-tag {
+  margin-left: auto; flex-shrink: 0;
+  font-size: 11px; font-weight: 600; padding: 5px 12px; border-radius: 20px;
+  background: var(--blue-lt); color: var(--blue);
+}
+
+/* section card (reused styling family) */
+.sec-card {
+  background: var(--white);
+  border: 0.5px solid var(--border2);
+  border-radius: var(--r-xl);
+  overflow: hidden;
+  margin-bottom: 18px;
+}
+.sec-hdr {
+  display: flex; align-items: center; gap: 12px;
+  padding: 14px 22px;
+  border-bottom: 0.5px solid var(--border);
+  cursor: pointer;
+  user-select: none;
+}
+.sec-hdr-icon { font-size: 17px; width: 26px; text-align: center; }
+.sec-hdr h3 { font-size: 14px; font-weight: 700; color: var(--ink); flex: 1; }
+.sec-hdr .chev { font-size: 12px; color: var(--ink4); transition: transform .2s; }
+.sec-hdr .chev.open { transform: rotate(180deg); }
+.sec-body { padding: 20px 22px; }
+.sec-body.hidden { display: none; }
+
+/* audio player section */
+.audio-wrap { display: flex; align-items: center; gap: 14px; }
+audio { flex: 1; height: 40px; }
+.audio-missing {
+  font-size: 13px; color: var(--ink3); font-style: italic;
+  padding: 14px 0;
+}
+
+/* script box */
+.script-box {
+  font-size: 14.5px; line-height: 1.85; color: var(--ink2);
+  white-space: pre-wrap;
+  background: var(--bg);
+  border-radius: var(--r);
+  padding: 16px 18px;
+  border: 1px solid var(--border);
+}
+
+/* sentence-level results */
+.sent-list { display: flex; flex-direction: column; gap: 8px; }
+.sent-item {
+  display: flex; gap: 12px;
+  padding: 11px 14px;
+  border-radius: var(--r);
+  background: var(--bg);
+  border: 1px solid var(--border);
+  font-size: 13.5px; line-height: 1.6;
+}
+.sent-item.ok { border-left: 3px solid var(--green-md); }
+.sent-item.flag { border-left: 3px solid var(--amber); background: var(--amber-lt); }
+.sent-num { flex-shrink: 0; font-weight: 700; color: var(--ink4); font-size: 12px; width: 20px; padding-top: 1px; }
+.sent-text { flex: 1; color: var(--ink2); }
+.sent-status-tag {
+  flex-shrink: 0; align-self: flex-start;
+  font-size: 10px; font-weight: 700; padding: 3px 9px; border-radius: 20px;
+  text-transform: uppercase; letter-spacing: 0.04em;
+}
+.sent-status-tag.ok { background: var(--green-lt); color: var(--green); }
+.sent-status-tag.flag { background: var(--amber-lt); color: var(--amber); }
+.sent-approved-note { font-size: 10px; color: var(--green); margin-top: 3px; font-weight: 600; }
+
+/* worksheet fields */
+.wf-group { margin-bottom: 18px; }
+.wf-group:last-child { margin-bottom: 0; }
+.wf-group-title {
+  font-size: 11px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase;
+  color: var(--ink3); margin-bottom: 10px;
+  padding-bottom: 6px; border-bottom: 1px solid var(--border);
+}
+.wf-field { margin-bottom: 12px; }
+.wf-field:last-child { margin-bottom: 0; }
+.wf-label { font-size: 12px; font-weight: 600; color: var(--ink2); margin-bottom: 4px; }
+.wf-value {
+  font-size: 13.5px; color: var(--ink2); line-height: 1.65;
+  background: var(--bg); border-radius: var(--r); padding: 9px 12px;
+  border: 1px solid var(--border);
+  white-space: pre-wrap;
+}
+.wf-value.empty { color: var(--ink4); font-style: italic; }
+.wf-bi-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.wf-bi-tag {
+  display: inline-block; font-size: 9.5px; font-weight: 700; padding: 1px 7px; border-radius: 20px;
+  margin-bottom: 4px;
+}
+.wf-bi-tag.ko { background: #fff3cd; color: #856404; }
+.wf-bi-tag.en { background: #cfe2ff; color: #0a3d62; }
+
+/* scores grid */
+.score-grid {
+  display: grid; grid-template-columns: repeat(4,1fr); gap: 10px;
+  margin-bottom: 4px;
+}
+.score-cell {
+  background: var(--bg); border: 1px solid var(--border); border-radius: var(--r);
+  padding: 12px; text-align: center;
+}
+.score-num { font-family: var(--serif); font-size: 26px; color: var(--ink); }
+.score-lbl { font-size: 10.5px; color: var(--ink3); margin-top: 2px; text-transform: uppercase; letter-spacing: 0.05em; }
+
+/* csv link */
+.csv-link {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: 12px; font-weight: 600; color: var(--blue);
+  text-decoration: none; padding: 7px 13px;
+  background: var(--blue-lt); border-radius: var(--r);
+  transition: background .12s;
+}
+.csv-link:hover { background: #d3e4f7; }
+
+.loading-row { display: flex; align-items: center; justify-content: center; padding: 60px 0; color: var(--ink3); font-size: 13px; gap: 10px; }
+.spinner {
+  width: 16px; height: 16px; border-radius: 50%;
+  border: 2px solid var(--border2); border-top-color: var(--ink3);
+  animation: spin 0.7s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+::-webkit-scrollbar { width: 9px; height: 9px; }
+::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.18); border-radius: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+.sidebar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.18); }
+
+@media (max-width: 980px) {
+  #app { flex-direction: column; height: auto; min-height: 100vh; }
+  .sidebar { width: 100%; flex-direction: row; overflow-x: auto; overflow-y: visible; }
+  .sb-head, .sb-search-wrap, .sb-foot { display: none; }
+  .sb-classes { display: flex; padding: 10px; gap: 4px; }
+  .sb-class-btn { white-space: nowrap; border-left: none; border-bottom: 3px solid transparent; border-radius: 8px; }
+  .sb-class-btn.active { border-left: none; border-bottom-color: var(--green-md); }
+  .roster { width: 100%; max-height: 50vh; }
+  .detail-inner { padding: 24px 16px 60px; }
+  .wf-bi-pair { grid-template-columns: 1fr; }
+  .score-grid { grid-template-columns: repeat(2,1fr); }
+}
+</style>
+</head>
+<body>
+
+<div id="app">
+
+  <!-- Sidebar: 반 목록 -->
+  <nav class="sidebar">
+    <div class="sb-head">
+      <div class="sb-badge">Book Speech Review</div>
+      <div class="sb-title">말하기 평가<br><em>열람 시스템</em></div>
+    </div>
+    <div class="sb-search-wrap">
+      <input class="sb-search" id="globalSearch" type="text" placeholder="학번 또는 이름 검색…" oninput="onGlobalSearch(this.value)">
+    </div>
+    <div class="sb-classes" id="classList"></div>
+    <div class="sb-foot">전체 학생 데이터를 실시간으로 불러옵니다.</div>
+  </nav>
+
+  <!-- Roster: 학생 목록 -->
+  <aside class="roster">
+    <div class="roster-head">
+      <h2 id="rosterTitle">반을 선택하세요</h2>
+      <div class="roster-sub" id="rosterSub">왼쪽에서 반을 클릭하면 학생 목록이 나타나요</div>
+      <div class="roster-stats" id="rosterStats"></div>
+    </div>
+    <div class="roster-list" id="rosterList">
+      <div class="roster-empty">반을 선택하면<br>학생 목록이 표시됩니다</div>
+    </div>
+  </aside>
+
+  <!-- Detail: 학생 상세 -->
+  <main class="detail" id="detail">
+    <div class="empty-state">
+      <div class="es-icon">📖</div>
+      <h3>학생을 선택해 주세요</h3>
+      <p>왼쪽 목록에서 학생을 클릭하면<br>활동지와 말하기 녹음을 확인할 수 있어요.</p>
+    </div>
+  </main>
+
+</div>
+
+<script>
+const SUPABASE_URL = 'https://nhkhjsirnvqlvljgqsvz.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5oa2hqc2lybnZxbHZsamdxc3Z6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk2MjA4ODMsImV4cCI6MjA5NTE5Njg4M30.8d1O5asQmYRKevSO7bLZAA1TS0F688lg716KoIemPR4';
+
+async function sb(path) {
+  const res = await fetch(SUPABASE_URL + '/rest/v1/' + path, {
+    headers: {
+      'apikey': SUPABASE_ANON_KEY,
+      'Authorization': 'Bearer ' + SUPABASE_ANON_KEY
+    }
+  });
+  if (!res.ok) throw new Error('Supabase request failed: ' + res.status);
+  return res.json();
+}
+
+let CLASSES = [];
+let ALL_STUDENTS = [];
+let activeClassId = null;
+let activeStudentId = null;
+
+const FICTION_S3_KEYS = [
+  ['Setting(한국어)','Setting(English)','어디서, 언제 일어나는 이야기인가요?'],
+  ['주인공(한국어)','주인공(English)','주인공은 누구인가요?'],
+  ['갈등(한국어)','갈등(English)','이야기의 가장 큰 문제나 갈등은 뭔가요?'],
+  ['핵심 사건(한국어)','핵심 사건(English)','이야기에서 가장 중요한 사건은 뭔가요?'],
+  ['결말(한국어)','결말(English)','결말은 어떻게 되나요?']
+];
+const NONFICTION_S3_KEYS = [
+  ['주요 내용(한국어)','주요 내용(English)','이 책은 주로 어떤 내용을 다루나요?'],
+  ['핵심 주장(한국어)','핵심 주장(English)','저자의 핵심 주장'],
+  ['핵심 아이디어(한국어)','핵심 아이디어(English)','가장 흥미로웠던 아이디어'],
+  ['저자 배경(한국어)','저자 배경(English)','저자의 배경'],
+  ['저자 신뢰성(한국어)','저자 신뢰성(English)','저자를 신뢰할 수 있는 이유'],
+  ['저자-책 연결(한국어)','저자-책 연결(English)','저자 배경과 책의 연결']
+];
+
+async function init() {
+  try {
+    CLASSES = await sb('classes?select=*&order=name.asc');
+    ALL_STUDENTS = await sb('submissions?select=*&order=student_number.asc');
+  } catch(e) {
+    document.getElementById('classList').innerHTML = '<div style="padding:16px 22px;color:#e08a8a;font-size:12px;">데이터를 불러오지 못했어요: ' + e.message + '</div>';
+    return;
+  }
+  renderClassList();
+}
+
+function renderClassList() {
+  const el = document.getElementById('classList');
+  el.innerHTML = CLASSES.map(function(c) {
+    const count = ALL_STUDENTS.filter(function(s){ return s.class_id === c.id; }).length;
+    return '<button class="sb-class-btn' + (c.id === activeClassId ? ' active' : '') + '" onclick="selectClass(\'' + c.id + '\')">'
+      + '<span>' + c.name + '</span>'
+      + '<span class="sb-class-count">' + count + '명</span>'
+      + '</button>';
+  }).join('');
+}
+
+function selectClass(classId) {
+  activeClassId = classId;
+  document.getElementById('globalSearch').value = '';
+  renderClassList();
+  renderRoster();
+}
+
+function onGlobalSearch(query) {
+  query = query.trim();
+  if (!query) { renderRoster(); return; }
+  const q = query.toLowerCase();
+  const matches = ALL_STUDENTS.filter(function(s) {
+    return (s.student_name && s.student_name.toLowerCase().includes(q))
+      || (s.student_number && s.student_number.toLowerCase().includes(q));
+  });
+  renderRoster(matches, true);
+}
+
+function classNameOf(classId) {
+  const c = CLASSES.find(function(x){ return x.id === classId; });
+  return c ? c.name : '';
+}
+
+function renderRoster(overrideList, isSearch) {
+  const titleEl = document.getElementById('rosterTitle');
+  const subEl = document.getElementById('rosterSub');
+  const statsEl = document.getElementById('rosterStats');
+  const listEl = document.getElementById('rosterList');
+
+  let students;
+  if (overrideList) {
+    students = overrideList;
+    titleEl.textContent = '검색 결과';
+    subEl.textContent = students.length + '명 찾음';
+  } else if (activeClassId) {
+    students = ALL_STUDENTS.filter(function(s){ return s.class_id === activeClassId; });
+    titleEl.textContent = classNameOf(activeClassId);
+    subEl.textContent = students.length + '명';
+  } else {
+    listEl.innerHTML = '<div class="roster-empty">반을 선택하면<br>학생 목록이 표시됩니다</div>';
+    statsEl.innerHTML = '';
+    return;
+  }
+
+  const passCount = students.filter(function(s){ return s.is_passed; }).length;
+  const audioCount = students.filter(function(s){ return s.final_speaking_audio; }).length;
+  statsEl.innerHTML = '<span class="stat-pill pass">통과 ' + passCount + '</span>'
+    + '<span class="stat-pill fail">미통과 ' + (students.length - passCount) + '</span>'
+    + '<span class="stat-pill">오디오 ' + audioCount + '</span>';
+
+  if (students.length === 0) {
+    listEl.innerHTML = '<div class="roster-empty">학생이 없습니다</div>';
+    return;
+  }
+
+  listEl.innerHTML = students.map(function(s) {
+    const hasAudio = !!s.final_speaking_audio;
+    const hasWorksheet = !!(s.worksheet_data || (s.script && s.script !== '(임시저장)'));
+    const cls = classNameOf(s.class_id);
+    return '<div class="student-card' + (s.id === activeStudentId ? ' active' : '') + '" onclick="selectStudent(\'' + s.id + '\')">'
+      + '<div class="student-num-badge">' + (s.student_number ? s.student_number.slice(-2) : '?') + '</div>'
+      + '<div class="student-info">'
+        + '<div class="student-name-row"><span class="student-name">' + esc(s.student_name || '이름 없음') + '</span><span class="student-number">' + esc(s.student_number || '') + '</span></div>'
+        + '<div class="student-book">' + (isSearch ? esc(cls) + ' · ' : '') + esc(s.book_title || '책 제목 없음') + '</div>'
+      + '</div>'
+      + '<div class="student-flags">'
+        + '<div class="flag ' + (hasWorksheet ? 'has-worksheet' : 'missing') + '" title="활동지"></div>'
+        + '<div class="flag ' + (hasAudio ? 'has-audio' : 'missing') + '" title="오디오"></div>'
+      + '</div>'
+    + '</div>';
+  }).join('');
+}
+
+function selectStudent(id) {
+  activeStudentId = id;
+  renderRoster(isSearchActive() ? currentSearchResults() : undefined, isSearchActive());
+  renderDetail(ALL_STUDENTS.find(function(s){ return s.id === id; }));
+}
+
+function isSearchActive() {
+  return document.getElementById('globalSearch').value.trim().length > 0;
+}
+function currentSearchResults() {
+  const q = document.getElementById('globalSearch').value.trim().toLowerCase();
+  return ALL_STUDENTS.filter(function(s) {
+    return (s.student_name && s.student_name.toLowerCase().includes(q))
+      || (s.student_number && s.student_number.toLowerCase().includes(q));
+  });
+}
+
+function esc(str) {
+  if (str === null || str === undefined) return '';
+  return String(str).replace(/[&<>"']/g, function(c) {
+    return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];
+  });
+}
+
+function fieldRow(label, value) {
+  const v = (value || '').trim();
+  return '<div class="wf-field"><div class="wf-label">' + esc(label) + '</div>'
+    + '<div class="wf-value' + (v ? '' : ' empty') + '">' + (v ? esc(v) : '작성되지 않음') + '</div></div>';
+}
+
+function biFieldRow(label, koVal, enVal) {
+  return '<div class="wf-field"><div class="wf-label">' + esc(label) + '</div>'
+    + '<div class="wf-bi-pair">'
+    + '<div><span class="wf-bi-tag ko">한국어</span><div class="wf-value' + ((koVal||'').trim() ? '' : ' empty') + '">' + ((koVal||'').trim() ? esc(koVal) : '작성되지 않음') + '</div></div>'
+    + '<div><span class="wf-bi-tag en">English</span><div class="wf-value' + ((enVal||'').trim() ? '' : ' empty') + '">' + ((enVal||'').trim() ? esc(enVal) : '작성되지 않음') + '</div></div>'
+    + '</div></div>';
+}
+
+function toggleSec(btn) {
+  const body = btn.nextElementSibling;
+  const chev = btn.querySelector('.chev');
+  body.classList.toggle('hidden');
+  chev.classList.toggle('open');
+}
+
+function renderDetail(s) {
+  if (!s) return;
+  const wd = s.worksheet_data || {};
+  const bookType = s.worksheet_book_type || 'fiction';
+  const passed = !!s.is_passed;
+
+  // ── header
+  let html = '<div class="detail-inner">';
+  html += '<div class="dh-top">'
+    + '<div><div class="dh-eyebrow">' + esc(classNameOf(s.class_id)) + ' · ' + esc(s.student_number || '') + '</div>'
+    + '<div class="dh-name">' + esc(s.student_name || '이름 없음') + '</div>'
+    + '<div class="dh-meta">' + (s.final_speaking_at ? '최종 제출: ' + new Date(s.final_speaking_at).toLocaleString('ko-KR') : '최종 말하기 미제출') + '</div></div>'
+    + '<div class="dh-status">'
+    + '<span class="status-badge ' + (passed ? 'pass' : 'fail') + '">' + (passed ? '✓ 통과' : '미통과') + '</span>'
+    + (s.teacher_override ? '<span class="status-sub">교사 승인 처리됨</span>' : '')
+    + '</div></div>';
+
+  // ── book card
+  html += '<div class="book-card">'
+    + '<div class="book-icon">' + (bookType === 'nonfiction' ? '📚' : '📖') + '</div>'
+    + '<div><div class="book-title">' + esc(s.book_title || '책 제목 없음') + '</div>'
+    + '<div class="book-author">' + esc(s.book_author || '저자 정보 없음') + '</div></div>'
+    + '<div class="book-type-tag">' + (bookType === 'nonfiction' ? '비소설' : '소설·문학') + '</div>'
+    + '</div>';
+
+  // ── scores (if available)
+  if (s.final_score !== null && s.final_score !== undefined) {
+    html += sectionWrap('📊', '평가 점수', true,
+      '<div class="score-grid">'
+        + scoreCell(s.final_score, '최종 점수')
+        + scoreCell(s.pronunciation, '발음')
+        + scoreCell(s.content, '내용')
+        + scoreCell(s.fluency, '유창성')
+      + '</div>'
+      + (s.grade ? '<div style="margin-top:10px;font-size:12px;color:var(--ink3);">성취도: <strong style="color:var(--ink2);">' + esc(s.grade) + '</strong></div>' : '')
+    );
+  }
+
+  // ── audio
+  let audioInner;
+  if (s.final_speaking_audio) {
+    audioInner = '<div class="audio-wrap"><audio controls preload="none" src="' + esc(s.final_speaking_audio) + '"></audio></div>';
+  } else {
+    audioInner = '<div class="audio-missing">아직 최종 말하기 녹음이 제출되지 않았어요.</div>';
+  }
+  html += sectionWrap('🎙️', '최종 말하기 녹음', true, audioInner);
+
+  // ── script
+  const scriptText = (s.script && s.script !== '(임시저장)') ? s.script : (wd['스크립트'] || '');
+  html += sectionWrap('✍️', '발표 스크립트', false,
+    scriptText ? '<div class="script-box">' + esc(scriptText) + '</div>' : '<div class="wf-value empty">작성되지 않음</div>'
+  );
+
+  // ── worksheet sections 1,2,4,5 + dynamic 3
+  const ex1 = sectionWrap('1️⃣', 'Who & Why · 발표 대상과 목적', false,
+    fieldRow('발표 대상', wd['발표 대상'])
+    + fieldRow('발표 목적', wd['발표 목적'])
+    + biFieldRow('청중 적합 이유', wd['청중 적합 이유(한국어)'], wd['청중 적합 이유(English)'])
+  );
+  html += ex1;
+
+  const ex2 = sectionWrap('2️⃣', 'Opening Hook · 시선 잡기 첫 문장', false,
+    fieldRow('Hook 방식', wd['Hook 방식'])
+    + biFieldRow('Hook 아이디어', wd['Hook 아이디어(한국어)'], wd['Hook 문장(English)'])
+  );
+  html += ex2;
+
+  const s3keys = bookType === 'nonfiction' ? NONFICTION_S3_KEYS : FICTION_S3_KEYS;
+  let s3body = '';
+  s3keys.forEach(function(pair) {
+    s3body += biFieldRow(pair[2], wd[pair[0]], wd[pair[1]]);
+  });
+  html += sectionWrap('3️⃣', bookType === 'nonfiction' ? 'Book & Author · 책과 저자 소개' : 'Story Map · 이야기 지도', false, s3body);
+
+  const ex4 = sectionWrap('4️⃣', 'My Favourite Part · 인상 깊은 구절', false,
+    fieldRow('인상 깊은 구절', wd['인상 깊은 구절'])
+    + biFieldRow('왜 중요한가', wd['중요한 이유(한국어)'], wd['중요한 이유(English)'])
+    + fieldRow('언어 분석 선택', wd['언어 분석 선택'])
+    + biFieldRow('언어 분석 설명', wd['언어 분석(한국어)'], wd['언어 분석(English)'])
+    + biFieldRow('내 말로 바꾸기', wd['내 말로 바꾸기(한국어)'], wd['내 말로 바꾸기(English)'])
+    + biFieldRow('바꾼 이유', wd['바꾼 이유(한국어)'], wd['바꾼 이유(English)'])
+  );
+  html += ex4;
+
+  const ex5 = sectionWrap('5️⃣', 'My Take · 나의 생각', false,
+    biFieldRow('책의 메시지', wd['책 메시지(한국어)'], wd['책 메시지(English)'])
+    + biFieldRow('동의 여부', wd['동의 여부(한국어)'], wd['동의 여부(English)'])
+    + biFieldRow('현실 연결', wd['현실 연결(한국어)'], wd['현실 연결(English)'])
+  );
+  html += ex5;
+
+  // ── files
+  let filesInner = '';
+  if (s.worksheet_csv_url) {
+    filesInner += '<a class="csv-link" href="' + esc(s.worksheet_csv_url) + '" target="_blank">⬇ 활동지 CSV 다운로드</a> ';
+  }
+  if (s.ppt_url) {
+    filesInner += '<a class="csv-link" href="' + esc(s.ppt_url) + '" target="_blank" style="margin-left:8px;">⬇ PPT 다운로드</a>';
+  }
+  if (filesInner) {
+    html += sectionWrap('📎', '첨부 파일', false, filesInner);
+  }
+
+  html += '</div>';
+  document.getElementById('detail').innerHTML = html;
+}
+
+function scoreCell(val, label) {
+  return '<div class="score-cell"><div class="score-num">' + (val !== null && val !== undefined ? val : '–') + '</div><div class="score-lbl">' + esc(label) + '</div></div>';
+}
+
+let secIdCounter = 0;
+function sectionWrap(icon, title, openByDefault, innerHtml) {
+  secIdCounter++;
+  return '<div class="sec-card">'
+    + '<div class="sec-hdr" onclick="toggleSec(this)">'
+    + '<span class="sec-hdr-icon">' + icon + '</span>'
+    + '<h3>' + esc(title) + '</h3>'
+    + '<span class="chev' + (openByDefault ? ' open' : '') + '">▾</span>'
+    + '</div>'
+    + '<div class="sec-body' + (openByDefault ? '' : ' hidden') + '">' + innerHtml + '</div>'
+    + '</div>';
+}
+
+init();
+</script>
+</body>
+</html>
